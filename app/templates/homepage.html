@@ -28,9 +28,15 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('home') }}">Login</a>
                     </li>
-    {% block content %}{% endblock %}
+                </ul>
+            </div>
+        </div>
+    </nav>
 
+    {% block content %}{% endblock %}
+    
     <!-- footer -->
     {% include 'footer.html' %}
+
 </body>
 </html>
