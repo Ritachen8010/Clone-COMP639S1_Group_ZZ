@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Countryside Community Swimming Club{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Welcome to Countryside Community Swimming Club</h1>
+        <p>Our club is a community swimming club that offers a range of swimming lessons for all ages and abilities. We are a friendly club and welcome all new members. Our club is based in the heart of the countryside and we have a range of facilities including a 25m indoor pool, a sauna and a steam room. We also have a fully equipped gym and a cafe. Our club is open 7 days a week and we have a range of membership options available. We also offer a range of social events and activities for our members. We look forward to welcoming you to our club.</p>
+    </div>
+
+    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="url_for('static', filename='homepage/istock-157732856_web.jpg')" class="d-block w-100" alt="1">
+          </div>
+          <div class="carousel-item">
+            <img src="url_for('static', filename='homepage/istockphoto-1167733673-612x612.jpg')" class="d-block w-100" alt="2">
+          </div>
+          <div class="carousel-item">
+            <img src="url_for('static', filename='homepage/istock-21312ddf.jpg')" class="d-block w-100" alt="3">
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+{% endblock %}
