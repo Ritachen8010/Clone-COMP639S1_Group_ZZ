@@ -11,6 +11,7 @@ CREATE DATABASE IF NOT EXISTS swimmingclub;
 -- user table 
 CREATE TABLE `users` (
     `user_id` INT AUTO_INCREMENT,
+    `instructor_id` INT,
     `username` VARCHAR(255) NOT NULL UNIQUE,
     `password_hash` VARCHAR(255) NOT NULL,
     `role` ENUM('member', 'instructor', 'manager') NOT NULL,
@@ -37,7 +38,7 @@ CREATE TABLE `instructors` (
     `experience` TEXT,
     `bio` TEXT,
     PRIMARY KEY (`instructor_id`),
-    FOREIGN KEY (`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
 );
 
 -- memeberships table
@@ -49,7 +50,7 @@ CREATE TABLE `memberships` (
     `end_date` DATE NOT NULL,
     `membership_fee` DECIMAL(10,2) NOT NULL,
     PRIMARY KEY (`membership_id`),
-    FOREIGN KEY (`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
 );
 
 -- setting table
@@ -74,7 +75,7 @@ CREATE TABLE `class_schedule` (
     `date` DATE NOT NULL,
     `capacity` INT NOT NULL DEFAULT 15,
     PRIMARY KEY (`class_id`),
-    FOREIGN KEY (`instructor_id`) REFERENCES instructors(`instructor_id`) ON DELETE CASCADE
+    FOREIGN KEY (`instructor_id`) REFERENCES `instructors`(`instructor_id`) ON DELETE CASCADE
 );
 
 -- one to one class
@@ -88,15 +89,15 @@ CREATE TABLE `lesson_schedule` (
     `lane_number` INT NOT NULL,
     `capacity` INT NOT NULL DEFAULT 1,
     PRIMARY KEY (`lesson_id`),
-    FOREIGN KEY (`instructor_id`) REFERENCES instructors(`instructor_id`) ON DELETE CASCADE
+    FOREIGN KEY (`instructor_id`) REFERENCES `instructors`(`instructor_id`) ON DELETE CASCADE
 );
 
 -- booking table
 CREATE TABLE `bookings` (
-    `booking_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `booking_id` INT AUTO_INCREMENT,
     `user_id` INT,
-    `class_schedule_id` INT,
-    `lesson_schedule_id` INT,
+    `class_id` INT,
+    `lesson_id` INT,
     `schedule_type` ENUM('class', 'lesson') NOT NULL,
     `booking_status` ENUM('confirmed', 'cancelled') NOT NULL,
     `booking_date` DATE NOT NULL,
@@ -108,9 +109,9 @@ CREATE TABLE `bookings` (
 
 -- payment table
 CREATE TABLE `payments` (
-    `payment_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `payment_id` INT AUTO_INCREMENT,
     `user_id` INT,
-    `payment_type` ENUM('membership', 'class', 'lesson') NOT NULL,
+    `payment_type` ENUM('membership', 'extra lesson') NOT NULL,
     `amount` DECIMAL(10,2) NOT NULL,
     `payment_date` DATE NOT NULL,
     PRIMARY KEY (`payment_id`),
@@ -119,7 +120,7 @@ CREATE TABLE `payments` (
 
 -- news table
 CREATE TABLE `news` (
-    `news_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `news_id` INT AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
     `content` TEXT NOT NULL,
     `publication_date` DATE NOT NULL,
@@ -132,19 +133,20 @@ CREATE TABLE `news` (
 
 -- image table
 CREATE TABLE `images` (
-    `image_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `image_id` INT AUTO_INCREMENT,
     `image_data` VARCHAR(500),
 	PRIMARY KEY (`image_id`)
 );
 
 -- attendance table 
 CREATE TABLE `attendance` (
-    `attendance_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `attendance_id` INT AUTO_INCREMENT,
     `schedule_id` INT NOT NULL,
     `schedule_type` ENUM('class', 'lesson') NOT NULL,
     `user_id` INT NOT NULL,
     `attended` BOOLEAN NOT NULL,
-	PRIMARY KEY (`attendance_id`),
+	`attendance_status` ENUM('present', 'absent', 'late') NOT NULL,
+    PRIMARY KEY (`attendance_id`),
     FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
 );
 
