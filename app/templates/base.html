@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="your_styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+    crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+<style>
+body {
+    background-color: var(--page-colour);
+    color: white;
+}
+.navbar {
+    background-color: var(--page-colour);
+}
+.navbar-brand img {
+    max-width: 60px;
+}
+.nav-link {
+    color: white !important;
+}
+.nav-link:hover {
+    color: var(--page-color-hover) !important;
+}
+.container-fluid {
+    background-color: var(--page-colour);
+    color: white;
+}
+.custom-carousel img {
+    border-radius: 10px;
+}
+.btn-login {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+.btn-login a {
+    color: #00e1ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+.login-container {
+    text-align: right;
+}
+.login-container a {
+    color: white;
+}
+.login-container p {
+    color: #ced4da;
+}
+.login-container .btn-login {
+    margin-top: 10px;
+}
+.welcome-message {
+    position: absolute;
+    top: 10px;
+    right: 140px;
+    font-size: 16px;
+    color: white;
+}
+.guide-text {
+    background-color: var(--page-colour);
+    padding: 10px;
+    margin-top: 20px;
+    color: white;
+}
+.guide-link {
+    font-size: 20px;
+    color: #005eb8;
+}
+.marine-content {
+    display: flex;
+    align-items: center;
+}
+.marine-text {
+    flex: 1;
+    padding: 20px;
+}
+.main-content {
+    margin-left: 0;
+}
+.custom-carousel {
+    max-width: 100%;
+    width: 100%;
+    margin-right: 0;
+}
+.custom-carousel img {
+    width: 100%;
+    height: auto;
+}
+.home-link {
+    color: #2196F3;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 10px;
+    position: absolute;
+    top: 40px;
+    right: 20px;
+}
+.home-link:hover {
+    color: #0D47A1 !important;
+}
+.modal-content {
+    background-color: var(--page-colour);
+    color: white;
+    border: none;
+}
+.modal-header {
+    border-bottom: none;
+}
+.custom-placeholder::placeholder {
+    color: #ced4da;
+}
+.btn-danger {
+    background-color: #005eb8;
+    border: none;
+}
+#loginModal .modal-content,
+#loginForm,
+#joinForm {
+    text-align: center;
+    
+}
+#joinForm {
+    display: none;
+}
+</style>
+<style>
+    :root {
+        --page-colour: #03A6D9;
+        --page-color-hover: rgba(3, 166, 217, 0.88);
+    }
+</style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('home') }}">
+                
+                </a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="history.go(-1);">Back</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard_all') }}">Dashboard</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div class="btn-login">
+                    {% if 'UserID' in session %}
+                        <div class="me-auto d-sm-inline d-md-inline d-lg-inline">
+                            <a href="{{ url_for('logout') }}" class="btn btn-outline-light me-2">
+                                {{ Username }} Logout
+                            </a>
+                        </div>
+                    {% endif %}
+                    {% if 'UserID' not in session %}
+                        <button class="btn btn-outline-light me-2" type="button" data-bs-toggle="modal"
+                            data-bs-target="#loginModal">Login</button>
+                    {% else %}
+                        {% if session['UserType'] == 'manager' %}
+                            <a class="btn btn-outline-light" href="{{ url_for('dashboard_manager') }}">Dashboard</a>
+                        {% elif session['UserType'] == 'instructor' %}
+                            <a class="btn btn-outline-light" href="{{ url_for('dashboard_instructor') }}">Dashboard</a>
+                        {% elif session['UserType'] == 'member' %}
+                            <a class="btn btn-outline-light" href="{{ url_for('dashboard_member') }}">Dashboard</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="welcome-message">
+                    
+                </div>
+            </div>
+            <div>
+                {% block content %}
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+</div>
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-aside">
+        <div class="modal-content bg-black text-light">
+            <div class="modal-header border-bottom-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Login Form -->
+                <div id="loginForm">
+                    <form action="/login" method="post">
+                        <div class="mb-3 ">
+                            <input type="text" class="form-control custom-placeholder" id="Username" name="Username"
+                                placeholder="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="Password" class="form-control custom-placeholder" id="Password" name="Password"
+                                placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">SIGN IN</button>
+                    </form>
+                    <p class="mt-3">No account? <a href="#" class="text-danger" id="switchToJoin">Register here</a></p>
+                </div>
+                <!-- Registration Form -->
+                <div id="joinForm" style="display: none;">
+                    <form action="/register" method="post">
+                        <div class="row justify-content-center">
+                            <div class="modal-content bg-black text-light">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control custom-placeholder" id="title"
+                                        name="title" placeholder="Title*" required>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control custom-placeholder" id="Username"
+                                        name="Username" placeholder="Username*" required>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="Password" class="form-control custom-placeholder" id="Password"
+                                        name="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}"
+                                        placeholder="Password*" required
+                                        title="Password must be at least 8 characters long, including an uppercase letter, a lowercase letter, a number, and a special character.">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="Password" class="form-control custom-placeholder"
+                                        id="confirm_Password" name="confirm_Password"
+                                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}" placeholder="Confirm Password*"
+                                        required
+                                        title="Password must be at least 8 characters long, including an uppercase letter, a lowercase letter, a number, and a special character.">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control custom-placeholder" id="First_name"
+                                        name="First_name" placeholder="First Name*" required>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control custom-placeholder" id="Last_name"
+                                        name="Last_name" placeholder="Last Name*" required>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="email" class="form-control custom-placeholder" id="email"
+                                        name="email" placeholder="Email">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="tel" class="form-control custom-placeholder" id="phone"
+                                        name="phone" pattern="[0-9]{8,15}" placeholder="Phone"
+                                        title="Phone number must be 8 to 15 digits long.">
+                                </div>
+                                <div class="mb-3">
+                                    <textarea class="form-control custom-placeholder" id="address"
+                                        name="address" placeholder="Address"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="date" class="form-control custom-placeholder" id="dob"
+                                        name="dob" placeholder="Date of Birth">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control custom-placeholder" id="occupation"
+                                        name="occupation" placeholder="Occupation">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control custom-placeholder" id="position"
+                                        name="position" placeholder="Position">
+                                </div>
+                                <div class="mb-3">
+                                    <textarea class="form-control custom-placeholder" id="health_info"
+                                        name="health_info" placeholder="Health Information"></textarea>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-danger ">Join</button>
+                    </form>
+                    <p class="mt-3">Have account? <a href="#" class="text-danger" id="switchToLogin">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Flash Messages Modal -->
+<div class="modal fade" id="flashMessagesModal" tabindex="-1" aria-labelledby="flashMessagesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="flashMessagesModalLabel">Flash Messages</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Flash messages content goes here -->
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul>
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    window.onload = function() {
+        {% if get_flashed_messages() %}
+        var flashModal = new bootstrap.Modal(document.getElementById('flashMessagesModal'));
+        flashModal.show();
+        setTimeout(function() {
+            flashModal.hide();
+        }, 2000);
+        {% endif %}
+    };
+</script>
+<script>
+    var today = new Date();
+    var year = today.getFullYear();
+    var month = String(today.getMonth() + 1).padStart(2, '0');
+    var day = String(today.getDate()).padStart(2, '0');
+    var systemDate = year + '-' + month + '-' + day;
+    var dateInput = document.getElementById('date_joined');
+    dateInput.addEventListener('input', function () {
+        var selectedDate = dateInput.value;
+        if (selectedDate > systemDate) {
+            dateInput.value = systemDate;
+            alert('The selected date cannot be later than today.');
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var loginForm = document.getElementById('loginForm');
+        var joinForm = document.getElementById('joinForm');
+        var switchToJoin = document.getElementById('switchToJoin');
+        var switchToLogin = document.getElementById('switchToLogin');
+        switchToJoin.addEventListener('click', function() {
+            loginForm.style.display = 'none';
+            joinForm.style.display = 'block';
+        });
+        switchToLogin.addEventListener('click', function() {
+            joinForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+    });
+</script>
+<script>
+    function hoverLink(element) {
+        element.classList.remove('text-light');
+        element.classList.add('text-light');
+        element.classList.add('bg-black');
+        element.classList.add('bold-text');
+    }
+    function unhoverLink(element) {
+        element.classList.remove('text-light');
+        element.classList.add('text-light');
+        element.classList.remove('bold-text');
+    }
+    document.getElementById('switchToJoin').addEventListener('click', function() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('joinForm').style.display = 'block';
+        document.getElementById('loginMessage').style.display = 'none';
+        document.getElementById('joinMessage').style.display = 'block';
+    });
+    document.getElementById('switchToLogin').addEventListener('click', function() {
+        document.getElementById('joinForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('joinMessage').style.display = 'none';
+        document.getElementById('loginMessage').style.display = 'block';
+    });
+    $(document).ready(function() {
+        $('#searchInput').on('input', function() {
+            var query = $(this).val();
+            if (query.length > 2) {
+                $.ajax({
+                    url: "/search",
+                    data: { 'q': query },
+                    type: "GET",
+                    success: function(data) {
+                        var suggestions = data.suggestions;
+                        $('#searchResult').empty();
+                        suggestions.forEach(function(suggestion) {
+                            $('#searchResult').append(
+                                `<a href="#" class="list-group-item list-group-item-action bg-black text-light">${suggestion}</a>`
+                            );
+                        });
+                    }
+                });
+            } else {
+                $('#searchResult').empty();
+            }
+        });
+        $(document).on('click', '.list-group-item', function() {
+            $('#searchInput').val($(this).text());
+            $('#searchForm').submit();
+        });
+    });
+</script>
+{% block scripts %}
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Magnific Popup JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+{% endblock %}
+</body>
+</html>
