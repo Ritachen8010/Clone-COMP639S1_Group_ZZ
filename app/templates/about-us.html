@@ -1,68 +1,34 @@
 {% extends 'base.html' %}
 
+{% block title %}About Us - Countryside Community Swimming Club{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>Welcome, {{ user_info.Username }}!</h2>
-    <h3>Member Dashboard</h3>
-    
-    <!-- Manage Profile -->
-    <div>
-        <h4>Manage Profile</h4>
-        <!-- Form to manage profile -->
-    </div>
 
-    <!-- Update Password -->
-    <div>
-        <h4>Update Password</h4>
-        <!-- Form to update password -->
+<!-- Fixed Header Image -->
+<div class="about-image d-flex align-items-center justify-content-center">
+    <div class="text-center text-white">
+      <h1>A SWIM CLUB THAT COMES TO YOU.</h1>
+      <p>THE BEST PLACE FOR FUN AND PLAY.</p>
     </div>
+  </div>
 
-    <!-- View Instructors -->
-    <div>
-        <h4>View Instructors</h4>
-        <!-- Display list of instructors with links to their profiles and lessons -->
-    </div>
-
-    <!-- View Aqua Aerobics Timetable -->
-    <div>
-        <h4>Aqua Aerobics Timetable</h4>
-        <!-- Display timetable with class details -->
-    </div>
-
-    <!-- Book Aqua Aerobics Class -->
-    <div>
-        <h4>Book Aqua Aerobics Class</h4>
-        <!-- Form to book a class -->
-    </div>
-
-    <!-- Book Swimming Lesson -->
-    <div>
-        <h4>Book Swimming Lesson</h4>
-        <!-- Form to book a lesson -->
-    </div>
-
-    <!-- Manage Bookings -->
-    <div>
-        <h4>Manage Bookings</h4>
-        <!-- Display booked classes/lessons with options to cancel -->
-    </div>
-
-    <!-- Manage Membership -->
-    <div>
-        <h4>Manage Membership</h4>
-        <!-- Display membership details with options to cancel or renew -->
-    </div>
-
-    <!-- View News -->
-    <div>
-        <h4>View News</h4>
-        <!-- Display latest news -->
-    </div>
-
-    <!-- Subscription Reminder -->
-    <div>
-        <h4>Subscription Reminder</h4>
-        <!-- Display reminder if subscription is near expiry -->
+  <!-- Introduction and Carousel -->
+<div class="container mt-4">
+    <!-- Introduction -->
+    <div class="row">
+      <div class="container-body col-lg-12">
+        <div class="heading text-black">
+          <h2>Contact Us</h2>
+        </div>
+        <div class="intro-text text-black">
+            <p>Please feel free to contact us!</p>
+            <p>Email: communityswimmingclub@123.com</p>
+            <p>Phone: 123-456-7890</p>
+            <p>Our opening hour is 7 days, 6 AM to 8 PM, exception of Christmas Day and Boxing Day.</p>
+        </div>
+            <img src="{{ url_for('static', filename='homepage/istock-157732856_web.jpg') }}" class="d-block w-100 image-slide" alt="Slide 1">
+        </div>
     </div>
 </div>
+{% include('footer.html') %}
 {% endblock %}

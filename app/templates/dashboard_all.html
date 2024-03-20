@@ -1,6 +1,180 @@
 <!-- dashboard_all.html -->
 {% extends 'base.html' %}
 
-{% block content %}
+{% block title %}
+  {% if UserType == 'manager' %}
+    Manager - Dashboard
+  {% elif UserType == 'instructor' %}
+    Instructor - Dashboard
+  {% else %}
+    Member - Dashboard
+  {% endif %}
+{% endblock %}
 
+{% block content %}
+<div class="dashboard-container">
+    <!-- Specific content for manager -->
+    {% if UserType == 'manager' %}
+    <div class="dashboard-container">
+        <div class="dashboard-block"></div>
+        <div class="greeting text-black">Hello,<span>{{ user_info.Username }}</span>!</div>
+
+        <div class="content-wrapper">
+            <div class="left-column">
+                <div class="management-buttons">
+                    <h2>Management Tools</h2>
+                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Members</button>
+                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Instructors</button>
+                        <button class="btn btn-primary" onclick="manageInstructors()">Members Subscription</button>
+                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Class Timetable</button>
+                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Swimming Instructors Lesson Schedule</button>
+                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Payment</button>
+                        <button class="btn btn-primary" onclick="manageLessons()">View Lesson Booking Details</button>
+                        <button class="btn btn-primary" onclick="manageLessons()">View Attendance</button>
+                        <button class="btn btn-primary" onclick="manageLessons()">News</button>
+                        <button class="btn btn-primary" onclick="manageLessons()">Report</button>
+                    </div>
+                </div>
+
+                <div class="management-buttons">
+                    <h2>My Tools</h2>
+                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                        <button class="btn btn-primary" onclick="manageLessons()">My Profile</button>
+                    </div>
+                </div>
+
+                <div class="da-small-block text-black">
+                    <h2>Today's Schedule</h2>
+                    <ul class="da-ul">
+                        <li class="da-li">10:00 AM - Swimming Class</li>
+                        <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                    </ul>
+                </div>
+
+                <div class="da-small-block text-black">
+                    <h2>Notifications</h2>
+                    <p>You have 1 new booking for a Swimming Class tomorrow.</p>
+                </div>
+
+                <div class="da-small-block text-black">
+                    <h2>News</h2>
+                    <li>Sport - Swimming Health</li>
+                </div>
+            </div>
+
+        <div class="da-large-block text-black">
+            <h2>Event</h2>
+            <ul class="da-ul">
+                <li class="da-li">10:00 AM - Swimming Class</li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Specific content for instructor -->
+    {% if UserType == 'instructor' %}
+    <div class="dashboard-container">
+        <div class="dashboard-block"></div>
+        <div class="greeting text-black">Hello,<span>{{ user_info.Username }}</span>!</div>
+
+        <div class="content-wrapper">
+            <div class="left-column">
+                <div class="management-buttons">
+                    <h2>Tools</h2>
+                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                        <button class="btn btn-primary">View Class Timetable</button>
+                        <button class="btn btn-primary">View Lesson Booking Details</button>
+                        <button class="btn btn-primary">Manage My Lesson Schedule</button>
+                        <button class="btn btn-primary">Attendance</button>
+                        <button class="btn btn-primary">My Profile</button>
+                    </div>
+                </div>
+
+                <div class="da-small-block">
+                    <h2>Today's Schedule</h2>
+                    <ul class="da-ul">
+                        <li class="da-li">10:00 AM - Swimming Class</li>
+                        <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                    </ul>
+                </div>
+
+                <div class="da-small-block">
+                    <h2>Notifications</h2>
+                    <p>You have 1 new booking for a Swimming Class tomorrow.</p>
+                </div>
+
+                <div class="da-small-block">
+                    <h2>News</h2>
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </div>
+            </div>
+
+        <div class="da-large-block">
+            <h2>My Event</h2>
+            <ul class="da-ul">
+                <li class="da-li">10:00 AM - Swimming Class</li>
+                <li class="da-li">2:00 PM - Aqua Aerobics</li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Specific content for member -->
+    {% if UserType == 'member' %}
+    <div class="dashboard-container">
+        <div class="dashboard-block"></div>
+        <div class="greeting text-black">Hello,<span>{{ user_info.Username }}</span>!
+            <p>Membership Expire Date:</p>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="left-column">
+                <div class="management-buttons">
+                    <h2>Tools</h2>
+                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                        <button class="btn btn-primary">View Class</button>
+                        <button class="btn btn-primary">View Instructors</button>
+                        <button class="btn btn-primary">Book Class</button>
+                        <button class="btn btn-primary">Book Lesson</button>
+                        <button class="btn btn-primary">Manage Booking</button>
+                        <button class="btn btn-primary">My Membership</button>
+                        <button class="btn btn-primary">My Profile</button>
+                    </div>
+                </div>
+
+                <div class="da-small-block text-black">
+                    <h2>Today's Schedule</h2>
+                    <ul class="da-ul">
+                        <li class="da-li">10:00 AM - Swimming Class</li>
+                        <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                    </ul>
+                </div>
+
+                <div class="da-small-block text-black">
+                    <h2>Notifications</h2>
+                    <p>You have 1 new booking for a Swimming Class tomorrow.</p>
+                </div>
+
+                <div class="da-small-block text-black">
+                    <h2>News</h2>
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </div>
+            </div>
+
+        <div class="da-large-block text-black">
+            <h2>My Event</h2>
+            <ul class="da-ul">
+                <li class="da-li">10:00 AM - Swimming Class</li>
+                <li class="da-li">2:00 PM - Aqua Aerobics</li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Any shared content across all user types -->
+    <div class="shared-content">
+        <!-- This could include notifications, general information, etc. -->
+    </div>
+</div>
 {% endblock %}

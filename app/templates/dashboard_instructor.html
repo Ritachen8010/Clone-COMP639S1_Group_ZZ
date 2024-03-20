@@ -1,52 +1,50 @@
 {% extends 'base.html' %}
 
+{% block title %}Instructors - Dashboard{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>Welcome, {{ user_info.Username }}!</h2>
-    <h3>Instructor Dashboard</h3>
+<div class="dashboard-container">
+    <div class="dashboard-block"></div>
+    <div class="greeting text-black">Hello,<span>{{ user_info.Username }}</span>!</div>
 
-    
-    
-    <!-- Manage Profile -->
-    <div>
-        <h4>Manage Profile</h4>
-        <!-- Form to manage profile -->
-    </div>
+    <div class="content-wrapper">
+        <div class="left-column">
+            <div class="management-buttons">
+                <h2>Tools</h2>
+                <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                    <button class="btn btn-primary">View Class Timetable</button>
+                    <button class="btn btn-primary">View Lesson Booking Details</button>
+                    <button class="btn btn-primary">Manage My Lesson Schedule</button>
+                    <button class="btn btn-primary">Attendance</button>
+                    <button class="btn btn-primary">My Profile</button>
+                </div>
+            </div>
 
-    <!-- Update Password -->
-    <div>
-        <h4>Update Password</h4>
-        <!-- Form to update password -->
-    </div>
+            <div class="da-small-block">
+                <h2>Today's Schedule</h2>
+                <ul class="da-ul">
+                    <li class="da-li">10:00 AM - Swimming Class</li>
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </ul>
+            </div>
 
-    <!-- View Aqua Aerobics Timetable -->
-    <div>
-        <h4>Aqua Aerobics Timetable</h4>
-        <!-- Display timetable with class details -->
-    </div>
+            <div class="da-small-block">
+                <h2>Notifications</h2>
+                <p>You have 1 new booking for a Swimming Class tomorrow.</p>
+            </div>
 
-    <!-- Manage Lesson Schedule -->
-    <div>
-        <h4>Manage Lesson Schedule</h4>
-        <!-- Options to view, add, edit, delete availability -->
-    </div>
+            <div class="da-small-block">
+                <h2>News</h2>
+                <li class="da-li">2:00 PM - Aqua Aerobics</li>
+            </div>
+        </div>
 
-    <!-- View Lesson Bookings -->
-    <div>
-        <h4>View Lesson Bookings</h4>
-        <!-- Display booked lessons with trainee information -->
-    </div>
-
-    <!-- Record Attendance -->
-    <div>
-        <h4>Record Attendance</h4>
-        <!-- Form to record attendance -->
-    </div>
-
-    <!-- View News -->
-    <div>
-        <h4>View News</h4>
-        <!-- Display latest news -->
+    <div class="da-large-block">
+        <h2>My Event</h2>
+        <ul class="da-ul">
+            <li class="da-li">10:00 AM - Swimming Class</li>
+            <li class="da-li">2:00 PM - Aqua Aerobics</li>
+        </ul>
     </div>
 </div>
 {% endblock %}

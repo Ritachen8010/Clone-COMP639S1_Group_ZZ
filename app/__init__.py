@@ -9,4 +9,4 @@ from app import public_views
 #from app import member_views
 #from app import manager_views
 #from app import instructor_views
-from app import login_register_logout_dashboard
+from app import login_register_logout_dashboard_views

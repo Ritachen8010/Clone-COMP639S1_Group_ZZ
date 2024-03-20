@@ -162,7 +162,7 @@ def login():
 
                     login_user(user)
                     # Set session variables
-                    session['UserID'] = user.id  # 设置为session['UserID']
+                    session['UserID'] = user.id  # 设置为 set up session['UserID']
                     session['Username'] = user.Username
                     session['UserType'] = user_record['UserType']
                     session['member_id'] = member_id if member_id else None
@@ -191,6 +191,7 @@ def logout():
     return redirect(url_for('home'))
 
 
+# dashboard_all
 @app.route('/dashboard_all')
 @login_required
 @UserType_required('manager', 'instructor', 'member')

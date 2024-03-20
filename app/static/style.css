@@ -1,3 +1,4 @@
+
 * {
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "segoe ui", roboto, oxygen, ubuntu, cantarell, "fira sans", "droid sans", "helvetica neue", Arial, sans-serif;
@@ -18,7 +19,7 @@
 
 .container-body {
     display: grid;
-    margin-top: 100px;
+    margin-top: 20px;
     margin-bottom: 50px;
     grid-template-columns: 1fr 1fr 2fr;
     grid-gap: 10px;
@@ -34,6 +35,7 @@
   
     .intro-text {
     grid-area: intro-text;
+    color: #333;
     }
   
     .image-slide {
@@ -69,3 +71,112 @@
     text-align: center;
 }
 
+.about-image {
+    padding-top: 90px;
+    padding-bottom: 200px;
+    background-color: #dde3e9;
+    background-image: url('./homepage/istock-21312ddf.jpg'); /* separated the properties */
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: cover;
+}
+
+/* dashboard */
+.dashboard-container {
+    margin: auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+}
+
+.dashboard-block {
+    padding-top: 100px;
+    padding-bottom: 100px;
+    background-color: #e9f1f8;
+}
+
+.greeting {
+    font-size: 60px;
+    margin-bottom: 20px;
+    margin-top: -50px;
+    text-align: center;
+}
+
+.greeting span {
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.profile-link-p {
+    display: flex;
+}
+
+.profile-link {
+    text-decoration: none;
+    margin-bottom: 20px;
+    color: #007bff; /* Example color */
+    font-weight: bold; /* Example font weight */
+    padding: 5px 10px; /* Example padding */
+    border: 1px solid #007bff; /* Example border */
+    border-radius: 5px; /* Example border radius for a button-like appearance */
+    margin-left: auto; /* Pushes the profile link to the right within the flex container */
+}
+
+.da-small-block {
+    max-width: 500px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.management-buttons {
+    max-width: 500px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+.btn-group-vertical > .btn {
+    margin-bottom: 10px; /* Space between buttons */
+}
+
+.btn-group-vertical > .btn {
+    width: 200px; 
+}
+
+.content-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+.da-large-block {
+    flex-grow: 1;
+    max-width: 1400px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.da-large-block h2, .da-small-block h2, .management-buttons h2 {
+    border-bottom: 2px solid #bfc0c2;
+    padding-bottom: 5px;
+    color: #333;
+}
+
+.da-ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.da-li {
+    background-color: #e7f1ff;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
