@@ -92,7 +92,7 @@ def register():
             address = request.form.get('address')
             dob = request.form.get('dob')
             occupation = request.form.get('occupation')
-            position = request.form.get('position')
+            # position = request.form.get('position')
             DateJoined = date.today().isoformat()
             
 
@@ -109,12 +109,13 @@ def register():
 
             if Password == confirm_Password:
                 # Insert user information, with the default UserType as 'Member'
-                cursor.execute("INSERT INTO user (UserType, Username, Password) VALUES ('member', %s, %s)", ( Username, hashed_Password))
+                cursor.execute("INSERT INTO user (usertype, username, password) VALUES ('member', %s, %s)", ( Username, hashed_Password))
                 user_id = cursor.lastrowid  # Get the last inserted id
 
-                # Insert Member information
-                cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, position, health_info, join_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-               (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, position, health_info, DateJoined))
+                # Insert Member information 
+                # Remove the position field from the member table
+                cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, health_info, join_date) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+               (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info, DateJoined))
                 getConnection().commit()
 
                 flash('Registration successful! You can now login.')

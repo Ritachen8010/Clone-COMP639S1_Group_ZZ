@@ -228,9 +228,19 @@ body {
                     <form action="/register" method="post">
                         <div class="row justify-content-center">
                             <div class="modal-content bg-black text-light">
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <input type="text" class="form-control custom-placeholder" id="title"
                                         name="title" placeholder="Title*" required>
+                                </div> -->
+                                <!-- #change to selection -->
+                                <div class="mb-3">
+                                    <select class="form-control" id="title" name="title" required>
+                                        <option value="" disabled selected>Please Select Your Title</option>
+                                        <option value="Mr">Mr.</option>
+                                        <option value="Mrs">Mrs.</option>
+                                        <option value="Miss">Miss</option>
+                                        <option value="Dr">Dr.</option>
+                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <input type="text" class="form-control custom-placeholder" id="Username"
@@ -279,10 +289,10 @@ body {
                                         name="occupation" placeholder="Occupation">
                                 </div>
                                 <!-- may not need for member -->
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <input type="text" class="form-control custom-placeholder" id="position"
                                         name="position" placeholder="Position">
-                                </div>
+                                </div> -->
                                 <div class="mb-3">
                                     <textarea class="form-control custom-placeholder" id="health_info"
                                         name="health_info" placeholder="Health Information"></textarea>
