@@ -1,7 +1,8 @@
+DROP SCHEMA IF EXISTS swimmingclub;
 CREATE SCHEMA `swimmingclub`;
 USE `swimmingclub`;
 
-DROP DATABASE `swimmingclub`;
+
 
 -- User table
 CREATE TABLE `user` (
