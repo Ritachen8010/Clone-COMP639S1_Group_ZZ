@@ -386,7 +386,19 @@ VALUES
 (17, 17, NULL, 'class', 'confirmed', '2024-05-17'),
 (18, 18, NULL, 'class', 'confirmed', '2024-05-18'),
 (19, 19, NULL, 'class', 'confirmed', '2024-05-19'),
-(20, 20, NULL, 'class', 'confirmed', '2024-05-20');
+(20, 20, NULL, 'class', 'confirmed', '2024-05-20'),
+
+(10, NULL, 1, 'lesson', 'confirmed', '2024-05-02'),
+(11, NULL, 2, 'lesson', 'confirmed', '2024-05-03'),
+(12, NULL, 3, 'lesson', 'confirmed', '2024-05-04'),
+(13, NULL, 4, 'lesson', 'confirmed', '2024-05-05'),
+(14, NULL, 5, 'lesson', 'confirmed', '2024-05-06'),
+(15, NULL, 6, 'lesson', 'confirmed', '2024-05-07'),
+(16, NULL, 7, 'lesson', 'confirmed', '2024-05-08'),
+(17, NULL, 8, 'lesson', 'confirmed', '2024-05-09'),
+(18, NULL, 9, 'lesson', 'confirmed', '2024-05-10'),
+(19, NULL, 10, 'lesson', 'confirmed', '2024-05-11'),
+(20, NULL, 11, 'lesson', 'confirmed', '2024-05-20');
 
 
 INSERT INTO `payments` (`member_id`, `membership_id`, `manager_id`, `lesson_id`, `payment_type`, `amount`, `payment_date`)
@@ -410,7 +422,19 @@ VALUES
 (17, 110127, 1, NULL, 'membership', 700.00, '2024-05-01'),
 (18, 110128, 1, NULL, 'membership', 700.00, '2024-05-01'),
 (19, 110129, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(20, 110130, 1, NULL, 'membership', 60.00, '2024-05-01');
+(20, 110130, 1, NULL, 'membership', 60.00, '2024-05-01'),
+
+(10, 110120, 2, 1, 'lesson', 50.00, '2024-05-02'),
+(11, 110121, 2, 2, 'lesson', 50.00, '2024-05-03'),
+(12, 110122, 2, 3, 'lesson', 50.00, '2024-05-03'),
+(13, 110123, 2, 4, 'lesson', 50.00, '2024-05-04'),
+(14, 110124, 2, 5, 'lesson', 50.00, '2024-05-05'),
+(15, 110125, 2, 6, 'lesson', 50.00, '2024-05-06'),
+(16, 110126, 2, 7, 'lesson', 50.00, '2024-05-07'),
+(17, 110127, 2, 8, 'lesson', 50.00, '2024-05-08'),
+(18, 110128, 2, 9, 'lesson', 50.00, '2024-05-09'),
+(19, 110129, 2, 10, 'lesson', 50.00, '2024-05-10'),
+(20, 110130, 2, 11, 'lesson', 50.00, '2024-05-11');
 
 
 INSERT INTO `attendance` (`class_id`, `schedule_type`, `member_id`, `attended`, `attendance_status`) VALUES 
