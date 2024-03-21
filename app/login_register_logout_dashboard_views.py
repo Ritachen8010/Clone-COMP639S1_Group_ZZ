@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template, flash, session, redirect, url_for, request
 from flask_bcrypt import Bcrypt
-from flask_apscheduler import APScheduler
+# from flask_apscheduler import APScheduler
 from functools import wraps
 import mysql.connector
 import re
@@ -20,9 +20,9 @@ ROLES = ['Member', 'Instructor', 'Manager']
 
 connection = None
 
-scheduler = APScheduler()
-scheduler.init_app(app)
-scheduler.start()
+# scheduler = APScheduler()
+# scheduler.init_app(app)
+# scheduler.start()
 
 
 class User(UserMixin):

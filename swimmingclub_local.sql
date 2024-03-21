@@ -1,3 +1,7 @@
+CREATE SCHEMA `swimmingclub`;
+USE `swimmingclub`;
+
+DROP DATABASE `swimmingclub`;
 
 -- User table
 CREATE TABLE `user` (
