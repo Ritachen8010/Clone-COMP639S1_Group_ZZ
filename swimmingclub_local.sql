@@ -1,4 +1,4 @@
-DROP SCHEMA IF EXISTS `swimmingclub`;
+DROP SCHEMA IF EXISTS swimmingclub;
 CREATE SCHEMA `swimmingclub`;
 USE `swimmingclub`;
 
