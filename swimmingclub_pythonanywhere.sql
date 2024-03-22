@@ -63,7 +63,7 @@ CREATE TABLE `member` (
 CREATE TABLE `memberships` (
     `membership_id` INT AUTO_INCREMENT,
     `member_id` INT NOT NULL,
-    `type` ENUM('Annual', 'Monthly') NOT NULL,
+    `type` ENUM('Annual', 'Monthly', '6 Month') NOT NULL,
     `start_date` DATE NOT NULL,
     `end_date` DATE NOT NULL,
     `membership_fee` DECIMAL(10,2) NOT NULL,
@@ -107,34 +107,50 @@ CREATE TABLE `settings` (
     FOREIGN KEY (`manager_id`) REFERENCES `manager`(`manager_id`)
 )AUTO_INCREMENT=1;
 
+-- Class name table
+CREATE TABLE `class_name` (
+    `class_name_id` INT AUTO_INCREMENT,
+    `name` ENUM('Zumba', 'Aqua Fit', 'Low-Impact', 'Mums', 'Babies') NOT NULL,
+    `description` TEXT,
+    PRIMARY KEY (`class_name_id`)
+)AUTO_INCREMENT=1;
+
 -- Class schedule table
 CREATE TABLE `class_schedule` (
     `class_id` INT AUTO_INCREMENT,
     `instructor_id` INT,
-    `name` ENUM('Zumba', 'Aqua Fit', 'Low-Impact', 'Mums', 'Babies') NOT NULL,
+    `class_name_id` INT,
     `week` ENUM('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') NOT NULL,
-    `description` TEXT,
     `pool_type` VARCHAR(10) NOT NULL DEFAULT 'Deep',
     `start_time` TIME NOT NULL,
     `end_time` TIME NOT NULL,
-    `capacity` INT NOT NULL CHECK (`capacity` >= 1 AND `capacity` <= 15),
+    `capacity` INT NOT NULL DEFAULT 15,
     PRIMARY KEY (`class_id`),
-    FOREIGN KEY (`instructor_id`) REFERENCES `instructor`(`instructor_id`)
+    FOREIGN KEY (`instructor_id`) REFERENCES `instructor`(`instructor_id`),
+    FOREIGN KEY (`class_name_id`) REFERENCES `class_name`(`class_name_id`)
+)AUTO_INCREMENT=1;
+
+-- Lesson name table
+CREATE TABLE `lesson_name` (
+    `lesson_name_id` INT AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL DEFAULT 'One-on-One Lesson',
+    `description` TEXT,
+    PRIMARY KEY (`lesson_name_id`)
 )AUTO_INCREMENT=1;
 
 -- Lesson schedule table
 CREATE TABLE `lesson_schedule` (
     `lesson_id` INT AUTO_INCREMENT,
     `instructor_id` INT,
-    `name` VARCHAR(255) NOT NULL DEFAULT 'One-on-One Lesson',
+    `lesson_name_id` INT,
     `week` ENUM('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') NOT NULL,
-    `description` TEXT,
     `start_time` TIME NOT NULL,
     `end_time` TIME NOT NULL,
     `lane_number` INT NOT NULL,
     `capacity` INT NOT NULL DEFAULT 1,
     PRIMARY KEY (`lesson_id`),
-    FOREIGN KEY (`instructor_id`) REFERENCES `instructor`(`instructor_id`)
+    FOREIGN KEY (`instructor_id`) REFERENCES `instructor`(`instructor_id`),
+    FOREIGN KEY (`lesson_name_id`) REFERENCES `lesson_name`(`lesson_name_id`)
 )AUTO_INCREMENT=1;
 
 -- Booking table
@@ -288,7 +304,7 @@ INSERT INTO `memberships` (`member_id`, `type`, `start_date`, `end_date`, `membe
 (17, 'Annual', '2024-05-01', '2025-04-30', 700.00),
 (18, 'Annual', '2024-05-01', '2025-04-30', 700.00),
 (19, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(20, 'Monthly', '2024-05-01', '2024-05-31', 60.00);
+(20, '6 Month', '2024-05-01', '2024-11-01', 360.00);
 
 
 INSERT INTO `news` (`manager_id`, `title`, `content`, `publication_date`, `image_id`) VALUES
@@ -302,63 +318,74 @@ increase strength, and offer low-impact options for all ages. Mark your calendar
 '2023-06-05', NULL);
 
 
-INSERT INTO `class_schedule` (`instructor_id`, `name`, `week`, `description`, `start_time`, `end_time`, `capacity`) VALUES
-(1, 'Zumba', 'Monday', 'Zumba class for beginners', '06:00:00', '07:00:00', 15),
-(2, 'Aqua Fit', 'Monday', 'Aqua Fit class for all levels', '07:00:00', '08:00:00', 15),
-(3, 'Low-Impact', 'Monday', 'Low-Impact class for seniors', '18:00:00', '19:00:00', 15),
+INSERT INTO `class_name` (`name`, `description`) VALUES
+('Zumba', 'Zumba class for all levels'),
+('Aqua Fit', 'Aqua Fit class for all levels'),
+('Low-Impact', 'Low-Impact class for all levels'),
+('Mums', 'Mums class for all levels'),
+('Babies', 'Babies class for all levels');
 
-(4, 'Mums', 'Tuesday', 'Mums class for intermediate level', '06:00:00', '07:00:00', 15),
-(5, 'Babies', 'Tuesday', 'Babies class for all levels',  '07:00:00', '08:00:00', 15),
-(1, 'Zumba', 'Tuesday', 'Zumba class for beginners',  '18:00:00', '19:00:00', 15),
+INSERT INTO `class_schedule` (`instructor_id`, `class_name_id`, `week`, `start_time`, `end_time`) VALUES
+(1, 1, 'Monday', '06:00', '07:00'),
+(2, 2, 'Monday', '07:00', '08:00'),
+(3, 3, 'Monday', '18:00', '19:00'),
 
-(2, 'Aqua Fit', 'Wednesday', 'Aqua Fit class for all levels',  '06:00:00', '07:00:00', 15),
-(3, 'Low-Impact', 'Wednesday', 'Low-Impact class for intermediate level', '07:00:00', '08:00:00', 15),
-(4, 'Mums', 'Wednesday', 'Mums class for intermediate level', '18:00:00', '19:00:00', 15),
+(4, 4, 'Tuesday', '06:00', '07:00'),
+(5, 5, 'Tuesday', '07:00', '08:00'),
+(1, 1, 'Tuesday', '18:00', '19:00'),
 
-(5, 'Babies', 'Thursday', 'Babies class for all levels',  '06:00:00', '07:00:00', 15),
-(1, 'Zumba', 'Thursday', 'Zumba class for beginners', '07:00:00', '08:00:00', 15),
-(2, 'Aqua Fit', 'Thursday', 'Aqua Fit class for all levels',  '18:00:00', '19:00:00', 15),
+(2, 2, 'Wednesday', '06:00', '07:00'),
+(3, 3, 'Wednesday', '07:00', '08:00'),
+(4, 4, 'Wednesday', '18:00', '19:00'),
 
-(3, 'Low-Impact', 'Friday', 'Low-Impact class for seniors',  '06:00:00', '07:00:00', 15),
-(4, 'Aqua Fit', 'Friday', 'Aqua Fit class in the shallow pool', '07:00:00', '08:00:00', 15),
-(5, 'Mums', 'Friday', 'Mums class for intermediate level', '18:00:00', '19:00:00', 15),
+(5, 5, 'Thursday', '06:00', '07:00'),
+(1, 1, 'Thursday', '07:00', '08:00'),
+(2, 2, 'Thursday', '18:00', '19:00'),
 
-(1, 'Babies', 'Saturday', 'Babies class for all levels', '06:00:00', '07:00:00', 15),
-(2, 'Zumba', 'Saturday', 'Zumba class for beginners', '07:00:00', '08:00:00', 15),
-(3, 'Aqua Fit', 'Saturday', 'Aqua Fit class for all levels',  '18:00:00', '19:00:00', 15),
+(3, 3, 'Friday', '06:00', '07:00'),
+(4, 4, 'Friday', '07:00', '08:00'),
+(5, 5, 'Friday', '18:00', '19:00'),
 
-(4, 'Low-Impact', 'Sunday', 'Low-Impact class for intermediate level',  '06:00:00', '07:00:00', 15),
-(5, 'Mums', 'Sunday', 'Mums class in the all levels',  '07:00:00', '08:00:00', 15),
-(1, 'Babies', 'Sunday', 'Babies class for all levels',  '18:00:00', '19:00:00', 15);
+(1, 1, 'Saturday', '06:00', '07:00'),
+(2, 2, 'Saturday', '07:00', '08:00'),
+(3, 3, 'Saturday', '18:00', '19:00'),
 
+(4, 4, 'Sunday', '06:00', '07:00'),
+(5, 5, 'Sunday', '07:00', '08:00'),
+(1, 1, 'Sunday', '18:00', '19:00');
 
-INSERT INTO `lesson_schedule` (`instructor_id`, `week`, `description`, `start_time`, `end_time`, `lane_number`, `capacity`) VALUES
-(1, 'Monday', 'Advanced swimming techniques for competitive swimmers.', '12:30', '13:30', 1, 1),
-(2, 'Monday', 'Beginner swimming lessons focusing on basic strokes and water safety.', '14:00', '15:00', 2, 1),
-(3, 'Monday', 'Intermediate swimming lessons to improve technique and endurance.', '16:30', '17:30', 3, 1),
+INSERT INTO `lesson_name` (`description`) VALUES
+('Beginner swimming lesson'),
+('Intermediate swimming lesson'),
+('Advanced swimming lesson');
 
-(4, 'Tuesday', 'Personalized water aerobics session for fitness and rehabilitation.', '12:30', '13:30', 4, 1),
-(5, 'Tuesday', 'One-on-one diving lessons focusing on techniques and safety.', '14:00', '15:00', 5, 1),
-(1, 'Tuesday', 'Personalized training session for triathlon swimming preparation.', '16:30', '17:30', 6, 1),
+INSERT INTO `lesson_schedule` (`instructor_id`, `lesson_name_id`, `week`, `start_time`, `end_time`, `lane_number`) VALUES
+(1, 1, 'Monday', '09:00', '10:00', 1),
+(2, 1, 'Monday', '11:00', '12:00', 2),
+(3, 1, 'Monday', '14:00', '15:00', 3),
 
-(2, 'Wednesday', 'Advanced breathing techniques for enhanced underwater performance.', '12:30', '13:30', 7, 1),
-(3, 'Wednesday', 'Stroke refinement and efficiency training for competitive swimmers.', '14:00', '15:00', 8, 1),
-(4, 'Wednesday', 'Underwater photography techniques and safety for divers.', '16:30', '17:30', 9, 1),
+(4, 2, 'Tuesday', '09:00', '10:00', 4),
+(5, 2, 'Tuesday', '11:00', '12:00', 5),
+(1, 2, 'Tuesday', '14:00', '15:00', 6),
 
-(5, 'Thursday', 'Personalized open water swimming lessons for long-distance swimmers.', '12:30', '13:30', 10, 1), 
-(1, 'Thursday', 'Speed and agility drills for competitive swimmers.', '14:00', '15:00', 1, 1),
-(2, 'Thursday', 'Survival swimming techniques and safety training.', '16:30', '17:30', 2, 1),
+(2, 3, 'Wednesday', '09:00', '10:00', 7),
+(3, 3, 'Wednesday', '11:00', '12:00', 8),
+(4, 3, 'Wednesday', '14:00', '15:00', 9),
 
-(3, 'Friday', 'One-on-one synchronized swimming techniques for all levels.', '12:30', '13:30', 3, 1),
-(4, 'Friday', 'Aquatic therapy sessions for rehabilitation and relaxation.', '14:00', '15:00', 4, 1),
-(5, 'Friday', 'Tailored swim workouts for fitness enthusiasts.', '16:30', '17:30', 5, 1),
+(5, 1, 'Thursday', '09:00', '10:00', 10), 
+(1, 1, 'Thursday', '11:00', '12:00', 1),
+(2, 1, 'Thursday', '14:00', '15:00', 2),
 
-(1, 'Saturday', 'Technique and tactics for open water racing.', '12:30', '13:30', 6, 1),
-(2, 'Saturday', 'Personal coaching for mastering the butterfly stroke.', '14:00', '15:00', 7, 1),
-(3, 'Saturday', 'Endurance training sessions for distance swimmers.', '16:30', '17:30', 8, 1),
+(3, 2, 'Friday', '09:00', '10:00', 3),
+(4, 2, 'Friday', '11:00', '12:00', 4),
+(5, 2, 'Friday', '14:00', '15:00', 5),
 
-(4, 'Sunday', 'Customized workout plans for swimmers looking to lose weight.', '12:30', '13:30', 9, 1),
-(5, 'Sunday', 'Pre-competition nerves and mental preparation coaching.', '14:00', '15:00', 10, 1);
+(1, 3, 'Saturday', '09:00', '10:00', 6),
+(2, 3, 'Saturday', '11:00', '12:00', 7),
+(3, 3, 'Saturday', '14:00', '15:00', 8),
+
+(4, 1, 'Sunday', '09:00', '10:00', 9),
+(5, 1, 'Sunday', '14:00', '15:00', 10);
 
 
 INSERT INTO `bookings` (`member_id`, `class_id`, `lesson_id`, `schedule_type`, `booking_status`, `booking_date`)
@@ -394,8 +421,7 @@ VALUES
 (17, NULL, 8, 'lesson', 'confirmed', '2024-05-09'),
 (18, NULL, 9, 'lesson', 'confirmed', '2024-05-10'),
 (19, NULL, 10, 'lesson', 'confirmed', '2024-05-11'),
-(20, NULL, 11, 'lesson', 'confirmed', '2024-05-20');
-
+(20, NULL, 11, 'lesson', 'confirmed', '2024-05-12');
 
 INSERT INTO `payments` (`member_id`, `membership_id`, `manager_id`, `lesson_id`, `payment_type`, `amount`, `payment_date`)
 VALUES
@@ -418,19 +444,19 @@ VALUES
 (17, 110127, 1, NULL, 'membership', 700.00, '2024-05-01'),
 (18, 110128, 1, NULL, 'membership', 700.00, '2024-05-01'),
 (19, 110129, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(20, 110130, 1, NULL, 'membership', 60.00, '2024-05-01'),
+(20, 110130, 1, NULL, 'membership', 360.00, '2024-05-01'),
 
 (10, 110120, 2, 1, 'lesson', 50.00, '2024-05-02'),
 (11, 110121, 2, 2, 'lesson', 50.00, '2024-05-03'),
-(12, 110122, 2, 3, 'lesson', 50.00, '2024-05-03'),
-(13, 110123, 2, 4, 'lesson', 50.00, '2024-05-04'),
-(14, 110124, 2, 5, 'lesson', 50.00, '2024-05-05'),
-(15, 110125, 2, 6, 'lesson', 50.00, '2024-05-06'),
-(16, 110126, 2, 7, 'lesson', 50.00, '2024-05-07'),
-(17, 110127, 2, 8, 'lesson', 50.00, '2024-05-08'),
-(18, 110128, 2, 9, 'lesson', 50.00, '2024-05-09'),
-(19, 110129, 2, 10, 'lesson', 50.00, '2024-05-10'),
-(20, 110130, 2, 11, 'lesson', 50.00, '2024-05-11');
+(12, 110122, 2, 3, 'lesson', 50.00, '2024-05-04'),
+(13, 110123, 2, 4, 'lesson', 50.00, '2024-05-05'),
+(14, 110124, 2, 5, 'lesson', 50.00, '2024-05-06'),
+(15, 110125, 2, 6, 'lesson', 50.00, '2024-05-07'),
+(16, 110126, 2, 7, 'lesson', 50.00, '2024-05-08'),
+(17, 110127, 2, 8, 'lesson', 50.00, '2024-05-09'),
+(18, 110128, 2, 9, 'lesson', 50.00, '2024-05-10'),
+(19, 110129, 2, 10, 'lesson', 50.00, '2024-05-11'),
+(20, 110130, 2, 11, 'lesson', 50.00, '2024-05-12');
 
 
 INSERT INTO `attendance` (`class_id`, `schedule_type`, `member_id`, `attended`, `attendance_status`) VALUES 
