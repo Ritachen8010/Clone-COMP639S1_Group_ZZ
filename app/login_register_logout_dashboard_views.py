@@ -234,3 +234,47 @@ def dashboard_manager():
     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
     user_info = cursor.fetchone()
     return render_template('dashboard_manager.html', user_info=user_info)
+
+
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+@UserType_required('member', 'instructor', 'manager')
+def change_password():
+    UserID = session.get('UserID')
+
+    if request.method == 'POST':
+        # Get form data
+        old_Password = request.form.get('old_Password')
+        new_Password = request.form.get('new_Password')
+        confirm_Password = request.form.get('confirm_Password')  # New confirm password
+
+        if old_Password and new_Password and confirm_Password:
+            if new_Password == confirm_Password:  # Confirm that both new passwords match
+                cursor = getCursor()
+                cursor.execute("SELECT password FROM user WHERE user_id = %s", (UserID,))
+                user_record = cursor.fetchone()
+
+                if user_record and bcrypt.check_password_hash(user_record['password'], old_Password):
+                    try:
+                        # Hash the new password
+                        hashed_Password = bcrypt.generate_password_hash(new_Password).decode('utf-8')
+                        cursor.execute("UPDATE user SET password = %s WHERE user_id = %s", (hashed_Password, UserID))
+                        getConnection().commit()  # Corrected the commit call
+                        flash("Password changed successfully.")
+                    except Exception as e:
+                        # Handle potential exceptions
+                        print("Error while changing password:", e)
+                        flash("An error occurred while changing the password.")
+                else:
+                    flash("Old password is incorrect.")
+            else:
+                flash("New passwords do not match.")
+        else:
+            flash("Please enter old password, new password, and confirm password.")
+
+        cursor.close()  # Close the cursor
+
+        return redirect(url_for('manage_profile'))  # Redirect if password change is successful or there is an error message
+
+    return render_template('change_password.html')
