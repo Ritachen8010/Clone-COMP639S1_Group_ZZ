@@ -5,7 +5,7 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-block"></div>
-    <div class="greeting text-black">Hello,<span>{{ user_info.Username }}</span>!</div>
+    <div class="greeting text-black">Hello,<span>{{ user_info.username }}</span>!</div>
 
     <div class="content-wrapper">
         <div class="left-column">
@@ -17,6 +17,7 @@
                     <button class="btn btn-primary">Manage My Lesson Schedule</button>
                     <button class="btn btn-primary">Attendance</button>
                     <button class="btn btn-primary">My Profile</button>
+                    <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">Manage Profile</a>
                 </div>
             </div>
 
