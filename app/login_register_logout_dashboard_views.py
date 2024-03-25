@@ -169,12 +169,13 @@ def login():
                     session['member_id'] = member_id if member_id else None
                     login_successful = True
                     flash(f'{Username} login successfully.')
+                    
                 else:
                     flash('Invalid Username or Password')
         except Exception as e:
             flash('An error occurred during login: ' + str(e))
         if login_successful:
-            next_page = session.get('next') or url_for('home')  # Redirect to the home page if there is no next page
+            next_page = session.get('next') or url_for('dashboard_all')  
             return redirect(next_page)
         else:
             # Handling failed login

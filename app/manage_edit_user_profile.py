@@ -5,10 +5,12 @@ from flask_bcrypt import Bcrypt
 from functools import wraps
 import mysql.connector
 import re
+import os
 from datetime import date, timedelta, datetime
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from app.database import getCursor, getConnection
 from app import connect
+from werkzeug.utils import secure_filename
 
 app.config['SECRET_KEY'] = 'some_random_string_here'
 bcrypt = Bcrypt(app)
@@ -73,6 +75,8 @@ def load_user(user_id):
         cursor.close()   
 
 
+UPLOAD_FOLDER = 'static/instructor/'
+
 @app.route('/manage_profile', methods=['GET', 'POST'])
 @login_required
 @UserType_required('member', 'instructor', 'manager')
@@ -101,6 +105,12 @@ def manage_profile():
             elif UserType == 'instructor':
                 cursor.execute("UPDATE instructor SET first_name = %s, last_name = %s, phone = %s WHERE user_id = %s",
                                (new_First_name, new_Last_name, new_phone, UserID))
+                if 'profile_image' in request.files:
+                    file = request.files['profile_image']
+                    if file.filename != '':
+                        filename = secure_filename(file.filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        cursor.execute("UPDATE instructor SET image_profile = %s WHERE user_id = %s", (filename, UserID))
             elif UserType == 'manager':
                 cursor.execute("UPDATE manager SET first_name = %s, last_name = %s, phone = %s WHERE user_id = %s",
                                (new_First_name, new_Last_name, new_phone, UserID))
@@ -126,5 +136,8 @@ def manage_profile():
         profile_info = cursor.fetchone()
 
     return render_template('manage_profile.html', profile_info=profile_info, UserType=UserType)
+
+
+
 
 

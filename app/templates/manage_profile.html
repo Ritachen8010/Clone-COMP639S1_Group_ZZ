@@ -89,7 +89,7 @@
                         {% endif %}
                     
                         {% if session['UserType'] in ['manager', 'instructor'] %}
-                            <form method="post" onsubmit="return validateForm()" action="{{ url_for('manage_profile') }}" required> 
+                            <form method="post" onsubmit="return validateForm()" action="{{ url_for('manage_profile') }}"  enctype="multipart/form-data" required> 
                                 <!-- Name Field -->
                                 <div class="mb-3 row text-light">
                                     <label class="col-sm-6 col-form-label text-light">First Name: </label>
@@ -114,13 +114,26 @@
                                     </div>
                                 {% endif %}
 
-                                <!-- Con Field -->
+                                
                                 <div class="mb-3 row">
                                     <label class="col-sm-6 col-form-label text-light">Phone: </label>
                                     <div class="col-sm-6">
                                         <input type="tel" class="form-control text-light bg-black" id="phone" name="phone" pattern="[0-9]{8,15}" value="{{ profile_info.phone }}" required title="Phone number must be 8 to 15 digits long.">
                                     </div>
                                 </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-6 col-form-label text-light">Email: </label>
+                                    <div class="col-sm-6">
+                                        <input type="email" class="form-control text-light bg-black" id="email" name="email" value="{{ profile_info.email }}">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-6 col-form-label text-light">Profile Image: </label>
+                                    <div class="col-sm-6">
+                                        <input type="file" class="form-control text-light bg-black" id="profile_image" name="file">
+                                    </div>
+                                </div>
+                                
                                 <div class="row">
                                     <div class="mt-3 col-md-3">
                                         <button type="submit" class="btn btn-outline-light me-2">Update Profile</button>
@@ -129,6 +142,7 @@
                                         <a href="{{ url_for('change_password') }}" class="btn btn-danger me-2">Change Password</a>
                                     </div>
                                 </div>
+                                
                             </form>
                         {% endif %}
                     
