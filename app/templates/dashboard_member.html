@@ -5,7 +5,8 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-block"></div>
-    <div class="greeting text-black">Hello,<span>{{ user_info.Username }}</span>!
+    <div class="greeting text-black">Hello,<span>{{ user_info.username }}</span>!
+        <p>Current user type: {{ session['UserType'] }}</p>
         <p>Membership Expire Date:</p>
     </div>
 
@@ -20,9 +21,13 @@
                     <button class="btn btn-primary">Book Lesson</button>
                     <button class="btn btn-primary">Manage Booking</button>
                     <button class="btn btn-primary">My Membership</button>
-                    <button class="btn btn-primary">My Profile</button>
+                    <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">Manage Profile</a>
                 </div>
-            </div>
+              
+            </div>    
+        </div>
+    </div>
+    
 
             <div class="da-small-block text-black">
                 <h2>Today's Schedule</h2>

@@ -6,8 +6,8 @@ from flask import url_for
 from flask import request
 from flask import render_template
 import mysql.connector
-from app.database_views import getCursor
-from app.database_views import getConnection
+from app.database import getCursor
+from app.database import getConnection
 from app import connect
 from app import hashing
 import re
