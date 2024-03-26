@@ -193,48 +193,48 @@ def logout():
     return redirect(url_for('home'))
 
 
-# dashboard_all
-@app.route('/dashboard_all')
-@login_required
-@UserType_required('manager', 'instructor', 'member')
-def dashboard_all():
-    user_id = session.get('UserID')
-    cursor = getCursor()
-    cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-    user_info = cursor.fetchone()
-    cursor.execute("SELECT * FROM member")
-    members = cursor.fetchall()
-    return render_template('dashboard_all.html', user_info=user_info, UserType=session.get('UserType'), members=members)
+# # dashboard_all
+# @app.route('/dashboard_all')
+# @login_required
+# @UserType_required('manager', 'instructor', 'member')
+# def dashboard_all():
+#     user_id = session.get('UserID')
+#     cursor = getCursor()
+#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
+#     user_info = cursor.fetchone()
+#     cursor.execute("SELECT * FROM member")
+#     members = cursor.fetchall()
+#     return render_template('dashboard_all.html', user_info=user_info, UserType=session.get('UserType'), members=members)
 
-@app.route('/dashboard_member')
-@login_required
-@UserType_required('member')
-def dashboard_member():
-    user_id = session.get('UserID')
-    cursor = getCursor()
-    cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-    user_info = cursor.fetchone()
-    return render_template('dashboard_member.html', user_info=user_info)
+# @app.route('/dashboard_member')
+# @login_required
+# @UserType_required('member')
+# def dashboard_member():
+#     user_id = session.get('UserID')
+#     cursor = getCursor()
+#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
+#     user_info = cursor.fetchone()
+#     return render_template('dashboard_member.html', user_info=user_info)
 
-@app.route('/dashboard_instructor')
-@login_required
-@UserType_required('instructor')
-def dashboard_instructor():
-    user_id = session.get('UserID')
-    cursor = getCursor()
-    cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-    user_info = cursor.fetchone()
-    return render_template('dashboard_instructor.html', user_info=user_info)
+# @app.route('/dashboard_instructor')
+# @login_required
+# @UserType_required('instructor')
+# def dashboard_instructor():
+#     user_id = session.get('UserID')
+#     cursor = getCursor()
+#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
+#     user_info = cursor.fetchone()
+#     return render_template('dashboard_instructor.html', user_info=user_info)
 
-@app.route('/dashboard_manager')
-@login_required
-@UserType_required('manager')
-def dashboard_manager():
-    user_id = session.get('UserID')
-    cursor = getCursor()
-    cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-    user_info = cursor.fetchone()
-    return render_template('dashboard_manager.html', user_info=user_info)
+# @app.route('/dashboard_manager')
+# @login_required
+# @UserType_required('manager')
+# def dashboard_manager():
+#     user_id = session.get('UserID')
+#     cursor = getCursor()
+#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
+#     user_info = cursor.fetchone()
+#     return render_template('dashboard_manager.html', user_info=user_info)
 
 
 

@@ -155,7 +155,7 @@
 
 .da-large-block {
     flex-grow: 1;
-    max-width: 1400px;
+    max-width: 1450px;
     margin-bottom: 20px;
     padding: 10px;
     border-radius: 8px;
@@ -181,7 +181,7 @@
     border-radius: 5px;
 }
 
-/* .timetable */
+/* .timetable homepage*/
 .timetable {
     width: 100%;
     border-collapse: collapse;

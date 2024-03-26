@@ -82,17 +82,49 @@ def generate_timetable():
     
     return timetable
 
-@app.route('/dashboard_instructor')
-@login_required
-@UserType_required('instructor')
-def dashboard_instructor():
+def get_user_info():
     user_id = session.get('UserID')
     cursor = getCursor()
     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
     user_info = cursor.fetchone()
+    print(user_info)
+    cursor.close()
+    return user_info
+
+def get_member():
+    user_id = session.get('UserID')
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM member WHERE user_id = %s", (user_id,))
+    member_info = cursor.fetchone()
+    print(member_info)
+    cursor.close()
+    return member_info
+
+def get_instructor():
+    user_id = session.get('UserID')
+    cursor = getCursor()
     cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
     instructor_info = cursor.fetchone()
+    print(instructor_info)
+    cursor.close()
+    return instructor_info
+
+def get_manager():
+    user_id = session.get('UserID')
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM manager WHERE user_id = %s", (user_id,))
+    manager_info = cursor.fetchone()
+    print(manager_info)
+    cursor.close()
+    return manager_info
+
+@app.route('/dashboard_all')
+@login_required
+@UserType_required('manager', 'instructor', 'member')
+def dashboard_all():
+    user_info = get_user_info()
+    member_info = get_member()
+    instructor_info = get_instructor()
+    manager_info = get_manager()
     timetable = generate_timetable()
-    return render_template('dashboard_instructor.html', user_info=user_info, timetable=timetable, instructor_info=instructor_info)
-
-
+    return render_template('dashboard_all.html', user_info=user_info, UserType=user_info['usertype'], member_info=member_info, instructor_info=instructor_info, manager_info=manager_info, timetable=timetable)

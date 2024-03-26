@@ -5,8 +5,8 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-block"></div>
-    <div class="greeting text-black">Hello,<span>{{ user_info.username }}</span>!
-        <p>Current user type: {{ session['UserType'] }}</p>
+    <div class="greeting text-black">Hello,<span>{{ member_info.first_name | capitalize }} {{ member_info.last_name | capitalize }}</span>!
+        <p>User Type: {{ session['UserType'] | capitalize }}</p>
         <p>Membership Expire Date:</p>
     </div>
 
@@ -21,13 +21,10 @@
                     <button class="btn btn-primary">Book Lesson</button>
                     <button class="btn btn-primary">Manage Booking</button>
                     <button class="btn btn-primary">My Membership</button>
-                    <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">Manage Profile</a>
+                    <!-- name changed to my profile -->
+                    <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a>
                 </div>
-              
             </div>    
-        </div>
-    </div>
-    
 
             <div class="da-small-block text-black">
                 <h2>Today's Schedule</h2>
@@ -44,16 +41,58 @@
 
             <div class="da-small-block text-black">
                 <h2>News</h2>
-                <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                <ul class="da-ul">
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </ul>
             </div>
-        </div>
+        </div> <!-- End of left-column -->
 
-    <div class="da-large-block text-black">
-        <h2>My Event</h2>
-        <ul class="da-ul">
-            <li class="da-li">10:00 AM - Swimming Class</li>
-            <li class="da-li">2:00 PM - Aqua Aerobics</li>
-        </ul>
-    </div>
-</div>
+        <div class="right-column">
+            <div class="da-large-block text-black">
+                <h2>Timetable - Aerobics Classes</h2>
+                <table class="timetable text-black">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                        {% for time, classes in timetable.items() %}
+                        <tr>
+                            <td>{{ time }}</td>
+                            {% for day in days %}
+                            <td>
+                                {% set class_info = classes.get(day, {}) %}
+                                <strong>{{ class_info.get('name', '') }}</strong><br>
+                                {{ class_info.get('description', '') | title }}<br>
+                                <span class="text-decoration-underline text-primary">{{ class_info.get('instructor', '') }}</span>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                        <th colspan="8" class="text-start">
+                            *All classes have a maximum capacity of 15 people.
+                            <br>
+                            *All classes to be held in deep pool.
+                        </th>
+                    </tbody>
+                </table>
+            </div>
+            <div class="da-large-block text-black">
+                <h2>My Events</h2>
+                <ul class="da-ul">
+                    <li class="da-li">123</li>
+                </ul>
+            </div>
+        </div> <!-- End of right-column -->
+    </div> <!-- End of content-wrapper -->
+</div> <!-- End of dashboard-container -->
 {% endblock %}

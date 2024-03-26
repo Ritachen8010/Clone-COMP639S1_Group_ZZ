@@ -1,4 +1,3 @@
-<!-- dashboard_all.html -->
 {% extends 'base.html' %}
 
 {% block title %}
@@ -12,172 +11,297 @@
 {% endblock %}
 
 {% block content %}
+{% if UserType == 'manager' %}
 <div class="dashboard-container">
-    <!-- Specific content for manager -->
-    {% if UserType == 'manager' %}
-    <div class="dashboard-container">
-        <div class="dashboard-block"></div>
-        <div class="greeting text-black">Hello,<span>{{ user_info.username }}</span>!</div>
+    <div class="dashboard-block"></div>
+    <div class="greeting text-black">Hello,<span>{{ manager_info.first_name | capitalize }} {{ manager_info.last_name | capitalize }}</span>!
+        <p>User Type: {{ session['UserType'] | capitalize }}</p>
+    </div>
 
-        <div class="content-wrapper">
-            <div class="left-column">
-                <div class="management-buttons">
-                    <h2>Management Tools</h2>
-                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
-                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Members</button>
-                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Instructors</button>
-                        <button class="btn btn-primary" onclick="manageInstructors()">Members Subscription</button>
-                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Class Timetable</button>
-                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Swimming Instructors Lesson Schedule</button>
-                        <button class="btn btn-primary" onclick="manageInstructors()">Manage Payment</button>
-                        <button class="btn btn-primary" onclick="manageLessons()">View Lesson Booking Details</button>
-                        <button class="btn btn-primary" onclick="manageLessons()">View Attendance</button>
-                        <button class="btn btn-primary" onclick="manageLessons()">News</button>
-                        <button class="btn btn-primary" onclick="manageLessons()">Report</button>
-                        <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">Manage Profile</a>
-                    </div>
-                </div>
-
-                <div class="management-buttons">
-                    <h2>My Tools</h2>
-                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
-                        <button class="btn btn-primary" onclick="manageLessons()">My Profile</button>
-                    </div>
-                </div>
-
-                <div class="da-small-block text-black">
-                    <h2>Today's Schedule</h2>
-                    <ul class="da-ul">
-                        <li class="da-li">10:00 AM - Swimming Class</li>
-                        <li class="da-li">2:00 PM - Aqua Aerobics</li>
-                    </ul>
-                </div>
-
-                <div class="da-small-block text-black">
-                    <h2>Notifications</h2>
-                    <p>You have 1 new booking for a Swimming Class tomorrow.</p>
-                </div>
-
-                <div class="da-small-block text-black">
-                    <h2>News</h2>
-                    <li>Sport - Swimming Health</li>
+    <div class="content-wrapper">
+        <div class="left-column">
+            <div class="management-buttons">
+                <h2>Management Tools</h2>
+                <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                    <button class="btn btn-primary" onclick="manageInstructors()">Manage Members</button>
+                    <button class="btn btn-primary" onclick="manageInstructors()">Manage Instructors</button>
+                    <button class="btn btn-primary" onclick="manageInstructors()">Members Subscription</button>
+                    <button class="btn btn-primary" onclick="manageInstructors()">Manage Class Timetable</button>
+                    <button class="btn btn-primary" onclick="manageInstructors()">Manage Swimming Instructors Lesson Schedule</button>
+                    <button class="btn btn-primary" onclick="manageInstructors()">Manage Payment</button>
+                    <button class="btn btn-primary" onclick="manageLessons()">View Lesson Booking Details</button>
+                    <button class="btn btn-primary" onclick="manageLessons()">View Attendance</button>
+                    <button class="btn btn-primary" onclick="manageLessons()">News</button>
+                    <button class="btn btn-primary" onclick="manageLessons()">Report</button>
+                    <!-- name changed to my profile -->
+                    <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a> 
                 </div>
             </div>
 
-        <div class="da-large-block text-black">
-            <h2>Event</h2>
-            <ul class="da-ul">
-                <li class="da-li">10:00 AM - Swimming Class</li>
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-    
-    <!-- Specific content for instructor -->
-    {% if UserType == 'instructor' %}
-    <div class="dashboard-container">
-        <div class="dashboard-block"></div>
-        <div class="greeting text-black">Hello,<span>{{ user_info.username }}</span>!</div>
-
-        <div class="content-wrapper">
-            <div class="left-column">
-                <div class="management-buttons">
-                    <h2>Tools</h2>
-                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
-                        <button class="btn btn-primary">View Class Timetable</button>
-                        <button class="btn btn-primary">View Lesson Booking Details</button>
-                        <button class="btn btn-primary">Manage My Lesson Schedule</button>
-                        <button class="btn btn-primary">Attendance</button>
-                        <button class="btn btn-primary">My Profile</button>
-                        <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">Manage Profile</a>
-                    </div>
-                </div>
-
-                <div class="da-small-block">
-                    <h2>Today's Schedule</h2>
-                    <ul class="da-ul">
-                        <li class="da-li">10:00 AM - Swimming Class</li>
-                        <li class="da-li">2:00 PM - Aqua Aerobics</li>
-                    </ul>
-                </div>
-
-                <div class="da-small-block">
-                    <h2>Notifications</h2>
-                    <p>You have 1 new booking for a Swimming Class tomorrow.</p>
-                </div>
-
-                <div class="da-small-block">
-                    <h2>News</h2>
+            <div class="da-small-block text-black">
+                <h2>Today's Schedule</h2>
+                <ul class="da-ul">
+                    <li class="da-li">10:00 AM - Swimming Class</li>
                     <li class="da-li">2:00 PM - Aqua Aerobics</li>
-                </div>
+                </ul>
             </div>
 
-        <div class="da-large-block">
-            <h2>My Event</h2>
-            <ul class="da-ul">
-                <li class="da-li">10:00 AM - Swimming Class</li>
-                <li class="da-li">2:00 PM - Aqua Aerobics</li>
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-    
-    <!-- Specific content for member -->
-    {% if UserType == 'member' %}
-    <div class="dashboard-container">
-        <div class="dashboard-block"></div>
-        <div class="greeting text-black">Hello,<span>{{ user_info.username }}</span>!
-            <p>Membership Expire Date:</p>
-        </div>
+            <div class="da-small-block text-black">
+                <h2>Notifications</h2>
+                <p>You have 1 new booking for a Swimming Class tomorrow.</p>
+            </div>
 
-        <div class="content-wrapper">
-            <div class="left-column">
-                <div class="management-buttons">
-                    <h2>Tools</h2>
-                    <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
-                        <button class="btn btn-primary">View Class</button>
-                        <button class="btn btn-primary">View Instructors</button>
-                        <button class="btn btn-primary">Book Class</button>
-                        <button class="btn btn-primary">Book Lesson</button>
-                        <button class="btn btn-primary">Manage Booking</button>
-                        <button class="btn btn-primary">My Membership</button>
-                        <button class="btn btn-primary">My Profile</button>
-                        <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">Manage Profile</a>
-                    </div>
-                </div>
-
-                <div class="da-small-block text-black">
-                    <h2>Today's Schedule</h2>
-                    <ul class="da-ul">
-                        <li class="da-li">10:00 AM - Swimming Class</li>
-                        <li class="da-li">2:00 PM - Aqua Aerobics</li>
-                    </ul>
-                </div>
-
-                <div class="da-small-block text-black">
-                    <h2>Notifications</h2>
-                    <p>You have 1 new booking for a Swimming Class tomorrow.</p>
-                </div>
-
-                <div class="da-small-block text-black">
-                    <h2>News</h2>
+            <div class="da-small-block text-black">
+                <h2>News</h2>
+                <ul class="da-ul">
                     <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </ul>
+            </div>
+        </div> <!-- End of left-column -->
+
+        <div class="right-column">
+            <div class="da-large-block text-black">
+                <h2>Timetable - Aerobics Classes</h2>
+                <table class="timetable text-black">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                        {% for time, classes in timetable.items() %}
+                        <tr>
+                            <td>{{ time }}</td>
+                            {% for day in days %}
+                            <td>
+                                {% set class_info = classes.get(day, {}) %}
+                                <strong>{{ class_info.get('name', '') }}</strong><br>
+                                {{ class_info.get('description', '') | title }}<br>
+                                <span class="text-decoration-underline text-primary">{{ class_info.get('instructor', '') }}</span>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                        <th colspan="8" class="text-start">
+                            *All classes have a maximum capacity of 15 people.
+                            <br>
+                            *All classes to be held in deep pool.
+                        </th>
+                    </tbody>
+                </table>
+            </div>
+            <div class="da-large-block text-black">
+                <h2>My Events</h2>
+                <ul class="da-ul">
+                    <li class="da-li">123</li>
+                </ul>
+            </div>
+        </div> <!-- End of right-column -->
+    </div> <!-- End of content-wrapper -->
+</div> <!-- End of dashboard-container -->
+{% endif %}
+    
+<!-- Specific content for instructor -->
+{% if UserType == 'instructor' %}
+<div class="dashboard-container">
+    <div class="dashboard-block"></div>
+    <div class="greeting text-black">Hello,<span>{{ instructor_info.first_name | capitalize }} {{ instructor_info.last_name | capitalize }}</span>!
+        <p>User Type: {{ session['UserType'] | capitalize }}</p>
+    </div>
+    
+    <div class="content-wrapper">
+        <div class="left-column">
+            <div class="management-buttons">
+                <h2>Tools</h2>
+                <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                    <button class="btn btn-primary">View Class Timetable</button>
+                    <button class="btn btn-primary">View Lesson Booking Details</button>
+                    <button class="btn btn-primary">Manage My Lesson Schedule</button>
+                    <button class="btn btn-primary">Attendance</button>
+                    <button class="btn btn-primary">My Profile</button>
+                    <!-- name changed to my profile -->
+                    <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a>
                 </div>
             </div>
-
-        <div class="da-large-block text-black">
-            <h2>My Event</h2>
-            <ul class="da-ul">
-                <li class="da-li">10:00 AM - Swimming Class</li>
-                <li class="da-li">2:00 PM - Aqua Aerobics</li>
-            </ul>
-        </div>
-    </div>
-    {% endif %}
     
-    <!-- Any shared content across all user types -->
-    <div class="shared-content">
-        <!-- This could include notifications, general information, etc. -->
+            <div class="da-small-block text-black">
+                <h2>Today's Schedule</h2>
+                <ul class="da-ul">
+                    <li class="da-li">10:00 AM - Swimming Class</li>
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </ul>
+            </div>
+    
+            <div class="da-small-block text-black">
+                <h2>Notifications</h2>
+                <p>You have 1 new booking for a Swimming Class tomorrow.</p>
+            </div>
+    
+            <div class="da-small-block text-black">
+                <h2>News</h2>
+                <ul class="da-ul">
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </ul>
+            </div>
+        </div> <!-- End of left-column -->
+    
+        <div class="right-column">
+            <div class="da-large-block text-black">
+                <h2>Timetable - Aerobics Classes</h2>
+                <table class="timetable text-black">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                        {% for time, classes in timetable.items() %}
+                        <tr>
+                            <td>{{ time }}</td>
+                            {% for day in days %}
+                            <td>
+                                {% set class_info = classes.get(day, {}) %}
+                                <strong>{{ class_info.get('name', '') }}</strong><br>
+                                {{ class_info.get('description', '') | title }}<br>
+                                <span class="text-decoration-underline text-primary">{{ class_info.get('instructor', '') }}</span>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                        <th colspan="8" class="text-start">
+                            *All classes have a maximum capacity of 15 people.
+                            <br>
+                            *All classes to be held in deep pool.
+                        </th>
+                    </tbody>
+                </table>
+            </div>
+            <div class="da-large-block text-black">
+                <h2>My Events</h2>
+                <ul class="da-ul">
+                    <li class="da-li">123</li>
+                </ul>
+            </div>
+        </div> <!-- End of right-column -->
+    </div> <!-- End of content-wrapper -->
+</div> <!-- End of dashboard-container -->
+{% endif %}
+
+    
+<!-- Specific content for member -->
+{% if UserType == 'member' %}
+<div class="dashboard-container">
+    <div class="dashboard-block"></div>
+    <div class="greeting text-black">Hello,<span>{{ member_info.first_name | capitalize }} {{ member_info.last_name | capitalize }}</span>!
+        <p>User Type: {{ session['UserType'] | capitalize }}</p>
+        <p>Membership Expire Date:</p>
     </div>
+    
+    <div class="content-wrapper">
+        <div class="left-column">
+            <div class="management-buttons">
+                <h2>Tools</h2>
+                <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                    <button class="btn btn-primary">View Class</button>
+                    <button class="btn btn-primary">View Instructors</button>
+                    <button class="btn btn-primary">Book Class</button>
+                    <button class="btn btn-primary">Book Lesson</button>
+                    <button class="btn btn-primary">Manage Booking</button>
+                    <button class="btn btn-primary">My Membership</button>
+                    <!-- name changed to my profile -->
+                    <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a>
+                </div>
+            </div>    
+    
+            <div class="da-small-block text-black">
+                <h2>Today's Schedule</h2>
+                <ul class="da-ul">
+                    <li class="da-li">10:00 AM - Swimming Class</li>
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </ul>
+            </div>
+    
+            <div class="da-small-block text-black">
+                <h2>Notifications</h2>
+                <p>You have 1 new booking for a Swimming Class tomorrow.</p>
+            </div>
+    
+            <div class="da-small-block text-black">
+                <h2>News</h2>
+                <ul class="da-ul">
+                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                </ul>
+            </div>
+        </div> <!-- End of left-column -->
+    
+        <div class="right-column">
+            <div class="da-large-block text-black">
+                <h2>Timetable - Aerobics Classes</h2>
+                <table class="timetable text-black">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                        {% for time, classes in timetable.items() %}
+                        <tr>
+                            <td>{{ time }}</td>
+                            {% for day in days %}
+                            <td>
+                                {% set class_info = classes.get(day, {}) %}
+                                <strong>{{ class_info.get('name', '') }}</strong><br>
+                                {{ class_info.get('description', '') | title }}<br>
+                                <span class="text-decoration-underline text-primary">{{ class_info.get('instructor', '') }}</span>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                        <th colspan="8" class="text-start">
+                            *All classes have a maximum capacity of 15 people.
+                            <br>
+                            *All classes to be held in deep pool.
+                        </th>
+                    </tbody>
+                </table>
+            </div>
+            <div class="da-large-block text-black">
+                <h2>My Events</h2>
+                <ul class="da-ul">
+                    <li class="da-li">123</li>
+                </ul>
+            </div>
+        </div> <!-- End of right-column -->
+    </div> <!-- End of content-wrapper -->
+</div> <!-- End of dashboard-container -->
+{% endif %}
+    
+<!-- Any shared content across all user types -->
+<div class="shared-content">
+    <!-- This could include notifications, general information, etc. -->
 </div>
 {% endblock %}
