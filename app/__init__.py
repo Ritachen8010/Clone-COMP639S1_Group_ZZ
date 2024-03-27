@@ -12,3 +12,4 @@ from app import manager_views
 from app import instructor_views
 from app import login_register_logout_dashboard_views
 from app import manage_edit_user_profile
+from app import view_membership

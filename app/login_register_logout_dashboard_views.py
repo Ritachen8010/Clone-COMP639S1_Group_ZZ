@@ -316,3 +316,5 @@ def change_password():
         return redirect(url_for('manage_profile'))  # Redirect if password change is successful or there is an error message
 
     return render_template('change_password.html')
+
+

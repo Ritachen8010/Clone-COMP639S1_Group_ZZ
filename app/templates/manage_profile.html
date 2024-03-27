@@ -89,7 +89,8 @@
                         {% endif %}
                     
                         {% if session['UserType'] in ['manager', 'instructor'] %}
-                            <form method="post" onsubmit="return validateForm()" action="{{ url_for('manage_profile') }}"  enctype="multipart/form-data" required> 
+                            <form method="post" enctype="multipart/form-data" onsubmit="return validateForm()" action="{{ url_for('manage_profile') }}" >
+
                                 <!-- Name Field -->
                                 <div class="mb-3 row text-light">
                                     <label class="col-sm-6 col-form-label text-light">First Name: </label>
@@ -130,7 +131,7 @@
                                 <div class="mb-3 row">
                                     <label class="col-sm-6 col-form-label text-light">Profile Image: </label>
                                     <div class="col-sm-6">
-                                        <input type="file" class="form-control text-light bg-black" id="profile_image" name="file">
+                                        <input type="file" class="form-control text-light bg-black" id="profile_image" name="profile_image">
                                     </div>
                                 </div>
                                 
