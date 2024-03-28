@@ -1,6 +1,7 @@
 DROP SCHEMA IF EXISTS swimmingclub;
 CREATE SCHEMA `swimmingclub`;
 USE `swimmingclub`;
+DELETE FROM user WHERE username = 'text01';
 
 -- User table
 CREATE TABLE `user` (
@@ -58,7 +59,6 @@ CREATE TABLE `member` (
     `health_info` TEXT,
     `image_profile` VARCHAR(500),
     `status` ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
-    `join_date` DATE,
     PRIMARY KEY (`member_id`),
     FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`)
 )AUTO_INCREMENT=1;

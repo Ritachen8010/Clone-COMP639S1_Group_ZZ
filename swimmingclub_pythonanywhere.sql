@@ -243,7 +243,7 @@ INSERT INTO `instructor` (`user_id`, `title`, `first_name`, `last_name`, `email`
 (1003, 'Mr', 'Tom', 'Smith', 'tom@example.com', '1234567890', 'Instructor', 
 'Tom is an enthusiastic aerobics instructor with a deep passion for promoting health and fitness through fun and engaging water aerobics classes. 
 With over 5 years of experience in fitness instruction, he specializes in creating dynamic workouts that are accessible to individuals of all skill levels.',
-'profile_image.jpg1', 'Active'),
+'profile_image1.jpg', 'Active'),
 
 (1004, 'Miss', 'Emily', 'Brown', 'emily@example.com', '1234567890', 'Instructor', 
 'Emily brings energy and enthusiasm to water aerobics. With a background in fitness and nutrition, she ensures her classes are fun and effective for all fitness levels.',

@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 
+<!-- added block title -->
+{% block title %}My Profile{% endblock %}
+
 {% block content %}
 <div class="vh-100 px-0 bg-black">
  
@@ -40,10 +43,23 @@
                                         <input type="tel" class="form-control text-light bg-black" id="phone" name="phone" pattern="[0-9]{8,15}" value="{{ profile_info.phone }}" required title="Phone number must be 8 to 15 digits long.">
                                     </div>
                                 </div>
-                                <div class="mb-3 row">
+                                <!-- <div class="mb-3 row">
                                     <label class="col-sm-6 col-form-label text-light">Title: </label>
                                     <div class="col-sm-6">
                                         <input type="text" class="form-control text-light bg-black" id="title" name="title" value="{{ profile_info.title }}" required>
+                                    </div>
+                                </div> -->
+                                <!-- changed to selection -->
+                                <div class="mb-3 row">
+                                    <label class="col-sm-6 col-form-label text-light">Title: </label>
+                                    <div class="col-sm-6">
+                                        <select class="form-control text-light bg-black" id="title" name="title" required>
+                                            <option value="">Select a title</option>
+                                            <option value="Mr" {% if profile_info.title == 'Mr' %}selected{% endif %}>Mr</option>
+                                            <option value="Mrs" {% if profile_info.title == 'Mrs' %}selected{% endif %}>Mrs</option>
+                                            <option value="Miss" {% if profile_info.title == 'Miss' %}selected{% endif %}>Miss</option>
+                                            <option value="Dr" {% if profile_info.title == 'Dr' %}selected{% endif %}>Dr</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -76,6 +92,14 @@
                                         <input type="text" class="form-control text-light bg-black" id="occupation" name="occupation" value="{{ profile_info.occupation }}">
                                     </div>
                                 </div>
+                                
+                                <!-- profile image if want to add for member - optional -->
+                                <!-- <div class="mb-3 row">
+                                    <label class="col-sm-6 col-form-label text-light">Profile Image: </label>
+                                    <div class="col-sm-6">
+                                        <input type="file" class="form-control text-light bg-black" id="profile_image" name="profile_image">
+                                    </div>
+                                </div> -->
 
                                 <div class="row">
                                     <div class="mt-3 col-md-3">
@@ -105,21 +129,32 @@
                                     </div>
                                 </div>
                                 
-                                
-                                {% if session['UserType'] == 'instructor' %}
+                                <!-- {% if session['UserType'] == 'instructor' %}
                                     <div class="mb-3 row">
                                         <label class="col-sm-6 col-form-label text-light">Position: </label>
                                         <div class="col-sm-6">
                                             <input type="text" class="form-control text-light bg-black" id="Position" name="Position" value="{{ profile_info.position }}" required>
                                         </div>
                                     </div>
-                                {% endif %}
+                                {% endif %} -->
 
-                                
                                 <div class="mb-3 row">
                                     <label class="col-sm-6 col-form-label text-light">Phone: </label>
                                     <div class="col-sm-6">
                                         <input type="tel" class="form-control text-light bg-black" id="phone" name="phone" pattern="[0-9]{8,15}" value="{{ profile_info.phone }}" required title="Phone number must be 8 to 15 digits long.">
+                                    </div>
+                                </div>
+                                <!-- added title -->
+                                <div class="mb-3 row">
+                                    <label class="col-sm-6 col-form-label text-light">Title: </label>
+                                    <div class="col-sm-6">
+                                        <select class="form-control text-light bg-black" id="title" name="title" required>
+                                            <option value="">Select a title</option>
+                                            <option value="Mr" {% if profile_info.title == 'Mr' %}selected{% endif %}>Mr</option>
+                                            <option value="Mrs" {% if profile_info.title == 'Mrs' %}selected{% endif %}>Mrs</option>
+                                            <option value="Miss" {% if profile_info.title == 'Miss' %}selected{% endif %}>Miss</option>
+                                            <option value="Dr" {% if profile_info.title == 'Dr' %}selected{% endif %}>Dr</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -128,13 +163,28 @@
                                         <input type="email" class="form-control text-light bg-black" id="email" name="email" value="{{ profile_info.email }}">
                                     </div>
                                 </div>
+                                <!-- added position -->
+                                <div class="mb-3 row">
+                                    <label class="col-sm-6 col-form-label text-light">Position: </label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control text-light bg-black" id="position" name="position" value="{{ profile_info.position }}">
+                                    </div>
+                                </div>
+                                <!-- added image for instructor -->
+                                {% if session['UserType'] == 'instructor' %}
                                 <div class="mb-3 row">
                                     <label class="col-sm-6 col-form-label text-light">Profile Image: </label>
                                     <div class="col-sm-6">
                                         <input type="file" class="form-control text-light bg-black" id="profile_image" name="profile_image">
                                     </div>
                                 </div>
-                                
+                                <div class="mb-3 row">
+                                    <label class="col-sm-6 col-form-label text-light">Bio: </label>
+                                    <div class="col-sm-6">
+                                        <textarea class="form-control text-light bg-black" id="bio" name="bio">{{ profile_info.bio }}</textarea>
+                                    </div>
+                                </div>
+                                {% endif %}
                                 <div class="row">
                                     <div class="mt-3 col-md-3">
                                         <button type="submit" class="btn btn-outline-light me-2">Update Profile</button>

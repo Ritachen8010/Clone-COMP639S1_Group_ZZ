@@ -35,6 +35,10 @@ def UserType_required(*UserTypes):
 
     return decorator
 
+@app.template_filter('formatdate')
+def format_date_filter(date):
+    return date.strftime("%d/%m/%Y")
+
 # Convert time to datetime, 'HH:MM AM/PM' format
 def format_time_slot(start_time, end_time):
     start_time_str = (datetime.min + start_time).time().strftime('%I:%M %p')
@@ -82,6 +86,49 @@ def generate_timetable():
     
     return timetable
 
+def generate_filtered_timetable_by_instructor(first_name, last_name):
+    full_name = " ".join([first_name, last_name])
+    cursor = getCursor()
+    cursor.execute("""
+        SELECT
+            class_name.name,
+            class_name.description,
+            instructor.first_name,
+            instructor.last_name,
+            class_schedule.week,
+            class_schedule.pool_type,
+            class_schedule.start_time,
+            class_schedule.end_time,
+            class_schedule.capacity
+        FROM class_schedule
+        JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
+        JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
+        WHERE CONCAT(instructor.first_name, ' ', instructor.last_name) = %s
+    """, (full_name,))
+    timetable_data = cursor.fetchall()
+    cursor.close()
+
+    timetable_data.sort(key=lambda row: row['start_time'])
+    
+    filtered_timetable = {}
+
+    for row in timetable_data:
+        time_slot = format_time_slot(row['start_time'], row['end_time'])
+
+        if time_slot not in filtered_timetable:
+            filtered_timetable[time_slot] = {}
+
+        if row['week'] not in filtered_timetable[time_slot]:
+            filtered_timetable[time_slot][row['week']] = {
+                'name': row['name'],
+                'description': row['description'],
+                'instructor': f"{row['first_name']} {row['last_name']}",
+                'pool_type': row['pool_type'],
+                'capacity': row['capacity']
+            }
+    
+    return filtered_timetable
+
 def get_user_info():
     user_id = session.get('UserID')
     cursor = getCursor()
@@ -118,6 +165,13 @@ def get_manager():
     cursor.close()
     return manager_info
 
+def get_membership_info(member_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM memberships WHERE member_id = %s", (member_id,))
+    membership_info = cursor.fetchone()
+    cursor.close()
+    return membership_info
+
 @app.route('/dashboard_all')
 @login_required
 @UserType_required('manager', 'instructor', 'member')
@@ -127,4 +181,27 @@ def dashboard_all():
     instructor_info = get_instructor()
     manager_info = get_manager()
     timetable = generate_timetable()
+    if member_info is not None:
+        membership_info = get_membership_info(member_info['member_id'])
+    else:
+        membership_info = None
+    return render_template('dashboard_all.html', user_info=user_info, 
+                           UserType=user_info['usertype'], member_info=member_info, 
+                           instructor_info=instructor_info, manager_info=manager_info, 
+                           timetable=timetable, membership_info=membership_info)
+
+@app.route('/dashboard_by_instructor/<first_name>/<last_name>', methods=['GET', 'POST'])
+@login_required
+@UserType_required('manager', 'instructor', 'member')
+def dashboard_by_instructor(first_name, last_name):
+    user_info = get_user_info()
+    member_info = get_member()
+    instructor_info = get_instructor()
+    manager_info = get_manager()
+
+    if 'form_submitted' in request.args and 'show_own_timetable' not in request.args:
+        timetable = generate_timetable()
+    else:
+        timetable = generate_filtered_timetable_by_instructor(first_name, last_name)
+
     return render_template('dashboard_all.html', user_info=user_info, UserType=user_info['usertype'], member_info=member_info, instructor_info=instructor_info, manager_info=manager_info, timetable=timetable)

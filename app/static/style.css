@@ -7,6 +7,11 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* font */
+.h2-custom {
+    font-size: 1.5rem;
+}
+
 .header-image {
     padding-top: 200px;
     padding-bottom: 300px;
@@ -82,6 +87,10 @@
 }
 
 /* dashboard */
+.content-wrapper {
+    display: flex;
+}
+
 .dashboard-container {
     margin: auto;
     background-color: #ffffff;
@@ -121,6 +130,12 @@
     margin-left: auto; /* Pushes the profile link to the right within the flex container */
 }
 
+.da-left-column {
+    padding: 20px;
+    width: 400px;
+    /* height: 100px; */
+}
+
 .da-small-block {
     max-width: 500px;
     margin-bottom: 20px;
@@ -130,14 +145,14 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.management-buttons {
+/* .management-buttons {
     max-width: 500px;
     margin-bottom: 20px;
     padding: 10px;
     border-radius: 8px;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+} */
 
 
 .btn-group-vertical > .btn {
@@ -154,8 +169,9 @@
 }
 
 .da-large-block {
-    flex-grow: 1;
-    max-width: 1450px;
+    /* flex-grow: 1; */
+    /* max-width: changed to witdth 1450px; */
+    width: 1500px;
     margin-bottom: 20px;
     padding: 10px;
     border-radius: 8px;
@@ -240,3 +256,19 @@
     color: white;
     transform: rotateY(180deg);
   }
+
+/* news */
+.news-link {
+    font-size: inherit;
+}
+
+.table th, .table td {
+/* border: 1px solid #8d8d8d; */
+padding: 8px;
+text-align: center;
+}
+
+    .table th {
+    background-color: #428bca !important;
+    color: white !important;
+    }

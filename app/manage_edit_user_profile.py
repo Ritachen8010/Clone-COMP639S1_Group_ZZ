@@ -98,13 +98,18 @@ def manage_profile():
             new_address = request.form.get('address')
             new_dob = request.form.get('dob')
             new_occupation = request.form.get('occupation')
+            # added position for instructor and manager
+            new_position = request.form.get('position')
+            # added bio for instructor
+            new_bio = request.form.get('bio')
             
             if UserType == 'member':
                 cursor.execute("UPDATE member SET first_name = %s, last_name = %s, phone = %s, title = %s, email = %s, health_info = %s, address = %s, dob = %s, occupation = %s WHERE user_id = %s",
                                (new_First_name, new_Last_name, new_phone, new_Title, new_email, new_health_info, new_address, new_dob, new_occupation, UserID))
             elif UserType == 'instructor':
-                cursor.execute("UPDATE instructor SET first_name = %s, last_name = %s, phone = %s WHERE user_id = %s",
-                               (new_First_name, new_Last_name, new_phone, UserID))
+                # added new position and bio | title, email and phone
+                cursor.execute("UPDATE instructor SET first_name = %s, last_name = %s, title = %s, phone = %s, email = %s, position = %s, bio = %s WHERE user_id = %s",
+                               (new_First_name, new_Last_name, new_Title, new_phone, new_email, new_position, new_bio, UserID))
                 if 'profile_image' in request.files:
                     file = request.files['profile_image']
                     if file.filename != '':
@@ -112,8 +117,9 @@ def manage_profile():
                         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                         cursor.execute("UPDATE instructor SET image_profile = %s WHERE user_id = %s", (filename, UserID))
             elif UserType == 'manager':
-                cursor.execute("UPDATE manager SET first_name = %s, last_name = %s, phone = %s WHERE user_id = %s",
-                               (new_First_name, new_Last_name, new_phone, UserID))
+                # added new position, title, email and phone
+                cursor.execute("UPDATE manager SET first_name = %s, last_name = %s, title = %s, phone = %s, email = %s, position = %s WHERE user_id = %s",
+                               (new_First_name, new_Last_name, new_Title, new_phone, new_email, new_position, UserID))
 
             getConnection().commit()
 

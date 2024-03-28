@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-block"></div>
+    <div class="greeting text-black">Hello,<span>{{ member_info.first_name | capitalize }} {{ member_info.last_name | capitalize }}</span>!</div>
+
+<div class="container text-black mt-5 mb-5">
+    <div class="h2-custom mb-4">My Class Bookings</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Class Name</th>
+                <th>Instructor</th>
+                <th>Booking Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in class_bookings %}
+            <tr>
+                <td>{{ booking.booking_id }}</td>
+                <td>{{ booking.class_name }}</td>
+                <td>{{ booking.first_name }} {{ booking.last_name }}</td>
+                <td>{{ booking.booking_date | formatdate }}</td>
+                <td>{{ format_time_slot(booking.start_time) }}</td>
+                <td>{{ format_time_slot(booking.end_time) }}</td>
+                <td>{{ booking.booking_status | capitalize }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="h2-custom mt-5 mb-4">My Lesson Bookings</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Lesson Name</th>
+                <th>Instructor</th>
+                <th>Booking Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in lesson_bookings %}
+            <tr>
+                <td>{{ booking.booking_id }}</td>
+                <td>{{ booking.lesson_name }}</td>
+                <td>{{ booking.first_name }} {{ booking.last_name }}</td>
+                <td>{{ booking.booking_date | formatdate }}</td>
+                <td>{{ format_time_slot(booking.start_time) }}</td>
+                <td>{{ format_time_slot(booking.end_time) }}</td>
+                <td>{{ booking.booking_status | capitalize }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -112,8 +112,11 @@ def register():
                 user_id = cursor.lastrowid  # Get the last inserted id
 
                 # Insert Member information
-                cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, health_info, join_date) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                               (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info, DateJoined))
+                # cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, health_info, join_date) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                #                (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info, DateJoined))
+                # removed date of join
+                cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, health_info) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                               (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info))
                 member_id = cursor.lastrowid  # Get the last inserted id for member
 
                 # New code to handle subscription type selection
@@ -237,8 +240,8 @@ def login():
         # Reload the login page
 
     # For GET requests or if the login logic fails
-    return render_template('homepage.html')
-
+    timetable = generate_timetable()  # Generate the timetable
+    return render_template('homepage.html', timetable=timetable)
 
 @app.route('/logout')
 def logout():
@@ -307,31 +310,56 @@ def change_password():
         if old_Password and new_Password and confirm_Password:
             if new_Password == confirm_Password:  # Confirm that both new passwords match
                 cursor = getCursor()
-                cursor.execute("SELECT password FROM user WHERE user_id = %s", (UserID,))
-                user_record = cursor.fetchone()
-
-                if user_record and bcrypt.check_password_hash(user_record['password'], old_Password):
-                    try:
+                # cursor.execute("SELECT password FROM user WHERE user_id = %s", (UserID,))
+                # user_record = cursor.fetchone()
+                try:
+                    cursor.execute("SELECT password FROM user WHERE user_id = %s", (UserID,))
+                    user_record = cursor.fetchone()
+                    
+                    if user_record and bcrypt.check_password_hash(user_record['password'], old_Password):
                         # Hash the new password
                         hashed_Password = bcrypt.generate_password_hash(new_Password).decode('utf-8')
                         cursor.execute("UPDATE user SET password = %s WHERE user_id = %s", (hashed_Password, UserID))
                         getConnection().commit()  # Corrected the commit call
                         flash("Password changed successfully.")
-                    except Exception as e:
-                        # Handle potential exceptions
-                        print("Error while changing password:", e)
-                        flash("An error occurred while changing the password.")
-                else:
-                    flash("Old password is incorrect.")
+                    else:
+                        flash("Old password is incorrect.")
+                except Exception as e:
+                    # Handle potential exceptions
+                    print("Error while changing password:", e)
+                    flash("An error occurred while changing the password.")
+                finally:
+                    cursor.close()  # Close the cursor
             else:
                 flash("New passwords do not match.")
         else:
             flash("Please enter old password, new password, and confirm password.")
 
-        cursor.close()  # Close the cursor
-
         return redirect(url_for('manage_profile'))  # Redirect if password change is successful or there is an error message
 
     return render_template('change_password.html')
 
+                # if user_record and bcrypt.check_password_hash(user_record['password'], old_Password):
+                #     try:
+                        # Hash the new password
+    #                     hashed_Password = bcrypt.generate_password_hash(new_Password).decode('utf-8')
+    #                     cursor.execute("UPDATE user SET password = %s WHERE user_id = %s", (hashed_Password, UserID))
+    #                     getConnection().commit()  # Corrected the commit call
+    #                     flash("Password changed successfully.")
+    #                 except Exception as e:
+    #                     # Handle potential exceptions
+    #                     print("Error while changing password:", e)
+    #                     flash("An error occurred while changing the password.")
+    #             else:
+    #                 flash("Old password is incorrect.")
+    #         else:
+    #             flash("New passwords do not match.")
+    #     else:
+    #         flash("Please enter old password, new password, and confirm password.")
+
+    #     cursor.close()  # Close the cursor
+
+    #     return redirect(url_for('manage_profile'))  # Redirect if password change is successful or there is an error message
+
+    # return render_template('change_password.html')
 

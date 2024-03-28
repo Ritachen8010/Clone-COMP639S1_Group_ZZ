@@ -17,9 +17,10 @@
                 <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
                     <!-- <button class="btn btn-primary">View Class</button> -->
                     <button class="btn btn-primary">View Instructors</button>
-                    <button class="btn btn-primary">Book Class</button>
-                    <button class="btn btn-primary">Book Lesson</button>
-                    <button class="btn btn-primary">Manage Booking</button>
+                    <a href="{{ url_for('news') }}" class="btn btn-primary" class="btn btn-primary">View News</a>
+                    <!-- <button class="btn btn-primary">Book Class</button>
+                    <button class="btn btn-primary">Book Lesson</button> -->
+                    <a href="{{ url_for('book') }}" class="btn btn-primary">Manage Booking</a>
                     <a href="{{ url_for('view_membership') }}" class="btn btn-primary">My Membership</a>
                     <!-- name changed to my profile -->
                     <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a>
