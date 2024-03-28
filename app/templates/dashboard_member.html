@@ -7,19 +7,20 @@
     <div class="dashboard-block"></div>
     <div class="greeting text-black">Hello,<span>{{ member_info.first_name | capitalize }} {{ member_info.last_name | capitalize }}</span>!
         <p>User Type: {{ session['UserType'] | capitalize }}</p>
-        <p>Membership Expire Date:</p>
+        <p>Membership Expire Date: {{ membership_info.end_date | formatdate }}</p>
     </div>
 
     <div class="content-wrapper">
-        <div class="left-column">
-            <div class="management-buttons">
+        <div class="da-left-column">
+            <div class="da-small-block">
                 <h2>Tools</h2>
                 <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
-                    <button class="btn btn-primary">View Class</button>
+                    <!-- <button class="btn btn-primary">View Class</button> -->
                     <button class="btn btn-primary">View Instructors</button>
-                    <button class="btn btn-primary">Book Class</button>
-                    <button class="btn btn-primary">Book Lesson</button>
-                    <button class="btn btn-primary">Manage Booking</button>
+                    <a href="{{ url_for('news') }}" class="btn btn-primary" class="btn btn-primary">View News</a>
+                    <!-- <button class="btn btn-primary">Book Class</button>
+                    <button class="btn btn-primary">Book Lesson</button> -->
+                    <a href="{{ url_for('book') }}" class="btn btn-primary">Manage Booking</a>
                     <button class="btn btn-primary">My Membership</button>
                     <!-- name changed to my profile -->
                     <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a>
@@ -27,24 +28,40 @@
             </div>    
 
             <div class="da-small-block text-black">
-                <h2>Today's Schedule</h2>
+                <h2>My Schedule</h2>
                 <ul class="da-ul">
-                    <li class="da-li">10:00 AM - Swimming Class</li>
-                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                    {% for booking in bookings %}
+                    {% if booking.booking_status == 'confirmed' %}
+                    <li class="da-li">
+                        {{ booking.booking_date | formatdate }} - 
+                        {{ format_time_slot(booking.start_time) }} to 
+                        {{ format_time_slot(booking.end_time) }} - 
+                        {% if booking.schedule_type == 'class' %}
+                        {{ booking.class_name }}
+                        {% elif booking.type == 'lesson' %}
+                        {{ booking.lesson_name }}
+                        {% endif %}
+                    </li>
+                    {% endif %}
+                    {% endfor %}
                 </ul>
             </div>
 
             <div class="da-small-block text-black">
                 <h2>Notifications</h2>
-                <p>You have 1 new booking for a Swimming Class tomorrow.</p>
-            </div>
-
-            <div class="da-small-block text-black">
-                <h2>News</h2>
                 <ul class="da-ul">
-                    <li class="da-li">2:00 PM - Aqua Aerobics</li>
+                    <li class="da-li">.....</li>
                 </ul>
             </div>
+
+            <!-- <div class="da-small-block text-black">
+                <h2><a href="/news" class="news-link">News</a></h2>
+                <ul class="da-ul">
+                    {% for news_item in news_info %}
+                    <li class="da-li">{{ news_item.title }}</li>
+                    {% endfor %}
+                </ul>
+            </div> -->
         </div> <!-- End of left-column -->
 
         <div class="right-column">

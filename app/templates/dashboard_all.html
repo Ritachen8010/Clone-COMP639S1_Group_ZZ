@@ -19,8 +19,8 @@
     </div>
 
     <div class="content-wrapper">
-        <div class="left-column">
-            <div class="management-buttons">
+        <div class="da-left-column">
+            <div class="da-small-block">
                 <h2>Management Tools</h2>
                 <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
                     <button class="btn btn-primary" onclick="manageInstructors()">Manage Members</button>
@@ -118,15 +118,16 @@
     </div>
     
     <div class="content-wrapper">
-        <div class="left-column">
-            <div class="management-buttons">
+        <div class="da-left-column">
+            <div class="da-small-block">
                 <h2>Tools</h2>
                 <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
+                    <!-- <button class="btn btn-primary">View Class Timetable</button> -->
                     <button class="btn btn-primary">View Class Timetable</button>
                     <button class="btn btn-primary">View Lesson Booking Details</button>
+                    <a href="{{ url_for('news') }}" class="btn btn-primary">View News</a>
                     <button class="btn btn-primary">Manage My Lesson Schedule</button>
                     <button class="btn btn-primary">Attendance</button>
-                    <button class="btn btn-primary">My Profile</button>
                     <!-- name changed to my profile -->
                     <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a>
                 </div>
@@ -152,9 +153,19 @@
                 </ul>
             </div>
         </div> <!-- End of left-column -->
-    
+        
         <div class="right-column">
             <div class="da-large-block text-black">
+                <!-- added a filter form to filter the timetable by user info -->
+                <div class="filter-form">
+                    <form method="GET" action="{{ url_for('dashboard_by_instructor', first_name=instructor_info.first_name, last_name=instructor_info.last_name) }}">
+                        <input type="hidden" name="form_submitted" value="true">
+                        <input type="checkbox" id="show_own_timetable" name="show_own_timetable" value="true" {% if not request.args.get('show_own_timetable') %}checked{% endif %}>
+                        <label class="show_own_timetable text-black">Show My Timetable</label>
+                        <button type="submit">Filter</button>
+                    </form>
+                </div>
+
                 <h2>Timetable - Aerobics Classes</h2>
                 <table class="timetable text-black">
                     <thead>
@@ -210,15 +221,15 @@
     <div class="dashboard-block"></div>
     <div class="greeting text-black">Hello,<span>{{ member_info.first_name | capitalize }} {{ member_info.last_name | capitalize }}</span>!
         <p>User Type: {{ session['UserType'] | capitalize }}</p>
-        <p>Membership Expire Date:</p>
+        <p>Membership Expire Date: {{ membership_info.end_date | formatdate }}</p>
     </div>
     
     <div class="content-wrapper">
-        <div class="left-column">
-            <div class="management-buttons">
+        <div class="da-left-column">
+            <div class="da-small-block">
                 <h2>Tools</h2>
                 <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Management Buttons">
-                    <button class="btn btn-primary">View Class</button>
+                    <!-- <button class="btn btn-primary">View Class</button> -->
                     <button class="btn btn-primary">View Instructors</button>
                     <button class="btn btn-primary">Book Class</button>
                     <button class="btn btn-primary">Book Lesson</button>
@@ -227,7 +238,7 @@
                     <!-- name changed to my profile -->
                     <a href="{{ url_for('manage_profile') }}" class="btn btn-primary">My Profile</a>
                 </div>
-            </div>    
+            </div>
     
             <div class="da-small-block text-black">
                 <h2>Today's Schedule</h2>

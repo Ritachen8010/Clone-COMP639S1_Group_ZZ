@@ -174,13 +174,30 @@ def login():
                     flash('Invalid Username or Password')
         except Exception as e:
             flash('An error occurred during login: ' + str(e))
+        # changed to redirect to different pages based on the user type    
         if login_successful:
-            next_page = session.get('next') or url_for('dashboard_all')  
-            return redirect(next_page)
+            user_type = session['UserType']
+            if user_type == 'manager':
+                next_page = url_for('dashboard_manager')
+            elif user_type == 'instructor':
+                next_page = url_for('dashboard_instructor')
+            elif user_type == 'member':
+                next_page = url_for('dashboard_member')
+            if next_page:
+                return redirect(next_page)
         else:
             # Handling failed login
             flash('Login failed. Please check your credentials.')
             return redirect(url_for('login'))  # Reload the login page
+        
+        # if login_successful:
+        #     next_page = session.get('next') or url_for('dashboard_all')  
+        #     return redirect(next_page)
+        # else:
+        #     # Handling failed login
+        #     flash('Login failed. Please check your credentials.')
+        #     return redirect(url_for('login'))  
+        # Reload the login page
 
     # For GET requests or if the login logic fails
     return render_template('homepage.html')
