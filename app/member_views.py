@@ -163,7 +163,7 @@ def get_member_class_bookings(member_id):
         LEFT JOIN 
             instructor ON class_schedule.instructor_id = instructor.instructor_id
         WHERE 
-            bookings.schedule_type = 'class'
+            bookings.schedule_type = 'aerobics class'
             AND bookings.member_id = %s
     """, (member_id,))
     return cursor.fetchall()
@@ -191,8 +191,26 @@ def get_member_lesson_bookings(member_id):
         LEFT JOIN 
             instructor ON lesson_schedule.instructor_id = instructor.instructor_id
         WHERE 
-            bookings.schedule_type = 'lesson'
+            bookings.schedule_type = 'swimming lesson'
             AND bookings.member_id = %s
+    """, (member_id,))
+    return cursor.fetchall()
+
+def get_booking_info(member_id):
+    cursor = getCursor()
+    cursor.execute("""
+        SELECT 
+            bookings.*, 
+            class_schedule.*, 
+            class_name.*, 
+            lesson_schedule.*, 
+            lesson_name.* 
+        FROM bookings 
+        LEFT JOIN class_schedule ON bookings.class_id = class_schedule.class_id
+        LEFT JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
+        LEFT JOIN lesson_schedule ON bookings.lesson_id = lesson_schedule.lesson_id
+        LEFT JOIN lesson_name ON lesson_schedule.lesson_name_id = lesson_name.lesson_name_id
+        WHERE bookings.member_id = %s
     """, (member_id,))
     return cursor.fetchall()
 
@@ -222,7 +240,7 @@ def news():
     news_info = get_news_info()
     return render_template('news.html', news_info=news_info)
 
-@app.route('/book', methods=['GET', 'POST'])
+@app.route('/book')
 @login_required
 @UserType_required('member')
 def book():
@@ -230,10 +248,61 @@ def book():
     member_info = get_member_info(user_id)
     class_bookings = get_member_class_bookings(member_info['member_id'])
     lesson_bookings = get_member_lesson_bookings(member_info['member_id'])
-
+    bookings = class_bookings + lesson_bookings
     return render_template('member_booking.html', class_bookings=class_bookings, 
-                           lesson_bookings=lesson_bookings, member_info=member_info)
+                           lesson_bookings=lesson_bookings, member_info=member_info, bookings=bookings)
 
-# @app.route('/book_class_lesson', methods=['GET', 'POST'])
-# @login_required
-# @UserType_required('member')
+@app.route('/cancel_booking', methods=['POST'])
+@login_required
+@UserType_required('member')
+def cancel_booking():
+    user_id = session.get('UserID')
+    member_info = get_member_info(user_id)
+    booking_id = request.form.get('booking_id')
+
+    cursor = getCursor()
+
+    # Check if the booking exists and is confirmed
+    cursor.execute("SELECT * FROM bookings WHERE member_id = %s AND booking_id = %s AND booking_status = 'confirmed'", (member_info['member_id'], booking_id))
+    booking_to_cancel = cursor.fetchone()
+
+    if booking_to_cancel:
+        # Update the booking status to 'cancelled'
+        cursor.execute("UPDATE bookings SET booking_status = 'cancelled' WHERE member_id = %s AND booking_id = %s", (member_info['member_id'], booking_id))
+        getConnection().commit()
+        flash('Booking cancelled successfully.')
+    else:
+        flash('Booking not found or not confirmed.')
+
+    return redirect(url_for('book'))
+
+@app.route('/add_booking', methods=['POST'])
+@login_required
+@UserType_required('member')
+def add_booking():
+    user_id = session.get('UserID')
+    member_info = get_member_info(user_id)
+    class_id = request.form.get('class_id')
+
+    cursor = getCursor()
+
+    # Check if the class exists and is not full
+    cursor.execute("SELECT * FROM classes WHERE class_id = %s AND class_status = 'open'", (class_id,))
+    class_to_book = cursor.fetchone()
+
+    if class_to_book:
+        # Check if the member has already booked this class
+        cursor.execute("SELECT * FROM bookings WHERE member_id = %s AND class_id = %s", (member_info['member_id'], class_id))
+        existing_booking = cursor.fetchone()
+
+        if existing_booking:
+            flash('You have already booked this class.')
+        else:
+            # Add the new booking
+            cursor.execute("INSERT INTO bookings (member_id, class_id, booking_status) VALUES (%s, %s, 'confirmed')", (member_info['member_id'], class_id))
+            getConnection().commit()
+            flash('Booking added successfully.')
+    else:
+        flash('Class not found or not open.')
+
+    return redirect(url_for('book'))

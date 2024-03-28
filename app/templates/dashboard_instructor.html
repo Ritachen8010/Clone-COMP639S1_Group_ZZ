@@ -81,7 +81,7 @@
                                 {% set class_info = classes.get(day, {}) %}
                                 <strong>{{ class_info.get('name', '') }}</strong><br>
                                 {{ class_info.get('description', '') | title }}<br>
-                                <span class="text-decoration-underline text-primary">{{ class_info.get('instructor', '') }}</span>
+                                *{{ class_info.get('instructor', '') }}
                             </td>
                             {% endfor %}
                         </tr>

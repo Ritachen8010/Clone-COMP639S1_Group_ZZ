@@ -30,20 +30,23 @@
             <div class="da-small-block text-black">
                 <h2>My Schedule</h2>
                 <ul class="da-ul">
-                    {% for booking in bookings %}
+                {% for booking in bookings %}
                     {% if booking.booking_status == 'confirmed' %}
                     <li class="da-li">
-                        {{ booking.booking_date | formatdate }} - 
-                        {{ format_time_slot(booking.start_time) }} to 
-                        {{ format_time_slot(booking.end_time) }} - 
-                        {% if booking.schedule_type == 'class' %}
-                        {{ booking.class_name }}
-                        {% elif booking.type == 'lesson' %}
-                        {{ booking.lesson_name }}
+                        {% if booking.schedule_type == 'aerobics class' %}
+                            {{ booking.booking_date | formatdate }} - 
+                            {{ format_time_slot(booking.start_time) }} to 
+                            {{ format_time_slot(booking.end_time) }} - 
+                            {{ booking.class_name }}
+                        {% elif booking.schedule_type == 'swimming lesson' %}
+                            {{ booking.booking_date | formatdate }} - 
+                            {{ format_time_slot(booking.start_time) }} to 
+                            {{ format_time_slot(booking.end_time) }} - 
+                            {{ booking.lesson_name }}
                         {% endif %}
                     </li>
                     {% endif %}
-                    {% endfor %}
+                {% endfor %}
                 </ul>
             </div>
 
@@ -90,7 +93,7 @@
                                 {% set class_info = classes.get(day, {}) %}
                                 <strong>{{ class_info.get('name', '') }}</strong><br>
                                 {{ class_info.get('description', '') | title }}<br>
-                                <span class="text-decoration-underline text-primary">{{ class_info.get('instructor', '') }}</span>
+                                *{{ class_info.get('instructor', '') }}
                             </td>
                             {% endfor %}
                         </tr>

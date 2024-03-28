@@ -8,12 +8,13 @@
     <div class="greeting text-black">Hello,<span>{{ member_info.first_name | capitalize }} {{ member_info.last_name | capitalize }}</span>!</div>
 
 <div class="container text-black mt-5 mb-5">
-    <div class="h2-custom mb-4">My Class Bookings</div>
+    <div class="h2-custom mb-4">My Bookings</div>
     <table class="table">
         <thead>
             <tr>
                 <th>Booking ID</th>
-                <th>Class Name</th>
+                <th>Name</th>
+                <th>Type</th>
                 <th>Instructor</th>
                 <th>Booking Date</th>
                 <th>Start Time</th>
@@ -23,20 +24,56 @@
             </tr>
         </thead>
         <tbody>
-            {% for booking in class_bookings %}
+            {% for booking in bookings %}
             <tr>
                 <td>{{ booking.booking_id }}</td>
-                <td>{{ booking.class_name }}</td>
-                <td>{{ booking.first_name }} {{ booking.last_name }}</td>
-                <td>{{ booking.booking_date | formatdate }}</td>
-                <td>{{ format_time_slot(booking.start_time) }}</td>
-                <td>{{ format_time_slot(booking.end_time) }}</td>
-                <td>{{ booking.booking_status | capitalize }}</td>
+                {% if booking.schedule_type == 'aerobics class' %}
+                    <td>{{ booking.class_name }}</td>
+                    <td>{{ booking.schedule_type | title }}</td>
+                    <td>{{ booking.first_name }} {{ booking.last_name }}</td>
+                    <td>{{ booking.booking_date | formatdate }}</td>
+                    <td>{{ format_time_slot(booking.start_time) }}</td>
+                    <td>{{ format_time_slot(booking.end_time) }}</td>
+                    <td>{{ booking.booking_status | capitalize }}</td>
+                    <td>
+                        {% if booking.booking_status != 'cancelled' %}
+                        <form action="/cancel_booking" method="post">
+                            <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
+                            <button type="submit" class="btn btn-danger" onclick="return confirmCancel()">Cancel Booking</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                {% elif booking.schedule_type == 'swimming lesson' %}
+                    <td>{{ booking.lesson_name }}</td>
+                    <td>{{ booking.schedule_type | title }}</td>
+                    <td>{{ booking.first_name }} {{ booking.last_name }}</td>
+                    <td>{{ booking.booking_date | formatdate }}</td>
+                    <td>{{ format_time_slot(booking.start_time) }}</td>
+                    <td>{{ format_time_slot(booking.end_time) }}</td>
+                    <td>{{ booking.booking_status | capitalize }}</td>
+                    <td>
+                        {% if booking.booking_status != 'cancelled' %}
+                        <form action="/cancel_booking" method="post">
+                            <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
+                            <button type="submit" class="btn btn-danger" onclick="return confirmCancel()">Cancel Booking</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
 
+
+<script>
+function confirmCancel() {
+    return confirm("Are you sure you want to cancel this booking?");
+    }
+</script>
+
+<!-- 
     <div class="h2-custom mt-5 mb-4">My Lesson Bookings</div>
     <table class="table">
         <thead>
@@ -65,5 +102,5 @@
             {% endfor %}
         </tbody>
     </table>
-</div>
+</div> -->
 {% endblock %}
