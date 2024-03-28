@@ -1,7 +1,6 @@
-DROP SCHEMA IF EXISTS swimmingclub;
+DROP SCHEMA IF EXISTS `swimmingclub`;
 CREATE SCHEMA `swimmingclub`;
 USE `swimmingclub`;
-DELETE FROM user WHERE username = 'text01';
 
 -- User table
 CREATE TABLE `user` (
@@ -163,7 +162,7 @@ CREATE TABLE `bookings` (
     `member_id` INT,
     `class_id` INT,
     `lesson_id` INT,
-    `schedule_type` ENUM('class', 'lesson') NOT NULL,
+    `schedule_type` ENUM('aerobics class', 'swimming lesson') NOT NULL,
     `booking_status` ENUM('confirmed', 'cancelled') NOT NULL,
     `booking_date` DATE NOT NULL,
     PRIMARY KEY (`booking_id`),
@@ -394,38 +393,38 @@ INSERT INTO `lesson_schedule` (`instructor_id`, `lesson_name_id`, `week`, `start
 
 INSERT INTO `bookings` (`member_id`, `class_id`, `lesson_id`, `schedule_type`, `booking_status`, `booking_date`)
 VALUES
-(1, 1, NULL, 'class', 'confirmed', '2024-05-01'),
-(2, 2, NULL, 'class', 'confirmed', '2024-05-02'),
-(3, 3, NULL, 'class', 'confirmed', '2024-05-03'),
-(4, 4, NULL, 'class', 'confirmed', '2024-05-04'),
-(5, 5, NULL, 'class', 'confirmed', '2024-05-05'),
-(6, 6, NULL, 'class', 'confirmed', '2024-05-06'),
-(7, 7, NULL, 'class', 'confirmed', '2024-05-07'),
-(8, 8, NULL, 'class', 'confirmed', '2024-05-08'),
-(9, 9, NULL, 'class', 'confirmed', '2024-05-09'),
-(10, 10, NULL, 'class', 'confirmed', '2024-05-10'),
-(11, 11, NULL, 'class', 'confirmed', '2024-05-11'),
-(12, 12, NULL, 'class', 'confirmed', '2024-05-12'),
-(13, 13, NULL, 'class', 'confirmed', '2024-05-13'),
-(14, 14, NULL, 'class', 'confirmed', '2024-05-14'),
-(15, 15, NULL, 'class', 'confirmed', '2024-05-15'),
-(16, 16, NULL, 'class', 'confirmed', '2024-05-16'),
-(17, 17, NULL, 'class', 'confirmed', '2024-05-17'),
-(18, 18, NULL, 'class', 'confirmed', '2024-05-18'),
-(19, 19, NULL, 'class', 'confirmed', '2024-05-19'),
-(20, 20, NULL, 'class', 'confirmed', '2024-05-20'),
+(1, 1, NULL, 'aerobics class', 'confirmed', '2024-05-01'),
+(2, 2, NULL, 'aerobics class', 'confirmed', '2024-05-02'),
+(3, 3, NULL, 'aerobics class', 'confirmed', '2024-05-03'),
+(4, 4, NULL, 'aerobics class', 'confirmed', '2024-05-04'),
+(5, 5, NULL, 'aerobics class', 'confirmed', '2024-05-05'),
+(6, 6, NULL, 'aerobics class', 'confirmed', '2024-05-06'),
+(7, 7, NULL, 'aerobics class', 'confirmed', '2024-05-07'),
+(8, 8, NULL, 'aerobics class', 'confirmed', '2024-05-08'),
+(9, 9, NULL, 'aerobics class', 'confirmed', '2024-05-09'),
+(10, 10, NULL, 'aerobics class', 'confirmed', '2024-05-10'),
+(11, 11, NULL, 'aerobics class', 'confirmed', '2024-05-11'),
+(12, 12, NULL, 'aerobics class', 'confirmed', '2024-05-12'),
+(13, 13, NULL, 'aerobics class', 'confirmed', '2024-05-13'),
+(14, 14, NULL, 'aerobics class', 'confirmed', '2024-05-14'),
+(15, 15, NULL, 'aerobics class', 'confirmed', '2024-05-15'),
+(16, 16, NULL, 'aerobics class', 'confirmed', '2024-05-16'),
+(17, 17, NULL, 'aerobics class', 'confirmed', '2024-05-17'),
+(18, 18, NULL, 'aerobics class', 'confirmed', '2024-05-18'),
+(19, 19, NULL, 'aerobics class', 'confirmed', '2024-05-19'),
+(20, 20, NULL, 'aerobics class', 'confirmed', '2024-05-20'),
 
-(10, NULL, 1, 'lesson', 'confirmed', '2024-05-02'),
-(11, NULL, 2, 'lesson', 'confirmed', '2024-05-03'),
-(12, NULL, 3, 'lesson', 'confirmed', '2024-05-04'),
-(13, NULL, 4, 'lesson', 'confirmed', '2024-05-05'),
-(14, NULL, 5, 'lesson', 'confirmed', '2024-05-06'),
-(15, NULL, 6, 'lesson', 'confirmed', '2024-05-07'),
-(16, NULL, 7, 'lesson', 'confirmed', '2024-05-08'),
-(17, NULL, 8, 'lesson', 'confirmed', '2024-05-09'),
-(18, NULL, 9, 'lesson', 'confirmed', '2024-05-10'),
-(19, NULL, 10, 'lesson', 'confirmed', '2024-05-11'),
-(20, NULL, 11, 'lesson', 'confirmed', '2024-05-12');
+(10, NULL, 1, 'swimming lesson', 'confirmed', '2024-05-02'),
+(11, NULL, 2, 'swimming lesson', 'confirmed', '2024-05-03'),
+(12, NULL, 3, 'swimming lesson', 'confirmed', '2024-05-04'),
+(13, NULL, 4, 'swimming lesson', 'confirmed', '2024-05-05'),
+(14, NULL, 5, 'swimming lesson', 'confirmed', '2024-05-06'),
+(15, NULL, 6, 'swimming lesson', 'confirmed', '2024-05-07'),
+(16, NULL, 7, 'swimming lesson', 'confirmed', '2024-05-08'),
+(17, NULL, 8, 'swimming lesson', 'confirmed', '2024-05-09'),
+(18, NULL, 9, 'swimming lesson', 'confirmed', '2024-05-10'),
+(19, NULL, 10, 'swimming lesson', 'confirmed', '2024-05-11'),
+(20, NULL, 11, 'swimming lesson', 'confirmed', '2024-05-12');
 
 INSERT INTO `payments` (`member_id`, `membership_id`, `manager_id`, `lesson_id`, `payment_type`, `amount`, `payment_date`)
 VALUES
