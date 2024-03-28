@@ -297,7 +297,14 @@ body {
                                     <textarea class="form-control custom-placeholder" id="health_info"
                                         name="health_info" placeholder="Health Information"></textarea>
                                 </div>
-                                
+                                <div class="mb-3">
+                                    <label for="subscription_type" class="form-label">Subscription Type</label>
+                                    <select class="form-select" id="subscription_type" name="subscription_type">
+                                        <option value="annual">Annual Subscription ($700)</option>
+                                        <option value="monthly">Monthly Subscription ($60)</option>
+                                        <option value="6_month">6 Month Subscription ($360)</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-danger ">Join</button>

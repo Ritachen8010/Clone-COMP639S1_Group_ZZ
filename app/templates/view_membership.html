@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Information</title>
+    <style>
+        /* Add custom CSS styles for the blue-themed table */
+        body {
+            color: black; /* Change font color to black */
+        }
+
+        /* Add custom CSS styles for the blue-themed table */
+        table {
+            font-family: Arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            color: black; /* Change font color to black */
+        }
+        
+        th {
+            background-color: #428bca;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Center-align and change font color for headers */
+        h1, h2 {
+            text-align: center;
+            color: #428bca; /* Change font color to blue */
+        }
+    </style>
+</head>
+<body>
+    <h1>Membership Information</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Member Name</th>
+                <th>Membership ID</th>
+                <th>Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Membership Fee</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for membership in memberships %}
+            <tr>
+                <td>{{ user_full_name }}</td>
+                <td>{{ membership.membership_id }}</td>
+                <td>{{ membership.type }}</td>
+                <td>{{ membership.start_date }}</td>
+                <td>{{ membership.end_date }}</td>
+                <td>{{ membership.membership_fee }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+{% endblock %}

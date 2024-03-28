@@ -9,6 +9,7 @@ from datetime import date, timedelta, datetime
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from app.database import getCursor, getConnection
 from app import connect
+from app.public_views import generate_timetable
 
 app.config['SECRET_KEY'] = 'some_random_string_here'
 bcrypt = Bcrypt(app)
@@ -92,9 +93,7 @@ def register():
             address = request.form.get('address')
             dob = request.form.get('dob')
             occupation = request.form.get('occupation')
-            # position = request.form.get('position')
             DateJoined = date.today().isoformat()
-            
 
             # Hash the Password
             hashed_Password = bcrypt.generate_password_hash(Password).decode('utf-8')
@@ -108,14 +107,46 @@ def register():
                 return redirect(url_for('register'))
 
             if Password == confirm_Password:
-                # Insert user information, with the default UserType as 'Member'
-                cursor.execute("INSERT INTO user (usertype, username, password) VALUES ('member', %s, %s)", ( Username, hashed_Password))
+                # Insert user information, with the default UserType as 'member'
+                cursor.execute("INSERT INTO user (usertype, username, password) VALUES ('member', %s, %s)", (Username, hashed_Password))
                 user_id = cursor.lastrowid  # Get the last inserted id
 
-                # Insert Member information 
-                # Remove the position field from the member table
+                # Insert Member information
                 cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, health_info, join_date) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-               (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info, DateJoined))
+                               (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info, DateJoined))
+                member_id = cursor.lastrowid  # Get the last inserted id for member
+
+                # New code to handle subscription type selection
+                subscription_type = request.form.get('subscription_type')
+
+                # Define subscription options and corresponding fees
+                subscription_options = {
+                    "annual": {"type": "Annual", "fee": 700, "duration": 365},
+                    "monthly": {"type": "Monthly", "fee": 60, "duration": 30},
+                    "6_month": {"type": "6 Month", "fee": 360, "duration": 180}
+                }
+
+                # Check if the selected subscription type is valid
+                if subscription_type not in subscription_options:
+                    flash("Invalid subscription type selected.")
+                    return redirect(url_for('register'))
+
+                # Extract subscription details based on the selected type
+                selected_subscription = subscription_options[subscription_type]
+
+                # Calculate start and end dates
+                start_date = date.today().isoformat()
+                end_date = (date.today() + timedelta(days=selected_subscription['duration'])).isoformat()
+
+                # Insert payment record
+                cursor.execute("INSERT INTO payments (member_id, payment_type, amount, payment_date) VALUES (%s, 'membership', %s, %s)",
+                               (member_id, selected_subscription['fee'], date.today().isoformat()))
+                payment_id = cursor.lastrowid
+
+                # Insert membership record
+                cursor.execute("INSERT INTO memberships (member_id, type, start_date, end_date, membership_fee) VALUES (%s, %s, %s, %s, %s)",
+                               (member_id, selected_subscription['type'], start_date, end_date, selected_subscription['fee']))
+
                 getConnection().commit()
 
                 flash('Registration successful! You can now login.')
@@ -129,7 +160,13 @@ def register():
             flash(f"An error occurred: {err}")
             return redirect(url_for('register'))
 
-    return render_template('homepage.html')
+    # Fetch timetable data
+    timetable = generate_timetable()
+    
+    # Render the template and pass the timetable variable
+    return render_template('homepage.html', timetable=timetable)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -296,3 +333,5 @@ def change_password():
         return redirect(url_for('manage_profile'))  # Redirect if password change is successful or there is an error message
 
     return render_template('change_password.html')
+
+
