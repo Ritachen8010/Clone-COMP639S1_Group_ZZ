@@ -1,0 +1,47 @@
+<!-- 更新后的 lesson_schedule.html -->
+{% extends 'base.html' %}
+{% block title %}Lesson Schedule{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Available Swimming Lessons for {{ selected_date }}</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Lesson Name</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Lane Number</th>
+                <th>Capacity</th>
+                <th>Instructor</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lesson in lesson_schedule %}
+            <tr>
+                <td>{{ lesson.lesson_name }}</td>
+                <td>{{ lesson.start_time }}</td>
+                <td>{{ lesson.end_time }}</td>
+                <td>{{ lesson.lane_number }}</td>
+                <td>{{ lesson.capacity }}</td>
+                <td>{{ lesson.instructor }}</td>
+                <!-- 更新表单部分 -->
+                <td>
+                    {% if lesson.capacity >= 15 %}
+                        Fully booked
+                    {% else %}
+                        <form action="{{ url_for('book') }}" method="post">
+                            <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
+                            <input type="hidden" name="member_id" value="{{ current_user.member_id }}">
+                            <!-- 这里可以添加更多的表单字段，如选择座位等 -->
+                            <button type="submit" class="btn btn-primary">Book Now</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

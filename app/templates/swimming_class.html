@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Swimming Classes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Swimming Classes</h1>
+    
+    <!-- Dynamic Day Navigation Buttons -->
+    <div class="day-navigation">
+        <button onclick="navigateDay(-1)" class="btn btn-info">&lt; Previous Day</button>
+        <button onclick="navigateDay(1)" class="btn btn-info">Next Day &gt;</button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Timetable</th>
+                    {% for date_info in dates %}
+                    <th>{{ date_info.strftime('%A') }}<br>{{ date_info.strftime('%d %b') }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for time_slot in time_slots %}
+                <tr>
+                    <td>{{ time_slot }}</td>
+                    {% for date_info in dates %}
+                    <td>
+                        {% set day_classes = timetable.get(date_info.date(), {}).get(time_slot, []) %}
+                        {% for class_info in day_classes %}
+                        <div class="class-container">
+                            <div class="timetable__content-title fw-500">{{ class_info.name }}</div>
+                            <div class="timetable__flex--start fw-400">
+                                <i class="fa-solid fa-location-dot fa-fw timetable__icon"></i>
+                                Pool Type: {{ class_info.pool_type }}
+                            </div>
+                            <div class="timetable__flex--start fw-400">
+                                <i class="fa-regular fa-circle-user fa-fw timetable__icon"></i>
+                                Availability: {{ class_info.availability }}
+                            </div>
+                            <progress value="{{ class_info.availability }}" max="100" title="{{ class_info.availability }}%" aria-hidden="true" class="timetable__content-space"></progress>
+                            <div>Instructor: {{ class_info.instructor }}</div>
+                            <button class="btn btn-primary">Book Now</button>
+                        </div>
+                        {% else %}
+                        <span>No classes</span>
+                        {% endfor %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function navigateDay(offset) {
+        var url = new URL(window.location);
+        var currentDate = new Date(url.searchParams.get('date') || new Date().toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + offset);
+        url.searchParams.set('date', currentDate.toISOString().split('T')[0]);
+        window.location = url.toString();
+    }
+</script>
+
+<style>
+td {
+    vertical-align: top;
+    width: calc(100% / {{ dates|length }} - 2px);
+}
+
+.class-container {
+    border: 1px solid #dee2e6;
+    padding: 4px;
+    margin-bottom: 5px;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.class-container > .timetable__content-title {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.class-container > .timetable__flex--start,
+.class-container > .btn,
+.class-container > .timetable__content-space,
+.class-container > .timetable__icon,
+.class-container > progress,
+.class-container > div {
+    font-size: 12px;
+    padding: 3px 8px;
+}
+
+.class-container > .timetable__flex--start:nth-child(3) {
+    font-weight: bold;
+    color: green;
+}
+td span {
+    color: #ccc; 
+}
+</style>
+
+{% endblock %}
