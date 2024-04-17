@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Class{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2>Book Class: {{ class_details.class_name }}</h2>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Details</h5>
+            <p class="card-text"><strong>Instructor:</strong> {{ class_details.instructor_name }}</p>
+            <p class="card-text"><strong>Time:</strong> {{ class_details.start_time }} - {{ class_details.end_time }}</p>
+            <p class="card-text"><strong>Date:</strong> {{ class_details.datetime.strftime('%A, %B %d, %Y') }}</p>
+            <p class="card-text"><strong>Pool Type:</strong> {{ class_details.pool_type }}</p>
+            <p class="card-text"><strong>Capacity:</strong> {{ class_details.capacity }}</p>
+            <p class="card-text"><strong>Space:</strong> {{ class_details.availability }}</p>
+            <p class="card-text"><strong>Description:</strong> {{ class_details.description }}</p>
+            <form action="{{ url_for('confirm_booking', class_id=class_details.class_id) }}" method="post">
+                <button type="submit" class="btn btn-success">Confirm Booking</button>
+            </form>
+        </div>
+        <div class="card-footer text-muted">
+            Booking Information
+        </div>
+    </div>
+</div>
+
+{% endblock %}
