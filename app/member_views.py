@@ -322,12 +322,8 @@ def confirm_booking(class_id):
     membership_info = cursor.fetchone()
 
     # Check if the membership has expired
-    if membership_info or membership_info['end_date'] < class_info['datetime']:
+    if membership_info and membership_info['end_date'] < class_info['datetime']:
         flash("Your membership has expired.", "warning")
-        return redirect(url_for('swimming_class'))
-    
-    if membership_info or class_info['datetime'] < membership_info['start_date']:
-        flash("Your membership does not cover the date of this class.", "warning")
         return redirect(url_for('swimming_class'))
 
     now = datetime.now()
