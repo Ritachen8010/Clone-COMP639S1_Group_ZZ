@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Instructor - Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid-container custom-bg">
+    <div class="sidebar-position">
+        {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
+    </div>
+    <div class="d-container-fluid">
+        <div class="col-12">
+            <div class="dashboard-block"></div>
+            <div class="text-black">
+                    <div class="greeting">Hello,<span>{{ instructor_info.first_name | capitalize }} {{ instructor_info.last_name | capitalize }}</span>!
+                        <p>Position: {{ instructor_info.position | title }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="da-small-block text-black">
+                            <div class="card mt-3">
+                                <img src="{{ url_for('static', filename='others/1334.png') }}" class="card-img-top" alt="Image 1">
+                                <div class="card-body">
+                                    <h5 class="card-title">My Timetable</h5>
+                                    <p class="card-text">Click below to view the club's timetable.</p>
+                                    <a href="{{ url_for('timetable_instructor') }}" class="btn btn-sm btn-primary">View Timetable</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

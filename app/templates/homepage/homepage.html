@@ -31,7 +31,7 @@
         <p>Our current aerobics classes offering: Zumba, Aqua Fit, low-impact sessions, and special mums and babies classes, among others. Each class is designed to offer a unique and enjoyable way to stay fit and healthy.</p>
         <p>Our mission is to providing a safe and welcoming environment for everyone to learn to swim and have fun. We invite you to join our community and experience the joy of swimming.</p>
         <p>We are excited to announce that our club is now accepting new bookings. Our schdule are open from 6 AM to 8 PM, seven days a week, throughout the year, with the exception of Christmas Day and Boxing Day.</p>
-        <p>Our membership is open to all, and we offer a range of packages to suit your needs. Annually: $700, Monthly: $60.</p>
+        <p>Our membership is open to all, and we offer a range of packages to suit your needs. Annually: $700, 6 Months: $360, Monthly: $60.</p>
         <p>Don't miss out on the chance to be part of our swimming family. Come and dive into the fun!</p>
       </div>
       <div id="carouselExampleControls" class="image-slide carousel slide" data-bs-ride="carousel">
@@ -59,50 +59,11 @@
   </div>
 </div>
 
-<div class="container mt-5 text-black">
-  <h2>Timetable - Aerobics Classes</h2>
-  <table class="timetable text-black">
-    <thead>
-      <tr>
-        <th>Time</th>
-        <th>Monday</th>
-        <th>Tuesday</th>
-        <th>Wednesday</th>
-        <th>Thursday</th>
-        <th>Friday</th>
-        <th>Saturday</th>
-        <th>Sunday</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-      {% for time, classes in timetable.items() %}
-      <tr>
-        <td>{{ time }}</td>
-        {% for day in days %}
-        <td>
-          {% set class_info = classes.get(day, {}) %}
-          <strong>{{ class_info.get('name', '') }}</strong><br>
-          {{ class_info.get('description', '') | title }}<br>
-          *{{ class_info.get('instructor', '') }}
-        </td>
-        {% endfor %}
-      </tr>
-      {% endfor %}
-      <th colspan="8" class="text-start">
-        *All classes have a maximum capacity of 15 people.
-        <br>
-        *All classes to be held in deep pool.
-      </th>
-    </tbody>
-  </table>
-</div>
-
-
 <div class="section-block"></div>
 
 <div class="container mt-5 text-black">
   <h2>Our Instructors</h2>
+  <div id="our_instructors">
   <div class="row">
     {% for instructor in instructor %}
     <div class="col-md-4 mb-1">
@@ -120,7 +81,8 @@
     </div>
     {% endfor %}
   </div>
-</div>>
+</div>
+</div>
 
 <div class="section-block"></div>
   
@@ -133,6 +95,6 @@
   </div>
 </div>
   
-{% include('footer.html') %}
+{% include 'homepage/footer.html' %}
 
 {% endblock %}

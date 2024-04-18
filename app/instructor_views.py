@@ -5,15 +5,12 @@ from flask import redirect
 from flask import url_for
 from flask import request
 from flask import render_template
-import mysql.connector
 from app.database import getCursor
 from app.database import getConnection
-from app import connect
-import re
-import os
 from datetime import datetime
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from functools import wraps
+from datetime import timedelta
 
 class User(UserMixin):
     def __init__(self, user_id, Username, UserType, member_id):
@@ -54,6 +51,11 @@ def format_time_slot(start_time, end_time):
 def format_date_filter(date):
     return date.strftime("%d/%m/%Y")
 
+def instructor(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
 def generate_timetable():
     cursor = getCursor()
     cursor.execute("""
@@ -66,37 +68,40 @@ def generate_timetable():
             class_schedule.pool_type,
             class_schedule.start_time,
             class_schedule.end_time,
-            class_schedule.capacity
+            class_schedule.capacity,
+            class_schedule.datetime,
+            class_schedule.availability
+            
         FROM class_schedule
         JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
         JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
     """)
     timetable_data = cursor.fetchall()
     cursor.close()
-
-    timetable_data.sort(key=lambda row: row['start_time'])
     
     timetable = {}
 
     for row in timetable_data:
+        # Extract datetime
+        date = row['datetime']
+        # Format time slot
         time_slot = format_time_slot(row['start_time'], row['end_time'])
 
-        if time_slot not in timetable:
-            timetable[time_slot] = {}
-
-        if row['week'] not in timetable[time_slot]:
-            timetable[time_slot][row['week']] = {
-                'name': row['name'],
-                'description': row['description'],
-                'instructor': f"{row['first_name']} {row['last_name']}",
-                'pool_type': row['pool_type'],
-                'capacity': row['capacity']
-            }
+        if date not in timetable:
+            timetable[date] = {}
+        if time_slot not in timetable[date]:
+            timetable[date][time_slot] = []
+        
+        timetable[date][time_slot].append({
+            'name': row['name'],
+            'description': row['description'],
+            'availability': row['availability'],
+            'instructor': f"{row['first_name']} {row['last_name']}",
+        })
     
     return timetable
 
-def generate_filtered_timetable_by_instructor(first_name, last_name):
-    full_name = " ".join([first_name, last_name])
+def generate_filtered_timetable_by_instructor(instructor_id):
     cursor = getCursor()
     cursor.execute("""
         SELECT
@@ -108,33 +113,35 @@ def generate_filtered_timetable_by_instructor(first_name, last_name):
             class_schedule.pool_type,
             class_schedule.start_time,
             class_schedule.end_time,
-            class_schedule.capacity
+            class_schedule.capacity,
+            class_schedule.datetime,
+            class_schedule.availability
+            
         FROM class_schedule
         JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
         JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
-        WHERE CONCAT(instructor.first_name, ' ', instructor.last_name) = %s
-    """, (full_name,))
+        WHERE instructor.instructor_id = %s
+    """, (instructor_id,))
     timetable_data = cursor.fetchall()
     cursor.close()
 
-    timetable_data.sort(key=lambda row: row['start_time'])
-    
     filtered_timetable = {}
 
     for row in timetable_data:
+        date = row['datetime']
         time_slot = format_time_slot(row['start_time'], row['end_time'])
 
-        if time_slot not in filtered_timetable:
-            filtered_timetable[time_slot] = {}
+        if date not in filtered_timetable:
+            filtered_timetable[date] = {}
+        if time_slot not in filtered_timetable[date]:
+            filtered_timetable[date][time_slot] = []
 
-        if row['week'] not in filtered_timetable[time_slot]:
-            filtered_timetable[time_slot][row['week']] = {
-                'name': row['name'],
-                'description': row['description'],
-                'instructor': f"{row['first_name']} {row['last_name']}",
-                'pool_type': row['pool_type'],
-                'capacity': row['capacity']
-            }
+        filtered_timetable[date][time_slot].append({
+            'name': row['name'],
+            'description': row['description'],
+            'availability': row['availability'],
+            'instructor': f"{row['first_name']} {row['last_name']}",
+        })
     
     return filtered_timetable
 
@@ -149,26 +156,38 @@ def dashboard_instructor():
     cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
     instructor_info = cursor.fetchone()
 
+    return render_template('dashboard/dashboard_instructor.html', user_info=user_info, 
+                           instructor_info=instructor_info)
+
+@app.route('/timetable_instructor', methods=['GET'])
+@login_required
+@UserType_required('instructor')
+def timetable_instructor():
+    user_id = session.get('UserID')
+    instructor_info = instructor(user_id)
+
+    cursor = getCursor()
+    cursor.execute("""
+        SELECT instructor.instructor_id 
+        FROM user 
+        JOIN instructor ON user.user_id = instructor.user_id 
+        WHERE user.user_id = %s
+    """, (user_id,))
+    instructor_id = cursor.fetchone()['instructor_id']
+    cursor.close()
+
+    selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
+    dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(7)]
+    
+    time_slots = [format_time_slot(timedelta(hours=h), timedelta(hours=h+1)) for h in range(6, 20)]
+
+    # Get the show_own_timetable parameter from the GET request
     show_own_timetable = request.args.get('show_own_timetable')
     if show_own_timetable:
-        timetable = generate_filtered_timetable_by_instructor(instructor_info['first_name'], instructor_info['last_name'])
+        timetable = generate_filtered_timetable_by_instructor(instructor_id)
     else:
         timetable = generate_timetable()
 
-    return render_template('dashboard_instructor.html', user_info=user_info, timetable=timetable, instructor_info=instructor_info)
-
-
-# @app.route('/dashboard_instructor')
-# @login_required
-# @UserType_required('instructor')
-# def dashboard_instructor():
-#     user_id = session.get('UserID')
-#     cursor = getCursor()
-#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-#     user_info = cursor.fetchone()
-#     cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
-#     instructor_info = cursor.fetchone()
-#     timetable = generate_timetable()
-#     return render_template('dashboard_instructor.html', user_info=user_info, timetable=timetable, instructor_info=instructor_info)
-
-
+    return render_template('timetable/timetable_instructor.html', timetable=timetable, 
+                           instructor_info=instructor_info, selected_date=selected_date, 
+                           dates=dates, time_slots=time_slots)

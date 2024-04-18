@@ -5,13 +5,11 @@ from flask import redirect
 from flask import url_for
 from flask import request
 from flask import render_template
-import mysql.connector
 from app.database import getCursor
 from app.database import getConnection
-from app import connect
 import re
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from functools import wraps
 
@@ -41,6 +39,16 @@ def format_time_slot(start_time, end_time):
     end_time_str = (datetime.min + end_time).time().strftime('%I:%M %p')
     return f"{start_time_str}-{end_time_str}"
 
+def get_user_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
+def get_manager_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM manager WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
 def generate_timetable():
     cursor = getCursor()
     cursor.execute("""
@@ -53,32 +61,36 @@ def generate_timetable():
             class_schedule.pool_type,
             class_schedule.start_time,
             class_schedule.end_time,
-            class_schedule.capacity
+            class_schedule.capacity,
+            class_schedule.datetime,
+            class_schedule.availability
+            
         FROM class_schedule
         JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
         JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
     """)
     timetable_data = cursor.fetchall()
     cursor.close()
-
-    timetable_data.sort(key=lambda row: row['start_time'])
     
     timetable = {}
 
     for row in timetable_data:
+        # Extract datetime
+        date = row['datetime']
+        # Format time slot
         time_slot = format_time_slot(row['start_time'], row['end_time'])
 
-        if time_slot not in timetable:
-            timetable[time_slot] = {}
-
-        if row['week'] not in timetable[time_slot]:
-            timetable[time_slot][row['week']] = {
-                'name': row['name'],
-                'description': row['description'],
-                'instructor': f"{row['first_name']} {row['last_name']}",
-                'pool_type': row['pool_type'],
-                'capacity': row['capacity']
-            }
+        if date not in timetable:
+            timetable[date] = {}
+        if time_slot not in timetable[date]:
+            timetable[date][time_slot] = []
+        
+        timetable[date][time_slot].append({
+            'name': row['name'],
+            'description': row['description'],
+            'availability': row['availability'],
+            'instructor': f"{row['first_name']} {row['last_name']}",
+        })
     
     return timetable
 
@@ -87,13 +99,25 @@ def generate_timetable():
 @UserType_required('manager')
 def dashboard_manager():
     user_id = session.get('UserID')
-    cursor = getCursor()
-    cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-    user_info = cursor.fetchone()
-    cursor.execute("SELECT * FROM manager WHERE user_id = %s", (user_id,))
-    manager_info = cursor.fetchone()
+    user_info = get_user_info(user_id)
+    manager_info = get_manager_info(user_id)
+    return render_template('dashboard/dashboard_manager.html', user_info=user_info, manager_info=manager_info)
+
+@app.route('/timetable_manager')
+@login_required
+@UserType_required('manager')
+def timetable_manager():
+    user_id = session.get('UserID')
+    manager_info = get_manager_info(user_id)
+
+    selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
     timetable = generate_timetable()
-    return render_template('dashboard_manager.html', user_info=user_info, timetable=timetable, manager_info=manager_info)
+    dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(7)]
+    
+    time_slots = [format_time_slot(timedelta(hours=h), timedelta(hours=h+1)) for h in range(6, 20)]
+
+    return render_template('manager/timetable_manager.html', manager_info=manager_info,
+                           timetable=timetable, selected_date=selected_date, dates=dates, time_slots=time_slots)
 
 
 

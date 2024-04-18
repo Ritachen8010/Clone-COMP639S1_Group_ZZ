@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- <link rel="stylesheet" href="your_styles.css"> -->
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- I ADD CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
     crossorigin="anonymous">
@@ -12,11 +12,18 @@
 <style>
 body {
     background-color: var(--page-colour);
-    color: white;
+    /* color: white; */
 }
 .navbar {
-    /* background-color: var(--page-colour); */
+    width: 100%;
     background-color: #005eb8;
+    overflow: hidden;
+}
+#navbar a {
+  float: left;
+  display: block;
+  text-align: center;
+  padding: 4px 8px;
 }
 .navbar-brand img {
     max-width: 60px;
@@ -26,6 +33,12 @@ body {
 }
 .nav-link:hover {
     color: var(--page-color-hover) !important;
+}
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999;
 }
 .container-fluid, .row {
     background-color: var(--page-colour);
@@ -116,7 +129,7 @@ body {
     border-bottom: none;
 }
 .custom-placeholder::placeholder {
-    color: #ced4da;
+    color: #000000;
 }
 .btn-danger {
     background-color: #005eb8;
@@ -131,75 +144,76 @@ body {
 #joinForm {
     display: none;
 }
-</style>
-<style>
     :root {
-        /* --page-colour: #03A6D9;  */
         --page-color-hover: rgba(255, 255, 255, 0.88);
     }
 </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Navigation Bar -->
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{{ url_for('home') }}">
-                
-                </a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="history.go(-1);">Back</a>
-                        </li>
-                        <li class="nav-item">
-                            <!--<a class="nav-link" href="{{ url_for('dashboard_all') }}">Dashboard</a>-->
-                            <a class="nav-link" href="{{ url_for('swimming_class') }}">ClassesTimetable</a>                 
-                        </li>
-                    </ul>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light" id="navbar">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='others/logo.png') }}" alt="Logo" class="logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="history.go(-1);">Back</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home_swimming_class') }}">Aerobics Class Timetable</a>                 
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home') }}#our_instructors">Instructors</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about_us') }}#refund">Refund Policy</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about_us') }}">About Us</a>
+                </li>
+            </ul>
+        </div>
+        <!-- Login and Logout buttons -->
+        <div class="btn-login ml-auto">
+            {% if 'UserID' in session %}
+                <div class="me-auto d-sm-inline d-md-inline d-lg-inline">
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-light me-2">
+                        {{ Username }} Logout
+                    </a>
                 </div>
-            </div>
-        </nav>
-        <!-- Main content -->
-        <!-- <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4"> -->
-            <!-- <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"> -->
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
-                <div class="btn-login">
-                    {% if 'UserID' in session %}
-                        <div class="me-auto d-sm-inline d-md-inline d-lg-inline">
-                            <a href="{{ url_for('logout') }}" class="btn btn-outline-light me-2">
-                                {{ Username }} Logout
-                            </a>
-                        </div>
-                    {% endif %}
-                    {% if 'UserID' not in session %}
-                        <button class="btn btn-outline-light me-2" type="button" data-bs-toggle="modal"
-                            data-bs-target="#loginModal">Login</button>
-                    {% else %}
-                        {% if session['UserType'] == 'manager' %}
-                            <a class="btn btn-outline-light" href="{{ url_for('dashboard_manager') }}">Dashboard</a>
-                        {% elif session['UserType'] == 'instructor' %}
-                            <a class="btn btn-outline-light" href="{{ url_for('dashboard_instructor') }}">Dashboard</a>
-                        {% elif session['UserType'] == 'member' %}
-                            <a class="btn btn-outline-light" href="{{ url_for('dashboard_member') }}">Dashboard</a>
-                        {% endif %}
-                    {% endif %}
-                </div>
-                <div class="welcome-message">
-                    
-                </div>
-            </div>
-            <div>
-                {% block content %}
-                {% endblock %}
-            </div>
-        </main>
+            {% endif %}
+            {% if 'UserID' not in session %}
+                <button class="btn btn-outline-light me-2" type="button" data-bs-toggle="modal"
+                    data-bs-target="#loginModal">Login</button>
+            {% else %}
+                {% if session['UserType'] == 'manager' %}
+                    <a class="btn btn-outline-light" href="{{ url_for('dashboard_manager') }}">Dashboard</a>
+                {% elif session['UserType'] == 'instructor' %}
+                    <a class="btn btn-outline-light" href="{{ url_for('dashboard_instructor') }}">Dashboard</a>
+                {% elif session['UserType'] == 'member' %}
+                    <a class="btn btn-outline-light" href="{{ url_for('dashboard_member') }}">Dashboard</a>
+                {% endif %}
+            {% endif %}
+        </div>
     </div>
-</div>
+</nav>
+<!-- Main content -->
+<main>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+        <div class="welcome-message"></div>
+    </div>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</main>
 <!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-aside">
@@ -229,11 +243,6 @@ body {
                     <form action="/register" method="post">
                         <div class="row justify-content-center">
                             <div class="modal-content bg-black text-light">
-                                <!-- <div class="mb-3">
-                                    <input type="text" class="form-control custom-placeholder" id="title"
-                                        name="title" placeholder="Title*" required>
-                                </div> -->
-                                <!-- #change to selection -->
                                 <div class="mb-3">
                                     <select class="form-control" id="title" name="title" required>
                                         <option value="" disabled selected>Please Select Your Title</option>
@@ -262,15 +271,15 @@ body {
                                 </div>
                                 <div class="mb-3">
                                     <input type="text" class="form-control custom-placeholder" id="First_name"
-                                        name="First_name" placeholder="First Name*" required>
+                                        name="First_name" placeholder="First Name*" pattern="[A-Za-z]+" maxlength="50" required>
                                 </div>
                                 <div class="mb-3">
                                     <input type="text" class="form-control custom-placeholder" id="Last_name"
-                                        name="Last_name" placeholder="Last Name*" required>
+                                        name="Last_name" placeholder="Last Name*" pattern="[A-Za-z]+" maxlength="50" required>
                                 </div>
                                 <div class="mb-3">
                                     <input type="email" class="form-control custom-placeholder" id="email"
-                                        name="email" placeholder="Email">
+                                        name="email" maxlength="100" placeholder="Email">
                                 </div>
                                 <div class="mb-3">
                                     <input type="tel" class="form-control custom-placeholder" id="phone"
@@ -279,7 +288,7 @@ body {
                                 </div>
                                 <div class="mb-3">
                                     <textarea class="form-control custom-placeholder" id="address"
-                                        name="address" placeholder="Address"></textarea>
+                                        name="address" maxlength="200" placeholder="Address"></textarea>
                                 </div>
                                 <div class="mb-3">
                                     <input type="date" class="form-control custom-placeholder" id="dob"
@@ -287,13 +296,8 @@ body {
                                 </div>
                                 <div class="mb-3">
                                     <input type="text" class="form-control custom-placeholder" id="occupation"
-                                        name="occupation" placeholder="Occupation">
+                                        name="occupation" pattern="[A-Za-z ]+" maxlength="50" placeholder="Occupation">
                                 </div>
-                                <!-- may not need for member -->
-                                <!-- <div class="mb-3">
-                                    <input type="text" class="form-control custom-placeholder" id="position"
-                                        name="position" placeholder="Position">
-                                </div> -->
                                 <div class="mb-3">
                                     <textarea class="form-control custom-placeholder" id="health_info"
                                         name="health_info" placeholder="Health Information"></textarea>
@@ -302,8 +306,8 @@ body {
                                     <label for="subscription_type" class="form-label">Subscription Type</label>
                                     <select class="form-select" id="subscription_type" name="subscription_type">
                                         <option value="annual">Annual Subscription ($700)</option>
-                                        <option value="monthly">Monthly Subscription ($60)</option>
-                                        <option value="6_month">6 Month Subscription ($360)</option>
+                                        <option value="6_month">6 Months Subscription ($360)</option>
+                                        <option value="monthly">Monthly Subscription ($60)</option>  
                                     </select>
                                 </div>
                             </div>
@@ -340,7 +344,32 @@ body {
         </div>
     </div>
 </div>
-<script>
+<script>   
+    var navbar = document.getElementById("navbar");
+    var sticky = navbar.offsetTop;
+    function myFunction() {
+        if (window.pageYOffset >= sticky) {
+            navbar.classList.add("sticky")
+        } else {
+            navbar.classList.remove("sticky");
+        }
+    }
+    
+    window.onscroll = function() {
+        myFunction();
+        var content = document.querySelector('.content');
+        if (navbar.classList.contains('sticky')) {
+            content.style.paddingTop = navbar.offsetHeight + 'px';
+        } else {
+            content.style.paddingTop = '';
+        }
+    };
+    
+    window.onload = function() {
+        var navbarHeight = document.getElementById('navbar').offsetHeight;
+        document.querySelector('.content').style.paddingTop = navbarHeight + 'px';
+    };
+
     window.onload = function() {
         {% if get_flashed_messages() %}
         var flashModal = new bootstrap.Modal(document.getElementById('flashMessagesModal'));
@@ -350,23 +379,7 @@ body {
         }, 2000);
         {% endif %}
     };
-</script>
-<script>
-    var today = new Date();
-    var year = today.getFullYear();
-    var month = String(today.getMonth() + 1).padStart(2, '0');
-    var day = String(today.getDate()).padStart(2, '0');
-    var systemDate = year + '-' + month + '-' + day;
-    var dateInput = document.getElementById('date_joined');
-    dateInput.addEventListener('input', function () {
-        var selectedDate = dateInput.value;
-        if (selectedDate > systemDate) {
-            dateInput.value = systemDate;
-            alert('The selected date cannot be later than today.');
-        }
-    });
-</script>
-<script>
+
     document.addEventListener('DOMContentLoaded', function() {
         var loginForm = document.getElementById('loginForm');
         var joinForm = document.getElementById('joinForm');
@@ -381,8 +394,7 @@ body {
             loginForm.style.display = 'block';
         });
     });
-</script>
-<script>
+
     function hoverLink(element) {
         element.classList.remove('text-light');
         element.classList.add('text-light');
@@ -405,33 +417,6 @@ body {
         document.getElementById('loginForm').style.display = 'block';
         document.getElementById('joinMessage').style.display = 'none';
         document.getElementById('loginMessage').style.display = 'block';
-    });
-    $(document).ready(function() {
-        $('#searchInput').on('input', function() {
-            var query = $(this).val();
-            if (query.length > 2) {
-                $.ajax({
-                    url: "/search",
-                    data: { 'q': query },
-                    type: "GET",
-                    success: function(data) {
-                        var suggestions = data.suggestions;
-                        $('#searchResult').empty();
-                        suggestions.forEach(function(suggestion) {
-                            $('#searchResult').append(
-                                `<a href="#" class="list-group-item list-group-item-action bg-black text-light">${suggestion}</a>`
-                            );
-                        });
-                    }
-                });
-            } else {
-                $('#searchResult').empty();
-            }
-        });
-        $(document).on('click', '.list-group-item', function() {
-            $('#searchInput').val($(this).text());
-            $('#searchForm').submit();
-        });
     });
 </script>
 {% block scripts %}

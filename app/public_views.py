@@ -1,11 +1,8 @@
 from app import app
 from flask import render_template
+from flask import request
 from app.database import getCursor, getConnection
-import mysql.connector
-from datetime import date, timedelta, datetime
-from pprint import pprint
-
-
+from datetime import timedelta, datetime
 
 # Convert time to datetime, 'HH:MM AM/PM' format
 def format_time_slot(start_time, end_time):
@@ -25,32 +22,36 @@ def generate_timetable():
             class_schedule.pool_type,
             class_schedule.start_time,
             class_schedule.end_time,
-            class_schedule.capacity
+            class_schedule.capacity,
+            class_schedule.datetime,
+            class_schedule.availability
+            
         FROM class_schedule
         JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
         JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
     """)
     timetable_data = cursor.fetchall()
     cursor.close()
-
-    timetable_data.sort(key=lambda row: row['start_time'])
     
     timetable = {}
 
     for row in timetable_data:
+        # Extract datetime
+        date = row['datetime']
+        # Format time slot
         time_slot = format_time_slot(row['start_time'], row['end_time'])
 
-        if time_slot not in timetable:
-            timetable[time_slot] = {}
-
-        if row['week'] not in timetable[time_slot]:
-            timetable[time_slot][row['week']] = {
-                'name': row['name'],
-                'description': row['description'],
-                'instructor': f"{row['first_name']} {row['last_name']}",
-                'pool_type': row['pool_type'],
-                'capacity': row['capacity']
-            }
+        if date not in timetable:
+            timetable[date] = {}
+        if time_slot not in timetable[date]:
+            timetable[date][time_slot] = []
+        
+        timetable[date][time_slot].append({
+            'name': row['name'],
+            'description': row['description'],
+            'availability': row['availability'],
+            'instructor': f"{row['first_name']} {row['last_name']}",
+        })
     
     return timetable
 
@@ -65,8 +66,18 @@ def profile_instructor():
 def home():
     timetable = generate_timetable()
     instructor = profile_instructor()
-    return render_template('homepage.html', timetable=timetable, instructor=instructor)
+    return render_template('homepage/homepage.html', timetable=timetable, instructor=instructor)
 
 @app.route('/about_us')
 def about_us():
-    return render_template('about-us.html')
+    return render_template('homepage/about-us.html')
+
+@app.route('/home_swimming_class/')
+def home_swimming_class():
+    selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
+    timetable = generate_timetable()
+    dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(7)]
+    
+    time_slots = [format_time_slot(timedelta(hours=h), timedelta(hours=h+1)) for h in range(6, 20)]
+    
+    return render_template('homepage/home_swimming_class.html', timetable=timetable, selected_date=selected_date, dates=dates, time_slots=time_slots)

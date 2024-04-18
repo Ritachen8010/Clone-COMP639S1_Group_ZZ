@@ -104,5 +104,5 @@ td span {
     color: #ccc; 
 }
 </style>
-
+{% include 'homepage/footer.html' %}
 {% endblock %}

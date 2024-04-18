@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Aerobics Classes{% endblock %}
+
+{% block content %}
+<div class="grid-container custom-bg">
+    <div class="sidebar-position">
+        {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+    </div>
+    <div class="container mt-5 mb-5">
+        <div class="h2-custom">Aerobics Classes</div>
+        <!-- Dynamic Day Navigation Buttons with Date Picker -->
+        <div class="day-navigation text-center mt-5 mb-5">
+            <button onclick="navigateDay(-1)" class="btn btn-primary">&lt; Previous Day</button>
+            <input type="date" id="datePicker" class="form-control" onchange="navigateToDate()" 
+            style="width: auto; display: inline-block; margin: 0 15px;" value="{{ selected_date }}">
+            <button onclick="navigateDay(1)" class="btn btn-primary">Next Day &gt;</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        {% for date_info in dates %}
+                        <th>{{ date_info.strftime('%A') }}<br>{{ date_info.strftime('%d %b') }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for time_slot in time_slots %}
+                    <tr>
+                        <td>{{ time_slot }}</td>
+                        {% for date_info in dates %}
+                        <td>
+                            {% set day_classes = timetable.get(date_info.strftime('%Y-%m-%d'), {}).get(time_slot, []) %}
+                            {% for class_info in day_classes %}
+                            <div class="class-container">
+                                <div class="timetable__content-title fw-500">
+                                    {{ class_info.name }}
+                                </div>
+                                <div class="timetable__flex--start fw-400">
+                                    {{ class_info.description }}
+                                </div>
+                                <div class="timetable__flex--start fw-400">
+                                    Space: {{ class_info.availability }}
+                                </div>
+                                <progress value="{{ class_info.availability }}" max="100" 
+                                title="{{ class_info.availability }}%" aria-hidden="true" 
+                                class="timetable__content-space"></progress>
+                                <div>Instr: {{ class_info.instructor }}</div>
+                                {% if class_info['class_id'] in user_booked_classes %}
+                                    <button class="btn btn-secondary disabled">Already Booked</button>
+                                {% elif class_info.availability > 0 %}
+                                    <a href="{{ url_for('booking_class', class_id=class_info['class_id']) }}" class="btn btn-primary">Book Now</a>
+                                {% else %}
+                                    <button class="btn btn-secondary disabled">No Space</button>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span>No classes</span>
+                            {% endfor %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('datePicker').value = "{{ selected_date }}";
+
+    function navigateDay(offset) {
+        var datePicker = document.getElementById('datePicker');
+        var currentDate = new Date(datePicker.value);
+        currentDate.setDate(currentDate.getDate() + offset);
+        datePicker.valueAsDate = currentDate;
+        navigateToDate();
+    }
+
+    function navigateToDate() {
+        var datePicker = document.getElementById('datePicker');
+        var selectedDate = datePicker.value;
+        var url = new URL(window.location.href);
+        url.searchParams.set('date', selectedDate);
+        window.location.href = url;
+    }
+</script>
+{% endblock %}

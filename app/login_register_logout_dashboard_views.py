@@ -1,15 +1,11 @@
 from app import app
 from flask import render_template, flash, session, redirect, url_for, request
 from flask_bcrypt import Bcrypt
-# from flask_apscheduler import APScheduler
 from functools import wraps
 import mysql.connector
-import re
 from datetime import date, timedelta, datetime
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from app.database import getCursor, getConnection
-from app import connect
-from app.public_views import generate_timetable
 
 app.config['SECRET_KEY'] = 'some_random_string_here'
 bcrypt = Bcrypt(app)
@@ -20,11 +16,6 @@ login_manager.init_app(app)
 ROLES = ['Member', 'Instructor', 'Manager']
 
 connection = None
-
-# scheduler = APScheduler()
-# scheduler.init_app(app)
-# scheduler.start()
-
 
 class User(UserMixin):
     def __init__(self, user_id, Username, UserType, member_id):
@@ -53,6 +44,21 @@ def convert_date_format(original_date):
         return new_date_format
     except ValueError:
         return "Invalid Date Format"
+    
+def get_member_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM member WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
+def get_instructor_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
+def get_manager_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM manager WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -93,7 +99,6 @@ def register():
             address = request.form.get('address')
             dob = request.form.get('dob')
             occupation = request.form.get('occupation')
-            DateJoined = date.today().isoformat()
 
             # Hash the Password
             hashed_Password = bcrypt.generate_password_hash(Password).decode('utf-8')
@@ -109,15 +114,11 @@ def register():
             if Password == confirm_Password:
                 # Insert user information, with the default UserType as 'member'
                 cursor.execute("INSERT INTO user (usertype, username, password) VALUES ('member', %s, %s)", (Username, hashed_Password))
-                user_id = cursor.lastrowid  # Get the last inserted id
+                user_id = cursor.lastrowid
 
-                # Insert Member information
-                # cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, health_info, join_date) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                #                (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info, DateJoined))
-                # removed date of join
                 cursor.execute("INSERT INTO member (user_id, title, first_name, last_name, email, phone, address, dob, occupation, health_info) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info))
-                member_id = cursor.lastrowid  # Get the last inserted id for member
+                member_id = cursor.lastrowid 
 
                 # New code to handle subscription type selection
                 subscription_type = request.form.get('subscription_type')
@@ -163,13 +164,7 @@ def register():
             flash(f"An error occurred: {err}")
             return redirect(url_for('register'))
 
-    # Fetch timetable data
-    timetable = generate_timetable()
-    
-    # Render the template and pass the timetable variable
-    return render_template('homepage.html', timetable=timetable)
-
-
+    return render_template('homepage/homepage.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -203,7 +198,7 @@ def login():
 
                     login_user(user)
                     # Set session variables
-                    session['UserID'] = user.id  # 设置为 set up session['UserID']
+                    session['UserID'] = user.id 
                     session['Username'] = user.Username
                     session['UserType'] = user_record['UserType']
                     session['member_id'] = member_id if member_id else None
@@ -230,18 +225,7 @@ def login():
             flash('Login failed. Please check your credentials.')
             return redirect(url_for('login'))  # Reload the login page
         
-        # if login_successful:
-        #     next_page = session.get('next') or url_for('dashboard_all')  
-        #     return redirect(next_page)
-        # else:
-        #     # Handling failed login
-        #     flash('Login failed. Please check your credentials.')
-        #     return redirect(url_for('login'))  
-        # Reload the login page
-
-    # For GET requests or if the login logic fails
-    timetable = generate_timetable()  # Generate the timetable
-    return render_template('homepage.html', timetable=timetable)
+    return render_template('homepage/homepage.html')
 
 @app.route('/logout')
 def logout():
@@ -249,57 +233,14 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('home'))
 
-
-# # dashboard_all
-# @app.route('/dashboard_all')
-# @login_required
-# @UserType_required('manager', 'instructor', 'member')
-# def dashboard_all():
-#     user_id = session.get('UserID')
-#     cursor = getCursor()
-#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-#     user_info = cursor.fetchone()
-#     cursor.execute("SELECT * FROM member")
-#     members = cursor.fetchall()
-#     return render_template('dashboard_all.html', user_info=user_info, UserType=session.get('UserType'), members=members)
-
-# @app.route('/dashboard_member')
-# @login_required
-# @UserType_required('member')
-# def dashboard_member():
-#     user_id = session.get('UserID')
-#     cursor = getCursor()
-#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-#     user_info = cursor.fetchone()
-#     return render_template('dashboard_member.html', user_info=user_info)
-
-# @app.route('/dashboard_instructor')
-# @login_required
-# @UserType_required('instructor')
-# def dashboard_instructor():
-#     user_id = session.get('UserID')
-#     cursor = getCursor()
-#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-#     user_info = cursor.fetchone()
-#     return render_template('dashboard_instructor.html', user_info=user_info)
-
-# @app.route('/dashboard_manager')
-# @login_required
-# @UserType_required('manager')
-# def dashboard_manager():
-#     user_id = session.get('UserID')
-#     cursor = getCursor()
-#     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
-#     user_info = cursor.fetchone()
-#     return render_template('dashboard_manager.html', user_info=user_info)
-
-
-
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
 @UserType_required('member', 'instructor', 'manager')
 def change_password():
     UserID = session.get('UserID')
+    member_info = get_member_info(UserID)
+    instructor_info = get_instructor_info(UserID)
+    manager_info = get_manager_info(UserID)
 
     if request.method == 'POST':
         # Get form data
@@ -310,8 +251,7 @@ def change_password():
         if old_Password and new_Password and confirm_Password:
             if new_Password == confirm_Password:  # Confirm that both new passwords match
                 cursor = getCursor()
-                # cursor.execute("SELECT password FROM user WHERE user_id = %s", (UserID,))
-                # user_record = cursor.fetchone()
+
                 try:
                     cursor.execute("SELECT password FROM user WHERE user_id = %s", (UserID,))
                     user_record = cursor.fetchone()
@@ -320,7 +260,7 @@ def change_password():
                         # Hash the new password
                         hashed_Password = bcrypt.generate_password_hash(new_Password).decode('utf-8')
                         cursor.execute("UPDATE user SET password = %s WHERE user_id = %s", (hashed_Password, UserID))
-                        getConnection().commit()  # Corrected the commit call
+                        getConnection().commit() 
                         flash("Password changed successfully.")
                     else:
                         flash("Old password is incorrect.")
@@ -337,29 +277,6 @@ def change_password():
 
         return redirect(url_for('manage_profile'))  # Redirect if password change is successful or there is an error message
 
-    return render_template('change_password.html')
-
-                # if user_record and bcrypt.check_password_hash(user_record['password'], old_Password):
-                #     try:
-                        # Hash the new password
-    #                     hashed_Password = bcrypt.generate_password_hash(new_Password).decode('utf-8')
-    #                     cursor.execute("UPDATE user SET password = %s WHERE user_id = %s", (hashed_Password, UserID))
-    #                     getConnection().commit()  # Corrected the commit call
-    #                     flash("Password changed successfully.")
-    #                 except Exception as e:
-    #                     # Handle potential exceptions
-    #                     print("Error while changing password:", e)
-    #                     flash("An error occurred while changing the password.")
-    #             else:
-    #                 flash("Old password is incorrect.")
-    #         else:
-    #             flash("New passwords do not match.")
-    #     else:
-    #         flash("Please enter old password, new password, and confirm password.")
-
-    #     cursor.close()  # Close the cursor
-
-    #     return redirect(url_for('manage_profile'))  # Redirect if password change is successful or there is an error message
-
-    # return render_template('change_password.html')
+    return render_template('manage_profile/change_password.html', member_info=member_info, 
+                           instructor_info=instructor_info, manager_info=manager_info)
 

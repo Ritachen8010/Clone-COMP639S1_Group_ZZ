@@ -1,15 +1,12 @@
 from app import app
 from flask import render_template, flash, session, redirect, url_for, request
 from flask_bcrypt import Bcrypt
-# from flask_apscheduler import APScheduler
 from functools import wraps
 import mysql.connector
-import re
 import os
-from datetime import date, timedelta, datetime
+from datetime import datetime
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from app.database import getCursor, getConnection
-from app import connect
 from werkzeug.utils import secure_filename
 
 app.config['SECRET_KEY'] = 'some_random_string_here'
@@ -51,6 +48,21 @@ def convert_date_format(original_date):
     except ValueError:
         return "Invalid Date Format"
 
+def get_member_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM member WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
+def get_instructor_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
+def get_manager_info(user_id):
+    cursor = getCursor()
+    cursor.execute("SELECT * FROM manager WHERE user_id = %s", (user_id,))
+    return cursor.fetchone()
+
 @login_manager.user_loader
 def load_user(user_id):
     try:
@@ -74,8 +86,60 @@ def load_user(user_id):
     finally:
         cursor.close()   
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+MAX_FILENAME_LENGTH = 300
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS and \
+           len(filename) <= MAX_FILENAME_LENGTH
 
-UPLOAD_FOLDER = 'static/instructor/'
+def upload_image_profile(user_id, file):
+    UserType = session.get('UserType')
+    filename = secure_filename(file.filename)
+    unique_filename = f"user_{user_id}_{filename}"
+
+    # Set the upload folder based on the user type
+    if UserType == 'member':
+        upload_folder = 'app/static/member/'
+    elif UserType == 'instructor':
+        upload_folder = 'app/static/instructor/'
+    elif UserType == 'manager':
+        upload_folder = 'app/static/manager/'
+
+    file.save(os.path.join(upload_folder, unique_filename))
+    cursor = getCursor()
+    if UserType == 'member':
+        cursor.execute("UPDATE member SET image_profile = %s WHERE user_id = %s", (unique_filename, user_id))
+    elif UserType == 'instructor':
+        cursor.execute("UPDATE instructor SET image_profile = %s WHERE user_id = %s", (unique_filename, user_id))
+    elif UserType == 'manager':
+        cursor.execute("UPDATE manager SET image_profile = %s WHERE user_id = %s", (unique_filename, user_id))
+    getConnection().commit()
+
+@app.route('/upload_image_profile', methods=['POST'])
+@login_required
+def handle_upload_image_profile():
+    # Check if the post request has the file part
+    if 'image_profile' not in request.files:
+        flash('No file part')
+        return redirect(url_for('manage_profile')) 
+    file = request.files['image_profile']
+    # If user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(url_for('manage_profile')) 
+    if len(file.filename) > 500: # Limit the filename length
+        flash('File name is too long')
+        return redirect(url_for('manage_profile')) 
+    if file and allowed_file(file.filename):
+        user_id = session.get('UserID')
+        upload_image_profile(user_id, file)
+        flash('Profile image successfully uploaded')
+        return redirect(url_for('manage_profile')) 
+    else:
+        flash('Allowed file types are .png, .jpg, .jpeg, .gif')
+        return redirect(url_for('manage_profile')) 
 
 @app.route('/manage_profile', methods=['GET', 'POST'])
 @login_required
@@ -84,6 +148,9 @@ def manage_profile():
     Username = session.get('Username')
     UserID = session.get('UserID')
     UserType = session.get('UserType')
+    member_info = get_member_info(UserID)
+    instructor_info = get_instructor_info(UserID)
+    manager_info = get_manager_info(UserID)
 
     cursor = getCursor()
 
@@ -110,12 +177,6 @@ def manage_profile():
                 # added new position and bio | title, email and phone
                 cursor.execute("UPDATE instructor SET first_name = %s, last_name = %s, title = %s, phone = %s, email = %s, position = %s, bio = %s WHERE user_id = %s",
                                (new_First_name, new_Last_name, new_Title, new_phone, new_email, new_position, new_bio, UserID))
-                if 'profile_image' in request.files:
-                    file = request.files['profile_image']
-                    if file.filename != '':
-                        filename = secure_filename(file.filename)
-                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                        cursor.execute("UPDATE instructor SET image_profile = %s WHERE user_id = %s", (filename, UserID))
             elif UserType == 'manager':
                 # added new position, title, email and phone
                 cursor.execute("UPDATE manager SET first_name = %s, last_name = %s, title = %s, phone = %s, email = %s, position = %s WHERE user_id = %s",
@@ -141,9 +202,8 @@ def manage_profile():
         cursor.execute("SELECT * FROM manager WHERE user_id = %s", (UserID,))
         profile_info = cursor.fetchone()
 
-    return render_template('manage_profile.html', profile_info=profile_info, UserType=UserType)
-
-
+    return render_template('manage_profile/manage_profile.html', profile_info=profile_info, UserType=UserType, 
+                           member_info=member_info, instructor_info=instructor_info, manager_info=manager_info)
 
 
 

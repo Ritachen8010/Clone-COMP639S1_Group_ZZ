@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}News{% endblock %}
+
+{% block content %}
+<div class="text-black custom-bg">
+    <div class="row">
+        <div class="col-12">
+            {% if session['UserType'] in ['member', 'instructor', 'manager'] %}
+                <div class="grid-container">
+                    <div class="sidebar-position">
+                        {% if session['UserType'] == 'member' %}
+                            {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+                        {% elif session['UserType'] == 'instructor' %}
+                            {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
+                        {% elif session['UserType'] == 'manager' %}
+                            {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
+                        {% endif %}
+                    </div>
+                    <div class="container mt-5 mb-5 text-black" style="min-height: 100vh;">
+                        <img src="{{ url_for('static', filename='news/' + news_info.image) }}" 
+                        alt="{{ news_info.title }}" style="width: 800px; height: 500px;">
+                            <div class="mt-5 mb-5">
+                                <h1>{{ news_info.title | title }}</h1>
+                                <p><em>Published on {{ news_info.publication_date | formatdate }}</em></p>
+                                <br>
+                                {% for paragraph in news_info.content.replace('•', '').split('.') %}
+                                    <p>{{ paragraph }}</p>
+                                    <p></p>
+                                {% endfor %}
+                            </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
