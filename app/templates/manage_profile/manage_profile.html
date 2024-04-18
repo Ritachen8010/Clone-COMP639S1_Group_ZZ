@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+
+<!-- added block title -->
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="text-black custom-bg">
+    <div class="row">
+        <div class="col-12">
+            <div class="container h2-custom mt-5 mb-5 text-black">Manage Profile</div>
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+
+            <!-- Profile Update Form -->
+                {% if session['UserType'] == 'member' %}
+                <div class="grid-container">
+                    <div class="sidebar-position">
+                        {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+                    </div>
+                    <div class="p-container-fluid">
+                        <hr class="mt-0 mb-4">
+                        <div class="row">
+                            <div class="col-xl-4">
+                                <!-- Profile picture card-->
+                                <div class="card mb-4 mb-xl-0">
+                                    <div class="card-header text-light">Profile Image</div>
+                                    <div class="card-body text-center text-black">
+                                        <!-- Profile picture image-->
+                                        <form method="post" enctype="multipart/form-data" onsubmit="return validateForm()" action="{{ url_for('handle_upload_image_profile') }}">
+                                            <img class="img-profile mb-2" img src="{{ url_for('static', filename='member/' + profile_info.image_profile) }}" alt="Profile Image">                                               
+                                            <input type="file" class="form-control" id="image_profile" name="image_profile">
+                                            <button type="submit" class="btn btn-primary mt-4">Update Picture</button>
+                                        </form> 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-8">
+                                <!-- Personal details card-->
+                                <div class="card mb-4">
+                                    <div class="card-header text-light">Personal Details</div>
+                                    <div class="card-body">
+                                        <form method="post" onsubmit="return validateForm()" action="{{ url_for('manage_profile') }}">
+                                            <div class="row gx-3 mb-3 text-black">
+                                                <div class="col-md-6">
+                                                    <label for="First_name" class="form-label">First Name</label>
+                                                    <input type="text" class="form-control" id="First_name" name="First_name" pattern="[A-Za-z]+" value="{{ profile_info.first_name }}" required title="Name must be a letter.">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="Last_name" class="form-label">Last Name</label>
+                                                    <input type="text" class="form-control" id="Last_name" name="Last_name" pattern="[A-Za-z]+" value="{{ profile_info.last_name }}" required title="Name must be a letter.">
+                                                </div>
+                                            </div>
+                                            <div class="row gx-3 mb-3 text-black">
+                                                <div class="col-md-6">
+                                                    <label for="phone" class="form-label">Phone</label>
+                                                    <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{8,15}" value="{{ profile_info.phone }}" required title="Phone number must be 8 to 15 digits long.">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="title" class="form-label">Title</label>
+                                                    <select class="form-control" id="title" name="title" required>
+                                                        <option value="">Select a title</option>
+                                                        <option value="Mr" {% if profile_info.title == 'Mr' %}selected{% endif %}>Mr</option>
+                                                        <option value="Mrs" {% if profile_info.title == 'Mrs' %}selected{% endif %}>Mrs</option>
+                                                        <option value="Miss" {% if profile_info.title == 'Miss' %}selected{% endif %}>Miss</option>
+                                                        <option value="Dr" {% if profile_info.title == 'Dr' %}selected{% endif %}>Dr</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row gx-3 mb-3 text-black">
+                                                <div class="col-md-6">
+                                                    <label for="email" class="form-label">Email</label>
+                                                    <input type="email" class="form-control" id="email" name="email" maxlength="50" value="{{ profile_info.email }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="position" class="form-label">Occupation</label>
+                                                    <input type="text" class="form-control" id="occupation" name="occupation" maxlength="50" pattern="[A-Za-z ]+" value="{{ profile_info.occupation }}" title="Must be a letter.">
+                                                </div>
+                                            </div>
+                                            <div class="row gx-3 mb-3 text-black">
+                                                <div class="col-md-6">
+                                                    <label for="address" class="form-label">Address</label>
+                                                    <textarea class="form-control" id="address" name="address" maxlength="100">{{ profile_info.address }}</textarea>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="dob" class="form-label">Date of Birth</label>
+                                                    <input type="date" class="form-control" id="dob" name="dob" value="{{ profile_info.dob }}">
+                                                </div>  
+                                            </div>
+                                            <div class="row gx-3 mb-3 text-black">
+                                                <div class="col-md-12">
+                                                    <label for="health_info" class="form-label">Health Information</label>
+                                                    <textarea class="form-control" id="health_info" name="health_info" maxlength="300">{{ profile_info.health_info }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="row gx-3">
+                                                <div class="col-md-12 d-flex justify-content-between">
+                                                    <div>
+                                                        <a href="{{ url_for('change_password') }}" class="btn btn-danger me-2">Change Password</a>
+                                                    </div>
+                                                    <div>
+                                                        <a href="{{ url_for('dashboard_member') }}" class="btn btn-secondary">Cancel</a>
+                                                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if session['UserType'] == 'instructor' %}
+                        <div class="grid-container">
+                            <div class="sidebar-position">
+                                {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
+                            </div>
+                            <div class="p-container-fluid">
+                                <hr class="mt-0 mb-4">
+                                <div class="row">
+                                    <div class="col-xl-4">
+                                        <!-- Profile picture card-->
+                                        <div class="card mb-4 mb-xl-0">
+                                            <div class="card-header text-light">Profile Image</div>
+                                            <div class="card-body text-center text-black">
+                                                <!-- Profile picture image-->
+                                                <form method="post" enctype="multipart/form-data" onsubmit="return validateForm()" action="{{ url_for('handle_upload_image_profile') }}">
+                                                    <img class="img-profile mb-2" img src="{{ url_for('static', filename='instructor/' + profile_info.image_profile) }}" alt="Profile Image">                                               
+                                                    <input type="file" class="form-control" id="image_profile" name="image_profile">
+                                                    <button type="submit" class="btn btn-primary mt-4">Update Picture</button>
+                                                </form> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-8">
+                                        <!-- Personal details card-->
+                                        <div class="card mb-4">
+                                            <div class="card-header text-light">Personal Details</div>
+                                            <div class="card-body">
+                                                <form method="post" onsubmit="return validateForm()" action="{{ url_for('manage_profile') }}">
+                                                    <div class="row gx-3 mb-3 text-black">
+                                                        <div class="col-md-6">
+                                                            <label for="First_name" class="form-label">First Name</label>
+                                                            <input type="text" class="form-control" id="First_name" name="First_name" pattern="[A-Za-z]+" value="{{ profile_info.first_name }}" required title="Name must be a letter.">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="Last_name" class="form-label">Last Name</label>
+                                                            <input type="text" class="form-control" id="Last_name" name="Last_name" pattern="[A-Za-z]+" value="{{ profile_info.last_name }}" required title="Name must be a letter.">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row gx-3 mb-3 text-black">
+                                                        <div class="col-md-6">
+                                                            <label for="phone" class="form-label">Phone</label>
+                                                            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{8,15}" value="{{ profile_info.phone }}" required title="Phone number must be 8 to 15 digits long.">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="title" class="form-label">Title</label>
+                                                            <select class="form-control" id="title" name="title" required>
+                                                                <option value="">Select a title</option>
+                                                                <option value="Mr" {% if profile_info.title == 'Mr' %}selected{% endif %}>Mr</option>
+                                                                <option value="Mrs" {% if profile_info.title == 'Mrs' %}selected{% endif %}>Mrs</option>
+                                                                <option value="Miss" {% if profile_info.title == 'Miss' %}selected{% endif %}>Miss</option>
+                                                                <option value="Dr" {% if profile_info.title == 'Dr' %}selected{% endif %}>Dr</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row gx-3 mb-3 text-black">
+                                                        <div class="col-md-6">
+                                                            <label for="email" class="form-label">Email</label>
+                                                            <input type="email" class="form-control" id="email" name="email" maxlength="50" value="{{ profile_info.email }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="position" class="form-label">Position</label>
+                                                            <input type="text" class="form-control" pattern="[A-Za-z ]+" id="position" name="position" maxlength="50" value="{{ profile_info.position }}" title="Position must be a letter.">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row gx-3 mb-3 text-black">
+                                                        <div class="col-md-12">
+                                                            <label for="bio" class="form-label">Bio</label>
+                                                            <textarea class="form-control" id="bio" name="bio" maxlength="300">{{ profile_info.bio }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row gx-3">
+                                                        <div class="col-md-12 d-flex justify-content-between">
+                                                            <div>
+                                                                <a href="{{ url_for('change_password') }}" class="btn btn-danger me-2">Change Password</a>
+                                                            </div>
+                                                            <div>
+                                                                <a href="{{ url_for('dashboard_instructor') }}" class="btn btn-secondary">Cancel</a>
+                                                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                        {% if session['UserType'] == 'manager' %}
+                        <div class="grid-container">
+                            <div class="sidebar-position">
+                                {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
+                            </div>
+                            <div class="p-container-fluid">
+                                <hr class="mt-0 mb-4">
+                                <div class="row">
+                                    <div class="col-xl-4">
+                                        <!-- Profile picture card-->
+                                        <div class="card mb-4 mb-xl-0">
+                                            <div class="card-header text-light">Profile Image</div>
+                                            <div class="card-body text-center text-black">
+                                                <!-- Profile picture image-->
+                                                <form method="post" enctype="multipart/form-data" onsubmit="return validateForm()" action="{{ url_for('handle_upload_image_profile') }}">
+                                                    <img class="img-profile mb-2" img src="{{ url_for('static', filename='manager/' + profile_info.image_profile) }}" alt="Profile Image">                                               
+                                                    <input type="file" class="form-control" id="image_profile" name="image_profile">
+                                                    <button type="submit" class="btn btn-primary mt-4">Update Picture</button>
+                                                </form> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-8">
+                                        <!-- Personal details card-->
+                                        <div class="card mb-4">
+                                            <div class="card-header text-light">Personal Details</div>
+                                            <div class="card-body">
+                                                <form method="post" onsubmit="return validateForm()" action="{{ url_for('manage_profile') }}">
+                                                    <div class="row gx-3 mb-3 text-black">
+                                                        <div class="col-md-6">
+                                                            <label for="First_name" class="form-label">First Name</label>
+                                                            <input type="text" class="form-control" id="First_name" name="First_name" pattern="[A-Za-z]+" value="{{ profile_info.first_name }}" required title="Name must be a letter.">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="Last_name" class="form-label">Last Name</label>
+                                                            <input type="text" class="form-control" id="Last_name" name="Last_name" pattern="[A-Za-z]+" value="{{ profile_info.last_name }}" required title="Name must be a letter.">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row gx-3 mb-3 text-black">
+                                                        <div class="col-md-6">
+                                                            <label for="phone" class="form-label">Phone</label>
+                                                            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{8,15}" value="{{ profile_info.phone }}" required title="Phone number must be 8 to 15 digits long.">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="title" class="form-label">Title</label>
+                                                            <select class="form-control" id="title" name="title" required>
+                                                                <option value="">Select a title</option>
+                                                                <option value="Mr" {% if profile_info.title == 'Mr' %}selected{% endif %}>Mr</option>
+                                                                <option value="Mrs" {% if profile_info.title == 'Mrs' %}selected{% endif %}>Mrs</option>
+                                                                <option value="Miss" {% if profile_info.title == 'Miss' %}selected{% endif %}>Miss</option>
+                                                                <option value="Dr" {% if profile_info.title == 'Dr' %}selected{% endif %}>Dr</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row gx-3 mb-3 text-black">
+                                                        <div class="col-md-6">
+                                                            <label for="email" class="form-label">Email</label>
+                                                            <input type="email" class="form-control" id="email" name="email" maxlength="50" value="{{ profile_info.email }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="position" class="form-label">Position</label>
+                                                            <input type="text" class="form-control" pattern="[A-Za-z ]+" id="position" name="position" maxlength="50" value="{{ profile_info.position }}" title="Position must be a letter.">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row gx-3">
+                                                        <div class="col-md-12 d-flex justify-content-between">
+                                                            <div>
+                                                                <a href="{{ url_for('change_password') }}" class="btn btn-danger me-2">Change Password</a>
+                                                            </div>
+                                                            <div>
+                                                                <a href="{{ url_for('dashboard_manager') }}" class="btn btn-secondary">Cancel</a>
+                                                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+                    
+                                    

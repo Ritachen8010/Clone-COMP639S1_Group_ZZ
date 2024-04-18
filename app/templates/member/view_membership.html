@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Membership Information{% endblock %}
+
+{% block content %}
+<div class="grid-container custom-bg">
+    <div class="sidebar-position">
+        {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+    </div>
+    <div class="d-container-fluid">
+        <div class="col-12">
+            <div class="container text-black mt-5 mb-5">
+                <div class="h2-custom mb-4">Membership Information
+                    <p>*Our refund policy please refer to our <a href="{{ url_for('about_us') }}#refund">Refund Policy</a></p>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Member Name</th>
+                            <th>Membership ID</th>
+                            <th>Type</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Membership Fee</th>
+                            <th>Cancel</th>
+                            <th>Renew</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for membership in memberships %}
+                        <tr>
+                            <td>{{ user_full_name }}</td>
+                            <td>{{ membership.membership_id }}</td>
+                            <td>{{ membership.type }}</td>
+                            <!-- nz date format -->
+                            <td>{{ membership.start_date | formatdate }}</td>
+                            <td>{{ membership.end_date | formatdate }}</td>
+                            <!-- a dollar sign is added to the membership fee -->
+                            <td>${{ membership.membership_fee }}</td>
+                            <td>
+                                <form action="{{ url_for('cancel_membership', membership_id=membership.membership_id) }}" method="post">
+                                    <input type="submit" class="btn btn-primary" onclick="return confirmCancel()" value="Cancel Membership" />
+                                </form>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-primary" id="renewMembershipButton">Renew Membership</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Renew Membership Modal -->
+<div class="modal fade" id="renewMembershipModal" tabindex="-1" role="dialog" aria-labelledby="renewMembershipModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="renewMembershipModalLabel">Renew Membership</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="renewMembershipForm" action="{{ url_for('renew_membership', membership_id=membership.membership_id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Renewal Type</label>
+                        <select class="form-select" id="type" name="type">
+                            <option selected>Choose...</option>
+                            <option value="Annual">Annual $700</option>
+                            <option value="6 Month">6 Months $360</option>
+                            <option value="Monthly">Monthly $60</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<script>
+    function confirmCancel() {
+        return confirm("Are you sure you want to cancel your membership?");
+    }
+</script>
+<script>
+    // Handle the click event on the renew membership button
+    document.getElementById('renewMembershipButton').addEventListener('click', function() {
+        // show the renew membership modal
+        $('#renewMembershipModal').modal('show');
+        $('#renewMembershipModal').modal('hide');
+    });
+</script>
+{% endblock %}

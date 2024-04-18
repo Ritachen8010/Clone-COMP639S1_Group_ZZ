@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}News{% endblock %}
+
+{% block content %}
+<div class="text-black custom-bg">
+    <div class="row">
+        <div class="col-12">
+            {% if session['UserType'] in ['member', 'instructor', 'manager'] %}
+                <div class="grid-container">
+                    <div class="sidebar-position">
+                        {% if session['UserType'] == 'member' %}
+                            {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+                        {% elif session['UserType'] == 'instructor' %}
+                            {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
+                        {% elif session['UserType'] == 'manager' %}
+                            {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
+                        {% endif %}
+                    </div>
+                    <div class="container" style="min-height: 100vh;">
+                        <div class="h2-custom mt-5 mb-5 text-black">News</div>
+                        {% for list in news_list %}
+                        <article class="newscard blue">
+                            <a class="newscard_img_link">
+                                <img class="newscard_img" src="{{ url_for('static', filename='news/' + list.image) }}" alt="{{ list.title }}">
+                            </a>
+                            <div class="newscard_text">
+                                <h1 class="newscard_title blue"><a href="{{ url_for('view_news', news_id=list.news_id) }}"> {{ list.title | title }}</a></h1>
+                                <div class="news_subtitle small">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> Published on {{ list.publication_date | formatdate }}
+                                    </small>
+                                </div>
+                                <div class="newscard_bar"></div>
+                                <div class="newscard_preview-txt">
+                                    {% for paragraph in list.content.replace('•', '').split('\n') %}
+                                        {{ paragraph.strip() | capitalize | truncate(30) }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+                

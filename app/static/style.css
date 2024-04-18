@@ -7,6 +7,12 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* logo */
+.logo {
+    height: 30px;
+    margin-left: 20px;
+}
+
 /* font */
 .h2-custom {
     font-size: 1.5rem;
@@ -101,13 +107,15 @@
     padding-top: 100px;
     padding-bottom: 100px;
     background-color: #e9f1f8;
+    margin: 0;
 }
 
 .greeting {
     font-size: 60px;
     margin-bottom: 20px;
     margin-top: -50px;
-    text-align: center;
+    margin-right: 800px;
+    margin-left: 100px;
 }
 
 .greeting span {
@@ -122,96 +130,23 @@
 .profile-link {
     text-decoration: none;
     margin-bottom: 20px;
-    color: #007bff; /* Example color */
-    font-weight: bold; /* Example font weight */
-    padding: 5px 10px; /* Example padding */
-    border: 1px solid #007bff; /* Example border */
-    border-radius: 5px; /* Example border radius for a button-like appearance */
-    margin-left: auto; /* Pushes the profile link to the right within the flex container */
-}
-
-.da-left-column {
-    padding: 20px;
-    width: 400px;
-    /* height: 100px; */
+    color: #007bff; 
+    font-weight: bold;
+    padding: 5px 10px; 
+    border: 1px solid #007bff; 
+    border-radius: 5px; 
+    margin-left: auto; 
 }
 
 .da-small-block {
-    max-width: 500px;
+    width: 500px;
+    margin-top: 50px;
+    margin-left: 100px;
     margin-bottom: 20px;
-    padding: 10px;
     border-radius: 8px;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
-/* .management-buttons {
-    max-width: 500px;
-    margin-bottom: 20px;
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-} */
-
-
-.btn-group-vertical > .btn {
-    margin-bottom: 10px; /* Space between buttons */
-}
-
-.btn-group-vertical > .btn {
-    width: 200px; 
-}
-
-.content-wrapper {
-    display: flex;
-    justify-content: space-between;
-}
-
-.da-large-block {
-    /* flex-grow: 1; */
-    /* max-width: changed to witdth 1450px; */
-    width: 1500px;
-    margin-bottom: 20px;
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.da-large-block h2, .da-small-block h2, .management-buttons h2 {
-    border-bottom: 2px solid #bfc0c2;
-    padding-bottom: 5px;
-    color: #333;
-}
-
-.da-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.da-li {
-    background-color: #e7f1ff;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-/* .timetable homepage*/
-.timetable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 100px;
-  }
-  .timetable th, .timetable td {
-    border: 1px solid #8d8d8d;
-    padding: 8px;
-    text-align: center;
-  }
-  .timetable th {
-    background-color: #1d4068;
-    color: white;
-  }
 
 /* .flip-card */
 .flip-card {
@@ -241,7 +176,7 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    -webkit-backface-visibility: hidden; /* Safari */
+    -webkit-backface-visibility: hidden; 
     backface-visibility: hidden;
   }
   
@@ -262,6 +197,43 @@
     font-size: inherit;
 }
 
+/* calendar timetbale and booking */
+td {
+    vertical-align: top;
+    width: calc(100% / {{ dates|length }} - 2px);
+}
+
+.class-container {
+    border: 1px solid #dee2e6;
+    padding: 4px;
+    margin-bottom: 5px;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.class-container > .timetable__content-title {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.class-container > .timetable__flex--start,
+.class-container > .btn,
+.class-container > .timetable__content-space,
+.class-container > progress,
+.class-container > div {
+    font-size: 12px;
+    padding: 3px 8px;
+}
+
+.class-container > .timetable__flex--start:nth-child(3) {
+    font-weight: bold;
+    color: green;
+}
+td span {
+    color: #ccc; 
+}
+
 .table th, .table td {
 /* border: 1px solid #8d8d8d; */
 padding: 8px;
@@ -273,33 +245,9 @@ text-align: center;
     color: white !important;
     }
 
-    .class-info {
-        border: 1px solid #ddd;
-        padding: 8px;
-        margin-bottom: 5px;
-        background-color: #f9f9f9;
-    }
-    .class-info {
-        border: 1px solid #ddd;
-        padding: 8px;
-        margin-bottom: 5px;
-        background-color: #f9f9f9;
-    }
-    
-    .class-info {
-        padding: 10px;
-        border: 1px solid #ccc;
-        margin-bottom: 5px;
-        background-color: #f9f9f9;
-    }
-    
     .table th, .table td {
         vertical-align: middle;
         text-align: center;
-    }
-    
-    .slider {
-        margin-bottom: 20px;
     }
     
     .class-container {
@@ -309,14 +257,167 @@ text-align: center;
         background-color: #f8f9fa;
     }
     
-    .timetable__icon {
-        margin-right: 4px;
-    }
-    
     .timetable__content-space {
         width: 100%;
         height: 5px;
         appearance: none;
     }
 
+/* profile */
+.p-container-fluid {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 200px 2fr;  /* Adjust 250px based on the width of your sidebar */
+    width: 100%;
+    margin-left: -100px;
+}
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+    .card-header:first-child {
+    border-radius: 1rem 1rem 0 0;
+    }
+    .card-header {
+    padding: 1rem 1.35rem;
+    margin-bottom: 0;
+    background-color: #428bca !important;
+    border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+    }
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1;
+    color: #69707a;
+    background-clip: padding-box;
+    border: 1px solid #c5ccd6;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.35rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.img-profile {
+    max-width: 50%;
+    height: auto;
+    padding: 10px;
+}
+
+/* dashboard side bar */
+  .sidebar {
+    position: fixed;
+    top: 57px;
+    bottom: 0;
+    left: 0;
+    padding: 58px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 240px;
+    z-index: 600;
+    background-color: rgb(84, 121, 175);
+  }
+@media (max-width: 991.98px) {
+    .sidebar {
+      width: 100%;
+    }
+  }
+
+    .list-group-item.list-group-item-action {
+        background-color: rgb(84, 121, 175) !important;
+        color: rgb(255, 255, 255) !important;
+    }
     
+    .list-group-item.list-group-item-action:hover {
+        background-color: rgb(64, 101, 155) !important;  /* Slightly darker blue when hovered */
+    }
+
+    .list-group-item.list-group-item-action:active {
+        background-color: rgb(44, 81, 135) !important;  /* Even darker blue when clicked */
+    }
+
+    /* dashboard adjustment */
+    .grid-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;  /* Adjust 250px based on the width of your sidebar */
+        width: 100%;
+    }
+    .custom-bg {
+        background-color: #e9f1f8; 
+    }
+    .d-container-fluid {
+        min-height: 100vh;
+    }
+
+/* news */
+/* Cards */
+.newscard {
+    display: flex;
+    flex-direction: row;
+
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin: 0 0 2rem 0;
+    overflow: hidden;
+    position: relative;
+    color: #000000;
+    background-color: white;
+      
+    a {
+        color: inherit;
+    }
+    .small {
+        font-size: 80%;
+    }
+  
+    .newscard_title {
+        font-size: 1.75rem;
+    }
+  
+    .newscard_img {
+        flex: 1;
+        height: 200px;
+        width: 200px;
+        object-fit: cover;
+        position: relative;
+    }
+  
+    .newscard_img_link {
+        display: contents;
+    }
+  
+    .newscard_text {
+        flex: 2;
+        padding: 1.5rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+  
+    .newscard_preview-txt {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: justify;
+        height: 100%;
+    }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+    }
+}
+
+/* COLORS */
+.newscard .blue:hover {
+	background: #0076bd;
+}
+.blue .newscard_title:hover {
+	color: #0076bd;
+}
+
+.modal-content {
+    background-color: #000 !important;
+}

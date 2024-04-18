@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Timetable{% endblock %}
+
+{% block content %}
+
+<div class="grid-container custom-bg">
+  <div class="sidebar-position">
+      {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
+  </div>
+  <div class="d-container-fluid">
+      <div class="col-12">
+          <div class="container text-black mt-5 mb-5">
+            <div class="day-navigation text-center mt-5 mb-5">
+                <button onclick="navigateDay(-1)" class="btn btn-primary">&lt; Previous Day</button>
+                <input type="date" id="datePicker" class="form-control" onchange="navigateToDate()" 
+                style="width: auto; display: inline-block; margin: 0 15px;" value="{{ selected_date }}">
+                <button onclick="navigateDay(1)" class="btn btn-primary">Next Day &gt;</button>
+            </div>
+
+            <div class="filter-form mb-3">
+                <form method="GET" action="{{ url_for('timetable_instructor') }}">
+                    <input type="hidden" name="instructor_id" value="{{ instructor_info.instructor_id }}">
+                    <input type="checkbox" id="show_own_timetable" name="show_own_timetable" value="true" {% if not request.args.get('show_own_timetable') %}checked{% endif %}>
+                    <label class="show_own_timetable text-black">Show My Timetable</label>
+                    <button type="submit">Filter</button>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            {% for date_info in dates %}
+                            <th>{{ date_info.strftime('%A') }}<br>{{ date_info.strftime('%d %b') }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for time_slot in time_slots %}
+                        <tr>
+                            <td>{{ time_slot }}</td>
+                            {% for date_info in dates %}
+                            <td>
+                                {% set day_classes = timetable.get(date_info.date(), {}).get(time_slot, []) %}
+                                {% for class_info in day_classes %}
+                                <div class="class-container">
+                                    <div class="timetable__content-title fw-500">
+                                        {{ class_info.name }}
+                                    </div>
+                                    <div class="timetable__flex--start fw-400">
+                                        {{ class_info.description }}
+                                    </div>
+                                    <div class="timetable__flex--start fw-400">
+                                        Availability: {{ class_info.availability }}
+                                    </div>
+                                    <div>Instructor: {{ class_info.instructor }}</div>
+                                </div>
+                                {% else %}
+                                <span>No classe</span>
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+<script>
+function navigateDay(offset, show_own_timetable) {
+var url = new URL(window.location);
+var currentDate = new Date(url.searchParams.get('date') || new Date().toISOString().split('T')[0]);
+currentDate.setDate(currentDate.getDate() + offset);
+url.searchParams.set('date', currentDate.toISOString().split('T')[0]);
+if (show_own_timetable === 'true') {
+    url.searchParams.set('show_own_timetable', 'true');
+} else {
+    url.searchParams.set('show_own_timetable', 'false');
+}
+window.location = url.toString();
+        }
+</script>
+{% endblock %}
+                
+
+                
+            
