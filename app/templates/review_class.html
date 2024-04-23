@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Classes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Review Classes</h1>
+    <div class="day-navigation text-center">
+        <button onclick="navigateDay(-1)" class="btn btn-info">&lt; Previous Day</button>
+        <input type="date" id="datePicker" class="form-control" onchange="navigateToDate()" value="{{ selected_date }}" style="width: auto; display: inline-block; margin: 0 15px;">
+        <button onclick="navigateDay(1)" class="btn btn-info">Next Day &gt;</button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    {% for date in dates %}
+                    <th>{{ date.strftime('%A') }}<br>{{ date.strftime('%d %b') }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for time_slot, classes in timetable.items() %}
+                <tr>
+                    <td>{{ time_slot }}</td>
+                    {% for class in classes %}
+                    <td>
+                        <div class="class-container">
+                            <div class="timetable__content-title fw-500">{{ class.name }}</div>
+                            <div class="timetable__flex--start fw-400">
+                                <i class="fa-solid fa-location-dot fa-fw timetable__icon"></i>
+                                Pool Type: {{ class.pool_type }}
+                            </div>
+                            <div class="timetable__flex--start fw-400">
+                                <i class="fa-regular fa-circle-user fa-fw timetable__icon"></i>
+                                Space: {{ class.availability }}
+                            </div>
+                            <div>Instr: {{ class.instructor }}</div>
+                            <a href="{{ url_for('cancel_class', class_id=class.class_id) }}" class="btn btn-danger">Cancel Class</a>
+                        </div>
+                    </td>
+                    {% else %}
+                    <td>
+                        <div class="class-container">
+                            <button class="btn btn-primary">Add Class</button>
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.getElementById('datePicker').value = "{{ selected_date }}";
+
+function navigateDay(offset) {
+    var datePicker = document.getElementById('datePicker');
+    var currentDate = new Date(datePicker.value);
+    currentDate.setDate(currentDate.getDate() + offset);
+    datePicker.valueAsDate = currentDate;
+    navigateToDate();
+}
+
+function navigateToDate() {
+    var datePicker = document.getElementById('datePicker');
+    var selectedDate = datePicker.value;
+    var url = new URL(window.location.href);
+    url.searchParams.set('date', selectedDate);
+    window.location.href = url;
+}
+</script>
+{% endblock %}

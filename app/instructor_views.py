@@ -11,6 +11,7 @@ from datetime import datetime
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from functools import wraps
 from datetime import timedelta
+from collections import defaultdict
 
 class User(UserMixin):
     def __init__(self, user_id, Username, UserType, member_id):
@@ -56,7 +57,7 @@ def instructor(user_id):
     cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
-def generate_timetable():
+def generate_timetable(selected_date=None):
     cursor = getCursor()
     cursor.execute("""
         SELECT
@@ -101,49 +102,59 @@ def generate_timetable():
     
     return timetable
 
-def generate_filtered_timetable_by_instructor(instructor_id):
+
+def generate_timetable(instructor_id=None):
     cursor = getCursor()
-    cursor.execute("""
+    query = """
         SELECT
-            class_name.name,
-            class_name.description,
-            instructor.first_name,
-            instructor.last_name,
-            class_schedule.week,
-            class_schedule.pool_type,
-            class_schedule.start_time,
-            class_schedule.end_time,
-            class_schedule.capacity,
-            class_schedule.datetime,
-            class_schedule.availability
-            
-        FROM class_schedule
-        JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
-        JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
-        WHERE instructor.instructor_id = %s
-    """, (instructor_id,))
+            cs.class_id,
+            cn.name as class_name,
+            cn.description,       
+            i.first_name,
+            i.last_name,
+            cs.week,
+            cs.pool_type,
+            cs.start_time,
+            cs.end_time,
+            cs.capacity,
+            cs.datetime as class_date,
+            cs.availability,
+            cs.class_status
+        FROM class_schedule AS cs
+        JOIN class_name AS cn ON cs.class_name_id = cn.class_name_id
+        JOIN instructor AS i ON cs.instructor_id = i.instructor_id
+    """
+    if instructor_id:
+        query += " WHERE i.instructor_id = %s"
+        cursor.execute(query, (instructor_id,))
+    else:
+        cursor.execute(query)
+
     timetable_data = cursor.fetchall()
     cursor.close()
 
-    filtered_timetable = {}
-
+    timetable = defaultdict(lambda: defaultdict(list))
     for row in timetable_data:
-        date = row['datetime']
-        time_slot = format_time_slot(row['start_time'], row['end_time'])
+        start_time_obj = (datetime.min + row['start_time']).time() if isinstance(row['start_time'], timedelta) else datetime.strptime(row['start_time'], '%H:%M:%S').time()
+        end_time_obj = (datetime.min + row['end_time']).time() if isinstance(row['end_time'], timedelta) else datetime.strptime(row['end_time'], '%H:%M:%S').time()
+        
+        class_datetime = datetime.combine(row['class_date'], start_time_obj)
+        time_slot = f"{start_time_obj.strftime('%I:%M %p')} - {end_time_obj.strftime('%I:%M %p')}"
 
-        if date not in filtered_timetable:
-            filtered_timetable[date] = {}
-        if time_slot not in filtered_timetable[date]:
-            filtered_timetable[date][time_slot] = []
-
-        filtered_timetable[date][time_slot].append({
-            'name': row['name'],
-            'description': row['description'],
+        timetable[row['class_date'].strftime('%Y-%m-%d')][time_slot].append({
+            'class_id': row['class_id'],
+            'name': row['class_name'],
+            'description': row['description'] if row['description'] else 'No description provided.',
             'availability': row['availability'],
             'instructor': f"{row['first_name']} {row['last_name']}",
+            'class_status': row['class_status'],
+            'datetime': class_datetime,
+            'expired': class_datetime < datetime.now()
         })
-    
-    return filtered_timetable
+
+    return timetable
+
+
 
 @app.route('/dashboard_instructor')
 @login_required
@@ -159,35 +170,22 @@ def dashboard_instructor():
     return render_template('dashboard/dashboard_instructor.html', user_info=user_info, 
                            instructor_info=instructor_info)
 
-@app.route('/timetable_instructor', methods=['GET'])
+@app.route('/timetable_instructor')
 @login_required
 @UserType_required('instructor')
 def timetable_instructor():
     user_id = session.get('UserID')
-    instructor_info = instructor(user_id)
+    instructor_info = instructor(user_id)  # Ensure this retrieves correct instructor info
 
-    cursor = getCursor()
-    cursor.execute("""
-        SELECT instructor.instructor_id 
-        FROM user 
-        JOIN instructor ON user.user_id = instructor.user_id 
-        WHERE user.user_id = %s
-    """, (user_id,))
-    instructor_id = cursor.fetchone()['instructor_id']
-    cursor.close()
+    instructor_id = instructor_info['instructor_id'] if instructor_info else None
 
-    selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
-    dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(7)]
-    
-    time_slots = [format_time_slot(timedelta(hours=h), timedelta(hours=h+1)) for h in range(6, 20)]
+    selected_date = request.args.get('date', default=datetime.today().strftime('%Y-%m-%d'))
+    dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(-3, 4)]
+    time_slots = [f"{(datetime.min + timedelta(hours=h)).strftime('%I:%M %p')} - {(datetime.min + timedelta(hours=h+1)).strftime('%I:%M %p')}" for h in range(6, 21)]
 
-    # Get the show_own_timetable parameter from the GET request
-    show_own_timetable = request.args.get('show_own_timetable')
-    if show_own_timetable:
-        timetable = generate_filtered_timetable_by_instructor(instructor_id)
-    else:
-        timetable = generate_timetable()
+    timetable = generate_timetable(instructor_id=instructor_id)  # Filter by instructor ID
 
-    return render_template('timetable/timetable_instructor.html', timetable=timetable, 
+    return render_template('timetable_instructor.html', timetable=timetable, 
                            instructor_info=instructor_info, selected_date=selected_date, 
                            dates=dates, time_slots=time_slots)
+

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Class{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Manage Class</h1>
+    <form method="POST">
+        <div class="form-group">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" class="form-control" value="{{ class_info.datetime.strftime('%Y-%m-%d') }}">
+        </div>
+        <div class="form-group">
+            <label for="time_slot">Time Slot:</label>
+            <select id="time_slot" name="time_slot" class="form-control">
+                {% for slot in available_timeslots %}
+                <option value="{{ slot }}">{{ slot }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="instructor_id">Instructor:</label>
+            <select id="instructor_id" name="instructor_id" class="form-control">
+                {% for instructor in available_instructors %}
+                <option value="{{ instructor.id }}">{{ instructor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Class</button>
+    </form>
+</div>
+{% endblock %}

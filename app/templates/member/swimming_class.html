@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
 
-{% block title %}Aerobics Classes{% endblock %}
+{% block title %}Swimming Classes{% endblock %}
 
 {% block content %}
 <div class="grid-container custom-bg">
     <div class="sidebar-position">
-        {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+        {% if member_info %}
+            {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+        {% else %}
+            <p>Member information not available.</p>
+        {% endif %}
     </div>
     <div class="container mt-5 mb-5">
-        <div class="h2-custom">Aerobics Classes</div>
+        <div class="h2-custom">Swimming Classes</div>
         <!-- Dynamic Day Navigation Buttons with Date Picker -->
         <div class="day-navigation text-center mt-5 mb-5">
             <button onclick="navigateDay(-1)" class="btn btn-primary">&lt; Previous Day</button>
@@ -35,30 +39,34 @@
                         <td>
                             {% set day_classes = timetable.get(date_info.strftime('%Y-%m-%d'), {}).get(time_slot, []) %}
                             {% for class_info in day_classes %}
-                            <div class="class-container">
+                            <div class="class-container {% if class_info['class_status'] == 'Cancelled' %}cancelled{% elif class_info['expired'] %}expired{% endif %}">
                                 <div class="timetable__content-title fw-500">
-                                    {{ class_info.name }}
+                                    {{ class_info['name'] }}
                                 </div>
                                 <div class="timetable__flex--start fw-400">
-                                    {{ class_info.description }}
+                                    {{ class_info['description'] | default('No description provided.') }}
                                 </div>
                                 <div class="timetable__flex--start fw-400">
-                                    Space: {{ class_info.availability }}
+                                    Space: {{ class_info['availability'] }}
                                 </div>
-                                <progress value="{{ class_info.availability }}" max="100" 
-                                title="{{ class_info.availability }}%" aria-hidden="true" 
+                                <progress value="{{ class_info['availability'] }}" max="100" 
+                                title="{{ class_info['availability'] }}%" aria-hidden="true" 
                                 class="timetable__content-space"></progress>
-                                <div>Instr: {{ class_info.instructor }}</div>
-                                {% if class_info['class_id'] in user_booked_classes %}
+                                <div>Instr: {{ class_info['instructor'] }}</div>
+                                {% if class_info['class_status'] == 'Cancelled' %}
+                                    <button class="btn btn-danger disabled">Class Cancelled</button>
+                                {% elif class_info['expired'] %}
+                                    <button class="btn btn-secondary disabled">Expired</button>
+                                {% elif class_info['class_id'] in user_booked_classes %}
                                     <button class="btn btn-secondary disabled">Already Booked</button>
-                                {% elif class_info.availability > 0 %}
+                                {% elif class_info['availability'] > 0 %}
                                     <a href="{{ url_for('booking_class', class_id=class_info['class_id']) }}" class="btn btn-primary">Book Now</a>
                                 {% else %}
                                     <button class="btn btn-secondary disabled">No Space</button>
                                 {% endif %}
                             </div>
                             {% else %}
-                            <span>No classes</span>
+                            <span>No classes available</span>
                             {% endfor %}
                         </td>
                         {% endfor %}
@@ -71,22 +79,22 @@
 </div>
 
 <script>
-    document.getElementById('datePicker').value = "{{ selected_date }}";
+document.getElementById('datePicker').value = "{{ selected_date }}";
 
-    function navigateDay(offset) {
-        var datePicker = document.getElementById('datePicker');
-        var currentDate = new Date(datePicker.value);
-        currentDate.setDate(currentDate.getDate() + offset);
-        datePicker.valueAsDate = currentDate;
-        navigateToDate();
-    }
+function navigateDay(offset) {
+    var datePicker = document.getElementById('datePicker');
+    var currentDate = new Date(datePicker.value);
+    currentDate.setDate(currentDate.getDate() + offset);
+    datePicker.valueAsDate = currentDate;
+    navigateToDate();
+}
 
-    function navigateToDate() {
-        var datePicker = document.getElementById('datePicker');
-        var selectedDate = datePicker.value;
-        var url = new URL(window.location.href);
-        url.searchParams.set('date', selectedDate);
-        window.location.href = url;
-    }
+function navigateToDate() {
+    var datePicker = document.getElementById('datePicker');
+    var selectedDate = datePicker.value;
+    var url = new URL(window.location.href);
+    url.searchParams.set('date', selectedDate);
+    window.location.href = url;
+}
 </script>
 {% endblock %}

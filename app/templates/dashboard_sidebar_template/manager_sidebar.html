@@ -12,9 +12,15 @@
                 <span class="ms-1 d-none d-sm-inline">News</span>
             </a>
 
-            <a href="{{ url_for('timetable_manager') }}" class="list-group-item list-group-item-action py-2 ripple">
+            <a href="{{ url_for('home_swimming_class') }}" class="list-group-item list-group-item-action py-2 ripple">
                 <i class="bi bi-book"></i>
                 <span class="ms-1 d-none d-sm-inline">Timetable</span>
+            </a>
+
+            <!-- New Link for Review Classes -->
+            <a href="{{ url_for('review_class') }}" class="list-group-item list-group-item-action py-2 ripple">
+                <i class="bi bi-calendar3"></i>
+                <span class="ms-1 d-none d-sm-inline">Manager Classes</span>
             </a>
 
             <a href="{{ url_for('manage_profile') }}" class="list-group-item list-group-item-action py-2 ripple">

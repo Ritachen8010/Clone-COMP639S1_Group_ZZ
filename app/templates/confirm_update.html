@@ -1,0 +1,23 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Confirm Class Update</h2>
+    <div>
+        <h4>Current Details:</h4>
+        <p>Class Name: {{ confirm_details.old_class['class_name'] }}</p>
+        <p>Instructor: {{ confirm_details.old_class['instructor'] }}</p>
+        <p>Time Slot: {{ confirm_details.old_class['start_time']|date('%I:%M %p') }} - {{ confirm_details.old_class['end_time']|date('%I:%M %p') }}</p>
+    </div>
+    <div>
+        <h4>New Details:</h4>
+        <p>New Time Slot: {{ confirm_details.new_start }} - {{ confirm_details.new_end }}</p>
+        <p>New Instructor ID: {{ confirm_details.instructor_id }}</p>
+        <p>New Class ID: {{ confirm_details.new_class_id }}</p>
+    </div>
+    <form method="POST">
+        <button type="submit" name="confirm" value="yes" class="btn btn-success">Confirm</button>
+        <a href="{{ url_for('manage_class', class_id=confirm_details.old_class['class_id']) }}" class="btn btn-danger">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -96,18 +96,21 @@ def get_member_class_bookings(member_id):
             class_schedule.datetime,
             bookings.schedule_type, 
             bookings.booking_status, 
-            bookings.booking_date
+            bookings.booking_date,
+            bookings.class_id  # Ensure class_id is being selected
         FROM 
             bookings
-        LEFT JOIN 
+        JOIN 
             class_schedule ON bookings.class_id = class_schedule.class_id
-        LEFT JOIN 
+        JOIN 
             class_name ON class_schedule.class_name_id = class_name.class_name_id
-        LEFT JOIN 
+        JOIN 
             instructor ON class_schedule.instructor_id = instructor.instructor_id
         WHERE 
-            bookings.schedule_type = 'aerobics class'
-            AND bookings.member_id = %s
+            bookings.member_id = %s AND
+            bookings.schedule_type = 'aerobics class' AND
+            bookings.booking_status = 'confirmed'
+        ORDER BY bookings.booking_id ASC
     """, (member_id,))
     return cursor.fetchall()
 
@@ -175,12 +178,16 @@ def dashboard_member():
                            lesson_bookings=lesson_bookings, bookings=bookings)
 
 # booking
+from datetime import datetime, timedelta
+
 def generate_timetable():
+    current_datetime = datetime.now()  # Get the current datetime to compare against class times
     cursor = getCursor()
     cursor.execute("""
         SELECT
-            cs.class_id,  # Ensure this is included
-            cn.name,
+            cs.class_id,
+            cn.name as class_name,
+            cn.description,       
             i.first_name,
             i.last_name,
             cs.week,
@@ -188,53 +195,64 @@ def generate_timetable():
             cs.start_time,
             cs.end_time,
             cs.capacity,
-            cs.datetime,
-            cs.availability
+            cs.datetime as class_date,  # this should be a date
+            cs.availability,
+            cs.class_status
         FROM class_schedule AS cs
         JOIN class_name AS cn ON cs.class_name_id = cn.class_name_id
         JOIN instructor AS i ON cs.instructor_id = i.instructor_id
     """)
     timetable_data = cursor.fetchall()
     cursor.close()
-    
+
     timetable = defaultdict(lambda: defaultdict(list))
     for row in timetable_data:
-        date = row['datetime'].strftime('%Y-%m-%d')  # Format date as string for consistent access
-        time_slot = format_time_slot(row['start_time'], row['end_time'])
-        timetable[date][time_slot].append({
-            'class_id': row['class_id'],  # Store class_id for URL generation
-            'name': row['name'],
-            'availability': row['availability'],
+        start_time_obj = datetime.strptime(row['start_time'], '%H:%M:%S').time() if isinstance(row['start_time'], str) else (datetime.min + row['start_time']).time()
+        end_time_obj = datetime.strptime(row['end_time'], '%H:%M:%S').time() if isinstance(row['end_time'], str) else (datetime.min + row['end_time']).time()
+        
+        class_datetime = datetime.combine(row['class_date'], start_time_obj)  # Combine date with time to create a full datetime
+
+        time_slot = f"{start_time_obj.strftime('%I:%M %p')} - {end_time_obj.strftime('%I:%M %p')}"
+        
+        timetable[row['class_date'].strftime('%Y-%m-%d')][time_slot].append({
+            'class_id': row['class_id'],
+            'name': row['class_name'],
             'instructor': f"{row['first_name']} {row['last_name']}",
-            'pool_type': row['pool_type']
+            'availability': row['availability'],
+            'class_status': row['class_status'],
+            'datetime': class_datetime,  # Full datetime of the class
+            'expired': class_datetime < current_datetime  # Check if the class datetime is before the current datetime
         })
-    
+
     return timetable
+
+
 
 @app.route('/swimming-class/', methods=['GET'])
 def swimming_class():
+    current_datetime = datetime.now()
     user_id = session.get('UserID')
     member_info = get_member_info(user_id)
-
-    selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
-    timetable = generate_timetable()
-    dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(7)]
-    time_slots = [format_time_slot(timedelta(hours=h), timedelta(hours=h+1)) for h in range(6, 20)]
     
-    user_booked_classes = []
-    if 'UserID' in session:
-        user_id = session['UserID']
-        cursor = getCursor()
-        cursor.execute("""
-            SELECT class_id 
-            FROM bookings 
-            WHERE member_id = (SELECT member_id FROM member WHERE user_id = %s) AND booking_status = 'confirmed'
-        """, (user_id,))
-        user_booked_classes = [row['class_id'] for row in cursor.fetchall()]
+    if not member_info:
+        flash("Member session not found.", "error")
+        return redirect(url_for('login'))
+    
+    selected_date = request.args.get('date', default=datetime.today().strftime('%Y-%m-%d'))
+    timetable = generate_timetable()
 
-    return render_template('member/swimming_class.html', timetable=timetable, 
-                           selected_date=selected_date, dates=dates, time_slots=time_slots, 
-                           user_booked_classes=user_booked_classes, member_info=member_info)
+    dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(-3, 4)]
+    time_slots = [f"{(datetime.min + timedelta(hours=h)).strftime('%I:%M %p')} - {(datetime.min + timedelta(hours=h+1)).strftime('%I:%M %p')}" for h in range(6, 21)]
+
+    # Fetch IDs of all classes the user has booked
+    user_booked_classes = {booking['class_id'] for booking in get_member_class_bookings(member_info['member_id'])}
+
+    return render_template('member/swimming_class.html', timetable=timetable, selected_date=selected_date,
+                           dates=dates, time_slots=time_slots, current_datetime=current_datetime,
+                           member_info=member_info, user_booked_classes=user_booked_classes)
+
+
+
 
 @app.template_filter('timeformat')
 def timeformat(value):
@@ -252,11 +270,20 @@ def timeformat(value):
 def book():
     user_id = session.get('UserID')
     member_info = get_member_info(user_id)
+    if not member_info:
+        flash("No member information found.", "error")
+        return redirect(url_for('home'))
+
+    # Get class and lesson bookings using a simplified process
     class_bookings = get_member_class_bookings(member_info['member_id'])
     lesson_bookings = get_member_lesson_bookings(member_info['member_id'])
+
+    # Combine class and lesson bookings
     bookings = class_bookings + lesson_bookings
+
     return render_template('member/member_booking.html', class_bookings=class_bookings, 
                            lesson_bookings=lesson_bookings, member_info=member_info, bookings=bookings)
+
 
 @app.route('/booking_class/<int:class_id>', methods=['GET'])
 @login_required
@@ -383,6 +410,8 @@ def cancel_booking():
         flash('Failed to cancel booking: ' + str(e), 'danger')
 
     return redirect(url_for('book'))
+
+
 
 # membership
 @app.route('/view_membership')

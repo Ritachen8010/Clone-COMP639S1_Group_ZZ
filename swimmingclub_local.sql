@@ -120,6 +120,7 @@ CREATE TABLE `class_schedule` (
     `capacity` INT NOT NULL DEFAULT 15,
     `datetime` DATE,
     `availability` INT NOT NULL DEFAULT 15,
+    `class_status` VARCHAR(20) DEFAULT 'Open',
     PRIMARY KEY (`class_id`),
     FOREIGN KEY (`instructor_id`) REFERENCES `instructor`(`instructor_id`),
     FOREIGN KEY (`class_name_id`) REFERENCES `class_name`(`class_name_id`)

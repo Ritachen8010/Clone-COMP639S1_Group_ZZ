@@ -421,3 +421,22 @@ text-align: center;
 .modal-content {
     background-color: #000 !important;
 }
+
+.cancelled-class {
+    background-color: #f8d7da; /* light red */
+    color: red;
+}
+.no-space-class {
+    background-color: #e2e3e5; /* light gray */
+    color: #838383; /* gray */
+}
+.open-class {
+    background-color: #d1e7dd; /* light green */
+    color: #0f5132; /* green */
+}
+.class-container {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #dee2e6;
+}
+

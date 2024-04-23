@@ -1,8 +1,9 @@
 from app import app
 from flask import render_template
-from flask import request
+from flask import request, g
 from app.database import getCursor, getConnection
 from datetime import timedelta, datetime
+from collections import defaultdict
 
 # Convert time to datetime, 'HH:MM AM/PM' format
 def format_time_slot(start_time, end_time):
@@ -14,46 +15,53 @@ def generate_timetable():
     cursor = getCursor()
     cursor.execute("""
         SELECT
-            class_name.name,
-            class_name.description,
-            instructor.first_name,
-            instructor.last_name,
-            class_schedule.week,
-            class_schedule.pool_type,
-            class_schedule.start_time,
-            class_schedule.end_time,
-            class_schedule.capacity,
-            class_schedule.datetime,
-            class_schedule.availability
-            
-        FROM class_schedule
-        JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
-        JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
+            cs.class_id,
+            cn.name as class_name,
+            cn.description,       
+            i.first_name,
+            i.last_name,
+            cs.week,
+            cs.pool_type,
+            cs.start_time,
+            cs.end_time,
+            cs.capacity,
+            cs.datetime as class_date,
+            cs.availability,
+            cs.class_status
+        FROM class_schedule AS cs
+        JOIN class_name AS cn ON cs.class_name_id = cn.class_name_id
+        JOIN instructor AS i ON cs.instructor_id = i.instructor_id
     """)
     timetable_data = cursor.fetchall()
     cursor.close()
-    
-    timetable = {}
 
+    timetable = defaultdict(lambda: defaultdict(list))
     for row in timetable_data:
-        # Extract datetime
-        date = row['datetime']
-        # Format time slot
-        time_slot = format_time_slot(row['start_time'], row['end_time'])
+        if isinstance(row['start_time'], timedelta):  # Handling timedelta if fetched as such
+            start_time = (datetime.min + row['start_time']).time()
+        else:
+            start_time = datetime.strptime(row['start_time'], '%H:%M:%S').time()
 
-        if date not in timetable:
-            timetable[date] = {}
-        if time_slot not in timetable[date]:
-            timetable[date][time_slot] = []
-        
-        timetable[date][time_slot].append({
-            'name': row['name'],
-            'description': row['description'],
+        if isinstance(row['end_time'], timedelta):
+            end_time = (datetime.min + row['end_time']).time()
+        else:
+            end_time = datetime.strptime(row['end_time'], '%H:%M:%S').time()
+
+        full_datetime = datetime.combine(row['class_date'], start_time)
+        time_slot = f"{start_time.strftime('%I:%M %p')} - {end_time.strftime('%I:%M %p')}"
+
+        timetable[row['class_date'].strftime('%Y-%m-%d')][time_slot].append({
+            'name': row['class_name'],
+            'description': row['description'] if row['description'] else 'No description provided.',
             'availability': row['availability'],
             'instructor': f"{row['first_name']} {row['last_name']}",
+            'class_status': row['class_status'],
+            'datetime': full_datetime,
+            'expired': full_datetime < datetime.now()
         })
-    
+
     return timetable
+
 
 def profile_instructor():
     cursor = getCursor()
@@ -74,10 +82,19 @@ def about_us():
 
 @app.route('/home_swimming_class/')
 def home_swimming_class():
+    current_datetime = datetime.now()
     selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
-    timetable = generate_timetable()
     dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(7)]
-    
-    time_slots = [format_time_slot(timedelta(hours=h), timedelta(hours=h+1)) for h in range(6, 20)]
-    
-    return render_template('homepage/home_swimming_class.html', timetable=timetable, selected_date=selected_date, dates=dates, time_slots=time_slots)
+    time_slots = [f"{(datetime.min + timedelta(hours=h)).strftime('%I:%M %p')} - {(datetime.min + timedelta(hours=h+1)).strftime('%I:%M %p')}" for h in range(6, 20)]
+
+    timetable = generate_timetable()
+
+    return render_template('homepage/home_swimming_class.html', timetable=timetable,
+                           selected_date=selected_date, dates=dates, time_slots=time_slots,
+                           current_datetime=current_datetime)
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now}
+
+
