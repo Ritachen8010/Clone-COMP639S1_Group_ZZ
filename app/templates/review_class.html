@@ -15,39 +15,43 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Time</th>
-                    {% for date in dates %}
-                    <th>{{ date.strftime('%A') }}<br>{{ date.strftime('%d %b') }}</th>
-                    {% endfor %}
+                    <th>Time Slot</th>
+                    <th>Activities</th>
                 </tr>
             </thead>
             <tbody>
-                {% for time_slot, classes in timetable.items() %}
+                {% for time_slot, slot_info in timetable.items() %}
                 <tr>
                     <td>{{ time_slot }}</td>
-                    {% for class in classes %}
                     <td>
-                        <div class="class-container">
-                            <div class="timetable__content-title fw-500">{{ class.name }}</div>
-                            <div class="timetable__flex--start fw-400">
-                                <i class="fa-solid fa-location-dot fa-fw timetable__icon"></i>
-                                Pool Type: {{ class.pool_type }}
+                        {% if slot_info.status == "Open" %}
+                            {% for class in slot_info.classes %}
+                            <div class="class-container">
+                                <div class="timetable__content-title fw-500">{{ class.name }}</div>
+                                <div class="timetable__flex--start fw-400">
+                                    <i class="fa-solid fa-location-dot fa-fw timetable__icon"></i>
+                                    Pool Type: {{ class.pool_type }}
+                                </div>
+                                <div class="timetable__flex--start fw-400">
+                                    <i class="fa-regular fa-circle-user fa-fw timetable__icon"></i>
+                                    Space: {{ class.availability }}
+                                </div>
+                                <div>Instr: {{ class.instructor }}</div>
+                                <a href="{{ url_for('cancel_class', class_id=class.class_id) }}" class="btn btn-danger btn-sm">Cancel</a>
                             </div>
-                            <div class="timetable__flex--start fw-400">
-                                <i class="fa-regular fa-circle-user fa-fw timetable__icon"></i>
-                                Space: {{ class.availability }}
+                            {% endfor %}
+                        {% elif slot_info.status == "Empty" or slot_info.status == "Cancelled" %}
+                            <div class="class-container">
+                                <a href="{{ url_for('add_class', date=selected_date, time_slot=time_slot) }}" class="btn btn-primary">Add Class</a>
                             </div>
-                            <div>Instr: {{ class.instructor }}</div>
-                            <a href="{{ url_for('cancel_class', class_id=class.class_id) }}" class="btn btn-danger">Cancel Class</a>
-                        </div>
+                        {% elif slot_info.expired %}
+                            <div class="class-container">
+                                <button class="btn btn-secondary disabled">Expired</button>
+                            </div>
+                        {% else %}
+                            <div>No activities planned.</div>
+                        {% endif %}
                     </td>
-                    {% else %}
-                    <td>
-                        <div class="class-container">
-                            <button class="btn btn-primary">Add Class</button>
-                        </div>
-                    </td>
-                    {% endfor %}
                 </tr>
                 {% endfor %}
             </tbody>

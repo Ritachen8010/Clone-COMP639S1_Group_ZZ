@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Edit Class Details</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="class_id">Select Class:</label>
+            <select name="class_id" id="class_id" class="form-control" onchange="this.form.submit();">
+                <option value="">Choose...</option>
+                {% for class in classes %}
+                <option value="{{ class.class_name_id }}" {% if selected_class and selected_class.class_name_id == class.class_name_id %}selected{% endif %}>{{ class.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        {% if selected_class %}
+        <div class="form-group">
+            <label for="name">Class Name:</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ selected_class.name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea name="description" id="description" class="form-control">{{ selected_class.description }}</textarea>
+        </div>
+        <button type="submit" name="update" class="btn btn-primary">Update</button>
+        <button type="submit" name="delete" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

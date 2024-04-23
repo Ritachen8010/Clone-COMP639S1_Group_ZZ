@@ -12,6 +12,8 @@ import os
 from datetime import datetime, timedelta, time
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from functools import wraps
+import mysql.connector
+from collections import defaultdict
 
 class User(UserMixin):
     def __init__(self, user_id, Username, UserType, member_id):
@@ -99,6 +101,9 @@ def generate_timetable():
 
     return timetable
 
+
+
+
 @app.route('/dashboard_manager')
 @login_required
 @UserType_required('manager')
@@ -139,15 +144,16 @@ def timeformat(value):
 @UserType_required('manager')
 def review_class():
     date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
-    timetable = generate_timetable(date)
-    return render_template('review_class.html', timetable=timetable, selected_date=date)
+    timetable, available_slots = generate_timetable(date)  # Make sure two values are expected here
+    return render_template('review_class.html', timetable=timetable, available_slots=available_slots, selected_date=date)
+
 
 def generate_timetable(date):
     cursor = getCursor()
     query = """
         SELECT cs.class_id, cn.name, i.first_name, i.last_name, cs.week,
                cs.pool_type, cs.start_time, cs.end_time, cs.capacity, cs.availability,
-               cs.datetime
+               cs.datetime, cs.class_status
         FROM class_schedule AS cs
         JOIN class_name AS cn ON cs.class_name_id = cn.class_name_id
         JOIN instructor AS i ON cs.instructor_id = i.instructor_id
@@ -159,22 +165,45 @@ def generate_timetable(date):
     cursor.execute(query, (date,))
     rows = cursor.fetchall()
     cursor.close()
-    return format_timetable_data(rows)
-
-def format_timetable_data(rows):
+    
     timetable = {}
+    available_slots = []  # This will capture slots for 'Empty' status
     for row in rows:
         time_slot = format_time_slot(row['start_time'], row['end_time'])
+        if row['class_status'] == 'Empty':
+            available_slots.append(time_slot)  # Add to available slots if status is 'Empty'
+
         if time_slot not in timetable:
-            timetable[time_slot] = []
-        timetable[time_slot].append({
+            timetable[time_slot] = {
+                'classes': [],
+                'status': row['class_status']
+            }
+
+        timetable[time_slot]['classes'].append({
             'class_id': row['class_id'],
             'name': row['name'],
             'instructor': f"{row['first_name']} {row['last_name']}",
             'pool_type': row['pool_type'],
             'availability': row['availability']
         })
-    return timetable
+
+    return timetable, available_slots
+
+
+
+
+def generate_time_slots(start, end, duration):
+    start = datetime.strptime(start, '%H:%M:%S')
+    end = datetime.strptime(end, '%H:%M:%S')
+    slots = []
+
+    while start < end:
+        slot_end = start + timedelta(minutes=duration)
+        slots.append(f"{start.strftime('%H:%M')} - {slot_end.strftime('%H:%M')}")
+        start = slot_end
+
+    return slots
+
 
 def get_class_info(class_id):
     cursor = getCursor()
@@ -219,30 +248,60 @@ def cancel_existing_class(class_id):
     cursor.close()
 
 
+
+from datetime import datetime
+
+def convert_time(time_str):
+    """Convert 12-hour formatted time with AM/PM to 24-hour format."""
+    return datetime.strptime(time_str, '%I:%M %p').strftime('%H:%M:%S')
+
 @app.route('/add_class', methods=['GET', 'POST'])
 @login_required
 @UserType_required('manager')
 def add_class():
     if request.method == 'POST':
-        # Extract form data
         class_name_id = request.form.get('class_name_id')
         instructor_id = request.form.get('instructor_id')
-        start_time = request.form.get('start_time')
-        date = request.form.get('date')
-        
-        # Convert start_time to datetime.time object
-        start_time = datetime.strptime(start_time, '%I:%M %p').time()
-        end_time = (datetime.combine(date.min, start_time) + timedelta(hours=1)).time()
+        date = request.form.get('datetime')
+        time_slot = request.form.get('time_slot')
 
-        # Insert new class into the database
-        insert_new_class(class_name_id, instructor_id, date, start_time, end_time)
-        flash('New class added successfully!', 'success')
-        return redirect(url_for('review_class', date=date))
-    
-    date = request.args.get('date')
-    timeslot = request.args.get('timeslot')
-    
-    return render_template('add_class.html', date=date, timeslot=timeslot)
+        try:
+            start_time, end_time = [convert_time(time.strip()) for time in time_slot.split("-")]
+        except ValueError:
+            flash("Invalid time slot format. Please use the format 'HH:MM AM - HH:MM PM'.", 'error')
+            return redirect(url_for('add_class'))
+
+        cursor = getCursor()
+        cursor.execute("""
+            UPDATE class_schedule
+            SET class_name_id = %s, instructor_id = %s, class_status = 'Open'
+            WHERE datetime = %s AND start_time = %s AND end_time = %s
+            AND class_status IN ('Empty', 'Cancelled')
+        """, (class_name_id, instructor_id, date, start_time, end_time))
+        updated_rows = cursor.rowcount
+        getConnection().commit()
+        cursor.close()
+
+        if updated_rows == 0:
+            flash('No available slots to update or slot not found.', 'error')
+        else:
+            flash('Class updated successfully!', 'success')
+
+        return redirect(url_for('review_class'))
+
+    # Fetch class names and instructors for dropdown
+    cursor = getCursor()
+    cursor.execute("SELECT class_name_id, name FROM class_name")
+    class_names = cursor.fetchall()
+    cursor.execute("SELECT instructor_id, CONCAT(first_name, ' ', last_name) as name FROM instructor")
+    instructors = cursor.fetchall()
+    cursor.close()
+
+    date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
+    _, available_slots = generate_timetable(date)  # Fetch available slots for the selected date
+
+    return render_template('add_class.html', available_slots=available_slots, date=date, class_names=class_names, instructors=instructors)
+
 
 @app.route('/cancel_class/<int:class_id>', methods=['GET', 'POST'])
 @login_required
@@ -294,4 +353,43 @@ def monthly_class_report():
 
     return render_template('monthly_class_report.html', class_bookings=class_bookings,
                            total_bookings=total_bookings, month=current_month, year=current_year)
+
+@app.route('/edit_class/', methods=['GET', 'POST'])
+@login_required
+@UserType_required('manager')
+def edit_class():
+    cursor = getCursor()
+    class_id = request.form.get('class_id')
+    selected_class = None
+
+    # Fetch all classes for dropdown
+    cursor.execute("SELECT class_name_id, name FROM class_name ORDER BY name")
+    classes = cursor.fetchall()
+
+    if request.method == 'POST':
+        description = request.form.get('description')
+
+        if 'update' in request.form:
+            # Update class description
+            cursor.execute("UPDATE class_name SET description = %s WHERE class_name_id = %s", (description, class_id))
+            getConnection().commit()
+            flash('Class description updated successfully!', 'success')
+
+        elif 'delete' in request.form:
+            try:
+                # Attempt to delete the class
+                cursor.execute("DELETE FROM class_name WHERE class_name_id = %s", (class_id,))
+                getConnection().commit()
+                flash('Class deleted successfully!', 'success')
+            except mysql.connector.Error as e:
+                if 'foreign key constraint fails' in str(e):
+                    flash('Cannot delete class: it is being used in scheduled classes.', 'error')
+                else:
+                    flash(f'Failed to delete class: {str(e)}', 'error')
+
+    if class_id:
+        cursor.execute("SELECT class_name_id, name, description FROM class_name WHERE class_name_id = %s", (class_id,))
+        selected_class = cursor.fetchone()
+
+    return render_template('edit_class.html', classes=classes, selected_class=selected_class)
 
