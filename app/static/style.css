@@ -440,3 +440,15 @@ text-align: center;
     border: 1px solid #dee2e6;
 }
 
+body {
+    /* Existing styles... */
+    margin: 20px; /* Add margin for centering */
+  }
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: flex-start; /* Align items at the top */
+  min-height: 100vh; /* Make sure the wrapper fills the viewport height */
+}

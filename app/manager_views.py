@@ -264,3 +264,34 @@ def confirm_cancel_class(class_id):
     flash('Class cancelled successfully!', 'success')
     return redirect(url_for('review_class'))
 
+@app.route('/monthly_class_report')
+@login_required
+@UserType_required('manager')
+def monthly_class_report():
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    cursor = getCursor()
+    cursor.execute("""
+        SELECT cn.name, COUNT(b.class_id) as total_bookings
+        FROM bookings b
+        JOIN class_schedule cs ON b.class_id = cs.class_id
+        JOIN class_name cn ON cs.class_name_id = cn.class_name_id
+        WHERE MONTH(b.booking_date) = %s AND YEAR(b.booking_date) = %s
+        AND b.booking_status = 'confirmed'
+        GROUP BY cn.name
+        ORDER BY total_bookings DESC
+    """, (current_month, current_year))
+    
+    class_bookings = cursor.fetchall()
+    cursor.close()
+
+    # Calculate total bookings for percentage calculations
+    total_bookings = sum([booking['total_bookings'] for booking in class_bookings])
+    # Prepare percentages
+    for booking in class_bookings:
+        booking['percentage'] = (booking['total_bookings'] / total_bookings) * 100 if total_bookings > 0 else 0
+
+    return render_template('monthly_class_report.html', class_bookings=class_bookings,
+                           total_bookings=total_bookings, month=current_month, year=current_year)
+
