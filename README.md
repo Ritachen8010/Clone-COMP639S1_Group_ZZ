@@ -1,6 +1,6 @@
 # COMP639S1_Group_ZZ
 - COMP639 Assignment 2 - Group Project 1
-- Student Name:Alex Zhao, Yingyue(Rita) Chen
+- Student Name: Alex Zhao, Yingyue(Rita) Chen
 - Student ID: 1156956, 1126418
 
 ## Project Description
