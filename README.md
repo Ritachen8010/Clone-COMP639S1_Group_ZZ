@@ -14,6 +14,10 @@
 - Since we are a small team with only two members, according to our team's ability, we had discussed with the product owner, and with agreement with the product owner that we only focus on high-priority tasks first. Additional features are considered only if time permits.
 - Our Final Feature to be delivery:
 ![Project Diagram](project_diagram_for_github_readme/05.jpg "Project Diagram")
+- Our Porject Key and Highlighted point: 
+    1. Dynamic schedule.
+    2. A visually appealing UI.
+    3. Easy to use.
 
 ## Web Application Structure
 1. The Web structure has been refactoring by role or function. 
