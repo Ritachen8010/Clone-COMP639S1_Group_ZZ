@@ -7,33 +7,33 @@
         </div>
 
         <div class="list-group list-group-flush mx-3 mt-4">
-            <a href="{{ url_for('news') }}" class="list-group-item list-group-item-action py-2 ripple">
-                <i class="bi bi-newspaper"></i>
-                <span class="ms-1 d-none d-sm-inline">News</span>
-            </a>
-
-            <a href="{{ url_for('home_swimming_class') }}" class="list-group-item list-group-item-action py-2 ripple">
-                <i class="bi bi-book"></i>
-                <span class="ms-1 d-none d-sm-inline">Timetable</span>
+            <a href="{{ url_for('home_swimming_class') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
+                <i class="bi bi-book me-2"></i>
+                <span class="ms-1 d-none d-sm-inline">Aqua Aerobics Timetable</span>
             </a>
 
             <!-- New Link for Review Classes -->
-            <a href="{{ url_for('review_class') }}" class="list-group-item list-group-item-action py-2 ripple">
-                <i class="bi bi-calendar3"></i>
-                <span class="ms-1 d-none d-sm-inline">Manager Classes</span>
+            <a href="{{ url_for('review_class') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
+                <i class="bi bi-calendar3 me-2"></i>
+                <span class="ms-1 d-none d-sm-inline">Manage Aqua Aerobics Classes</span>
             </a>
+
             <a href="{{ url_for('edit_class') }}" class="list-group-item list-group-item-action py-2 ripple">
-                <i class="bi bi-pencil-square"></i>  <!-- Using a pencil icon for edit -->
+                <i class="bi bi-pencil-square me-2"></i>  <!-- Using a pencil icon for edit -->
                 <span class="ms-1 d-none d-sm-inline">Edit Class</span>
             </a>
+
+            <a href="{{ url_for('monthly_class_report') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center ">
+                <i class="bi bi-graph-up me-2"></i>
+                <span class="ms-1 d-none d-sm-inline">Popularity Aqua Aerobics Class Report</span>
+            
+            <a href="{{ url_for('financial_report') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
+                <i class="bi bi-graph-up me-2"></i>
+                <span class="ms-1 d-none d-sm-inline">Financial Report</span>
                 
             <a href="{{ url_for('manage_profile') }}" class="list-group-item list-group-item-action py-2 ripple">
                 <i class="bi bi-person"></i>
                 <span class="ms-1 d-none d-sm-inline">My Profile</span>
-            </a>
-            <a href="{{ url_for('monthly_class_report') }}" class="list-group-item list-group-item-action py-2 ripple text-white">
-                <i class="bi bi-graph-up"></i>
-                <span class="ms-1 d-none d-sm-inline">Monthly Report</span>
             </a>
         </div>
     </div>

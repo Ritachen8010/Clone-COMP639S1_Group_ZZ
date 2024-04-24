@@ -54,21 +54,25 @@ def format_time_slot(start_time, end_time):
 def format_date_filter(date):
     return date.strftime("%d/%m/%Y")
 
+# Define user info based on user id
 def get_user_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM user WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
+# Define member inf based on user id 
 def get_member_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM member WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
+# Define membership info based on member id
 def get_membership_info(member_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM memberships WHERE member_id = %s", (member_id,))
     return cursor.fetchone()
 
+# Define news info
 def get_news_info():
     cursor = getCursor()
     cursor.execute("""
@@ -77,11 +81,13 @@ def get_news_info():
                    """)
     return cursor.fetchall()
 
+# Define booking info based on member id 
 def get_booking(member_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM bookings WHERE member_id = %s", (member_id,))
     return cursor.fetchall()
 
+# Define member class booking based on member id 
 def get_member_class_bookings(member_id):
     cursor = getCursor()
     cursor.execute("""
@@ -114,6 +120,7 @@ def get_member_class_bookings(member_id):
     """, (member_id,))
     return cursor.fetchall()
 
+# Define member lesson booking based on member id 
 def get_member_lesson_bookings(member_id):
     cursor = getCursor()
     cursor.execute("""
@@ -142,6 +149,7 @@ def get_member_lesson_bookings(member_id):
     """, (member_id,))
     return cursor.fetchall()
 
+# Define booking info based on member id
 def get_booking_info(member_id):
     cursor = getCursor()
     cursor.execute("""
@@ -168,18 +176,11 @@ def dashboard_member():
     user_info = get_user_info(user_id)
     member_info = get_member_info(user_id)
     membership_info = get_membership_info(member_info['member_id'])
-    class_bookings = get_member_class_bookings(member_info['member_id'])
-    lesson_bookings = get_member_lesson_bookings(member_info['member_id'])
-    bookings = class_bookings + lesson_bookings
     return render_template('dashboard/dashboard_member.html', user_info=user_info, 
                            member_info=member_info,
-                           membership_info=membership_info,
-                           class_bookings=class_bookings, 
-                           lesson_bookings=lesson_bookings, bookings=bookings)
+                           membership_info=membership_info)
 
 # booking
-from datetime import datetime, timedelta
-
 def generate_timetable():
     current_datetime = datetime.now()  # Get the current datetime to compare against class times
     cursor = getCursor()
@@ -226,8 +227,6 @@ def generate_timetable():
 
     return timetable
 
-
-
 @app.route('/swimming-class/', methods=['GET'])
 def swimming_class():
     current_datetime = datetime.now()
@@ -252,8 +251,6 @@ def swimming_class():
                            member_info=member_info, user_booked_classes=user_booked_classes)
 
 
-
-
 @app.template_filter('timeformat')
 def timeformat(value):
     """Format a time object to 'HH:MM AM/PM' format."""
@@ -264,6 +261,7 @@ def timeformat(value):
     else:
         return str(value) 
 
+# Member view my aerobics booking list only
 @app.route('/book')
 @login_required
 @UserType_required('member')
@@ -411,8 +409,6 @@ def cancel_booking():
 
     return redirect(url_for('book'))
 
-
-
 # membership
 @app.route('/view_membership')
 @login_required
@@ -429,13 +425,13 @@ def view_membership():
     user_info = cursor.fetchone()
     cursor.close()
     return render_template('member/view_membership.html', memberships=memberships, 
-                           user_full_name=user_info['full_name'], member_info=member_info)
+                           member_id=current_user.MemberID, user_full_name=user_info['full_name'], member_info=member_info)
 
 @app.route('/cancel_membership/<int:membership_id>', methods=['POST'])
 @login_required
 def cancel_membership(membership_id):
     cursor = getCursor()
-    # Get the membership type, start date, and status
+    # Get the membership type, date, and status
     cursor.execute("SELECT type, start_date, end_date, status FROM memberships WHERE membership_id = %s", (membership_id,))
     membership = cursor.fetchone()
     membership_type = membership['type']
@@ -451,8 +447,8 @@ def cancel_membership(membership_id):
     # Calculate the refund amount and end date based on the start date and the current date
     refund_amount, end_date = calculate_refund_amount_and_end_date(membership_type, start_date)
 
-    # If the membership type is 'Annual', add a record to the memberships_refund table
-    if membership_type == 'Annual':
+    # If the membership type is 'Annual', record to the memberships_refund table
+    if membership_type in ['Annual', 'Monthly', '6 Month']:
         refund_date = datetime.now().date()
         cursor.execute("INSERT INTO memberships_refund (membership_id, member_id, refund_amount, refund_date) VALUES (%s, %s, %s, %s)",
                        (membership_id, current_user.MemberID, refund_amount, refund_date))
@@ -466,7 +462,7 @@ def cancel_membership(membership_id):
         SET booking_status = 'cancelled' 
         WHERE member_id = %s AND booking_status = 'confirmed' AND class_schedule.datetime > %s
     """, (current_user.MemberID, end_date))
-    
+
     getConnection().commit()
     cursor.close()
     flash('Membership cancelled successfully.', 'success')
@@ -477,20 +473,27 @@ def calculate_refund_amount_and_end_date(membership_type, start_date):
     current_date = datetime.now().date()
 
     days_since_start = (current_date - start_date).days
-  
+
     if membership_type == 'Annual':
         if days_since_start <= 90:  
             refund_amount = 0
             end_date = start_date + timedelta(days=90)
+            # End date = 90 days from start date and no refund
         elif days_since_start <= 180:  
             refund_amount = 100
             end_date = start_date + timedelta(days=180)
+            # End date = 180 days from start date and get $100 refund
         else:  
             refund_amount = 0
             end_date = start_date + timedelta(days=365)
-    else:
+            # End date = 365 days from start date and no refund
+    elif membership_type == 'Monthly':
         refund_amount = 0
-        end_date = current_date  
+        end_date = start_date + timedelta(days=30)  # End date = 30 days from current date
+    elif membership_type == '6 Month':
+        refund_amount = 0
+        end_date = start_date + timedelta(days=180)  # End date = 180 days from current date
+ 
     return refund_amount, end_date
 
 @app.route('/renew_membership/<int:membership_id>', methods=['POST'])
@@ -543,3 +546,24 @@ def renew_membership(membership_id):
     getConnection().commit()
     cursor.close()
     return redirect(url_for('view_membership', membership_id=membership_id))
+
+# Payment history
+@app.route('/membership_payment_history/<int:member_id>', methods=['GET'])
+def membership_payment_history(member_id):
+    user_id = session.get('UserID')
+    member_info = get_member_info(user_id)
+    cursor = getCursor()
+
+    # Execute a query to get all membership payment records for the given member
+    cursor.execute("""
+        SELECT payment_id, member_id, membership_id, amount, payment_date, payment_type FROM payments 
+        WHERE member_id = %s AND payment_type = 'membership'
+        UNION ALL
+        SELECT membership_refund_id, member_id, membership_id, refund_amount, refund_date, 'refund' as payment_type FROM memberships_refund
+        WHERE member_id = %s
+        ORDER BY payment_date DESC
+    """, (member_id, member_id))
+    payment_records = cursor.fetchall()
+    cursor.close()
+
+    return render_template('member/payment_history.html', payment_records=payment_records, member_info=member_info)

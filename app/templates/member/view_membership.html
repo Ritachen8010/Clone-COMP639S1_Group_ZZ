@@ -12,6 +12,8 @@
             <div class="container text-black mt-5 mb-5">
                 <div class="h2-custom mb-4">Membership Information
                     <p>*Our refund policy please refer to our <a href="{{ url_for('about_us') }}#refund">Refund Policy</a></p>
+                    <a href="{{ url_for('membership_payment_history', member_id=member_id) }}" class="btn btn-primary">
+                        View My Payment History</a>
                 </div>
                 <table class="table">
                     <thead>

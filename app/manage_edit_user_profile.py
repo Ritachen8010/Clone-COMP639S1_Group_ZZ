@@ -48,16 +48,19 @@ def convert_date_format(original_date):
     except ValueError:
         return "Invalid Date Format"
 
+# Define member info based on user id
 def get_member_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM member WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
+# Define instructor info based on user id
 def get_instructor_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
+# Define manager info based on user id
 def get_manager_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM manager WHERE user_id = %s", (user_id,))
@@ -86,25 +89,34 @@ def load_user(user_id):
     finally:
         cursor.close()   
 
+# Define allowed file types for image upload
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-MAX_FILENAME_LENGTH = 300
+MAX_FILENAME_LENGTH = 500
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS and \
            len(filename) <= MAX_FILENAME_LENGTH
 
+# Define a name for upload image profile
 def upload_image_profile(user_id, file):
     UserType = session.get('UserType')
     filename = secure_filename(file.filename)
     unique_filename = f"user_{user_id}_{filename}"
 
     # Set the upload folder based on the user type
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     if UserType == 'member':
-        upload_folder = 'app/static/member/'
+        upload_folder = os.path.join(base_dir, 'static/member/')
     elif UserType == 'instructor':
-        upload_folder = 'app/static/instructor/'
+        upload_folder = os.path.join(base_dir, 'static/instructor/')
     elif UserType == 'manager':
-        upload_folder = 'app/static/manager/'
+        upload_folder = os.path.join(base_dir, 'static/manager/')
+    # if UserType == 'member':
+    #     upload_folder = 'app/static/member/'
+    # elif UserType == 'instructor':
+    #     upload_folder = 'app/static/instructor/'
+    # elif UserType == 'manager':
+    #     upload_folder = 'app/static/manager/'
 
     file.save(os.path.join(upload_folder, unique_filename))
     cursor = getCursor()
@@ -165,20 +177,20 @@ def manage_profile():
             new_address = request.form.get('address')
             new_dob = request.form.get('dob')
             new_occupation = request.form.get('occupation')
-            # added position for instructor and manager
+            # Added position for instructor and manager
             new_position = request.form.get('position')
-            # added bio for instructor
+            # Added bio for instructor
             new_bio = request.form.get('bio')
             
             if UserType == 'member':
                 cursor.execute("UPDATE member SET first_name = %s, last_name = %s, phone = %s, title = %s, email = %s, health_info = %s, address = %s, dob = %s, occupation = %s WHERE user_id = %s",
                                (new_First_name, new_Last_name, new_phone, new_Title, new_email, new_health_info, new_address, new_dob, new_occupation, UserID))
             elif UserType == 'instructor':
-                # added new position and bio | title, email and phone
+                # Added new position and bio | title, email and phone
                 cursor.execute("UPDATE instructor SET first_name = %s, last_name = %s, title = %s, phone = %s, email = %s, position = %s, bio = %s WHERE user_id = %s",
                                (new_First_name, new_Last_name, new_Title, new_phone, new_email, new_position, new_bio, UserID))
             elif UserType == 'manager':
-                # added new position, title, email and phone
+                # Added new position, title, email and phone
                 cursor.execute("UPDATE manager SET first_name = %s, last_name = %s, title = %s, phone = %s, email = %s, position = %s WHERE user_id = %s",
                                (new_First_name, new_Last_name, new_Title, new_phone, new_email, new_position, UserID))
 

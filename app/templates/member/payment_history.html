@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}My Payment History{% endblock %}
+
+{% block content %}
+<div class="grid-container custom-bg">
+    <div class="sidebar-position">
+        {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+    </div>
+    <div class="d-container-fluid container mt-5 mb-5">
+        <div class="h2-custom mb-4">My Payment History</div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Membership ID</th>
+                        <th>Payment Type</th>
+                        <th>Amount</th>
+                        <th>Payment Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in payment_records %}
+                    <tr>
+                        <td>{{ record.membership_id }}</td>
+                        <td>{{ record.payment_type | capitalize }}</td>
+                        <td>${{ record.amount }}</td>
+                        <td>{{ record.payment_date | formatdate }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+</div>
+
+{% endblock %}

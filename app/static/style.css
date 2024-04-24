@@ -111,7 +111,7 @@
 }
 
 .greeting {
-    font-size: 60px;
+    font-size: 50px;
     margin-bottom: 20px;
     margin-top: -50px;
     margin-right: 800px;
@@ -423,16 +423,16 @@ text-align: center;
 }
 
 .cancelled-class {
-    background-color: #f8d7da; /* light red */
+    background-color: #f8d7da; 
     color: red;
 }
 .no-space-class {
-    background-color: #e2e3e5; /* light gray */
-    color: #838383; /* gray */
+    background-color: #e2e3e5; 
+    color: #838383; 
 }
 .open-class {
-    background-color: #d1e7dd; /* light green */
-    color: #0f5132; /* green */
+    background-color: #d1e7dd; 
+    color: #0f5132; 
 }
 .class-container {
     padding: 10px;
@@ -441,14 +441,19 @@ text-align: center;
 }
 
 body {
-    /* Existing styles... */
-    margin: 20px; /* Add margin for centering */
+    margin: 20px;
   }
 
 .page-wrapper {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
-  align-items: center; /* Center horizontally */
-  justify-content: flex-start; /* Align items at the top */
-  min-height: 100vh; /* Make sure the wrapper fills the viewport height */
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: flex-start; 
+  min-height: 100vh; 
 }
+
+/* input */
+.custom-input {
+    max-width: 100px;
+}
+

@@ -88,27 +88,24 @@ def get_news_info(news_id):
 # news for all
 @app.route('/news')
 @login_required
-@UserType_required('member', 'instructor', 'manager')
+@UserType_required('member', 'instructor')
 def news():
     user_id = session.get('UserID')
     UserType=session.get('UserType')
     member_info = get_member_info(user_id)
     instructor_info = get_instructor_info(user_id)
-    manager_info = get_manager_info(user_id)
     news_list = get_news_list()
     return render_template('news/news.html', member_info=member_info, instructor_info=instructor_info, 
-                           manager_info=manager_info, 
                            UserType=session.get('UserType'), news_list=news_list)
 
 @app.route('/news/<int:news_id>')
 @login_required
-@UserType_required('member', 'instructor', 'manager')
+@UserType_required('member', 'instructor')
 def view_news(news_id):
     user_id = session.get('UserID')
     member_info = get_member_info(user_id)
     instructor_info = get_instructor_info(user_id)
-    manager_info = get_manager_info(user_id)
     news_info = get_news_info(news_id)
     return render_template('news/view_news.html', member_info=member_info, instructor_info=instructor_info, 
-                           manager_info=manager_info, news_info=news_info)
+                           news_info=news_info)
 

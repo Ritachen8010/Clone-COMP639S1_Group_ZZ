@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Instructor Timetable{% endblock %}
+
+{% block content %}
+
+<div class="grid-container custom-bg">
+    <div class="sidebar-position">
+        {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
+    </div>
+    <div class="d-container-fluid container mt-5 mb-5">
+        <div class="col-12">
+            <div class="h2-custom mb-4">My Aerobics Classes Timetable</div>
+            <!-- Dynamic Day Navigation Buttons with Date Picker -->
+            <div class="day-navigation text-center mt-5 mb-5">
+                <button onclick="navigateDay(-1)" class="btn btn-primary">&lt; Previous Day</button>
+                <input type="date" id="datePicker" class="form-control" onchange="navigateToDate()" 
+                style="width: auto; display: inline-block; margin: 0 15px;" value="{{ selected_date }}">
+                <button onclick="navigateDay(1)" class="btn btn-primary">Next Day &gt;</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            {% for date in dates %}
+                            <th>{{ date.strftime('%A') }}<br>{{ date.strftime('%d %b') }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for time_slot in time_slots %}
+                        <tr>
+                            <td>{{ time_slot }}</td>
+                            {% for date in dates %}
+                            <td>
+                                {% set day_classes = timetable[date.strftime('%Y-%m-%d')].get(time_slot, []) %}
+                                {% for class_info in day_classes %}
+                                <div class="class-container {{ 'cancelled' if class_info['class_status'] == 'Cancelled' else 'expired' if class_info['expired'] else '' }}">
+                                    <div class="timetable__content-title fw-500">
+                                        {{ class_info['name'] }}
+                                    </div>
+                                    <div class="timetable__flex--start fw-400">
+                                        {{ class_info['description'] | default('No description provided.') }}
+                                    </div>
+                                    <div class="timetable__flex--start fw-400">
+                                        Space: {{ class_info['availability'] }}
+                                    </div>
+                                    <div>Instr: {{ class_info['instructor'] }}</div>
+                                    {% if class_info['datetime'] < now() %}
+                                        {% if class_info['class_status'] == 'Cancelled' %}
+                                            <button class="btn btn-danger disabled">Class Cancelled</button>
+                                        {% else %}
+                                            <button class="btn btn-secondary disabled">Expired</button>
+                                        {% endif %}
+                                    {% elif class_info['class_status'] == 'Cancelled' %}
+                                        <button class="btn btn-danger disabled">Class Cancelled</button>
+                                    {% elif class_info['availability'] > 0 %}
+                                        <button class="btn btn-success disabled">Class Open</button>
+                                    {% else %}
+                                        <button class="btn btn-secondary disabled">No Space</button>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <span>No classes available at this time.</span>
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('datePicker').value = "{{ selected_date }}";
+        // navigate to a different day
+        function navigateDay(offset) {
+            var datePicker = document.getElementById('datePicker');
+            var currentDate = new Date(datePicker.value);
+            currentDate.setDate(currentDate.getDate() + offset);
+            datePicker.valueAsDate = currentDate;
+            navigateToDate();
+        }
+        // navigate to the selected date by updating the URL
+        function navigateToDate() {
+            var datePicker = document.getElementById('datePicker');
+            var selectedDate = datePicker.value;
+            var url = new URL(window.location.href);
+            url.searchParams.set('date', selectedDate);
+            window.location.href = url;
+        }
+        
+        window.onload = function() {
+            var datePicker = document.getElementById('datePicker');
+            window.scrollTo(0, datePicker.offsetTop - 100); 
+        };
+</script>
+
+{% endblock %}

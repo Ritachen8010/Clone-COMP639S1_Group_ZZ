@@ -18,6 +18,7 @@ CREATE TABLE `manager` (
     `email` VARCHAR(255),
     `phone` VARCHAR(20),
     `position`  VARCHAR(255),
+    `image_profile` VARCHAR(500),
     `status` ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
     PRIMARY KEY (`manager_id`),
     FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`)
@@ -53,7 +54,7 @@ CREATE TABLE `member` (
     `dob` DATE,
     `occupation` VARCHAR(255),
     `health_info` TEXT,
-    `image_profile` VARCHAR(500),
+    `image_profile` VARCHAR(500) DEFAULT '123.jpeg',
     `status` ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
     PRIMARY KEY (`member_id`),
     FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`)
@@ -67,20 +68,22 @@ CREATE TABLE `memberships` (
     `start_date` DATE NOT NULL,
     `end_date` DATE NOT NULL,
     `membership_fee` DECIMAL(10,2) NOT NULL,
+    `status` ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
     PRIMARY KEY (`membership_id`),
     FOREIGN KEY (`member_id`) REFERENCES `member`(`member_id`)
 )AUTO_INCREMENT=110111;
 
--- Image table
-CREATE TABLE `images` (
-    `image_id` INT AUTO_INCREMENT,
-    `image_data` VARCHAR(500),
-    `instructor_id` INT,
-    `member_id` INT,
-    PRIMARY KEY (`image_id`),
-    FOREIGN KEY (`instructor_id`) REFERENCES `instructor`(`instructor_id`),
+-- Membership_refund table
+CREATE TABLE `memberships_refund` (
+    `membership_refund_id` INT AUTO_INCREMENT,
+    `membership_id` INT NOT NULL,
+    `member_id` INT NOT NULL,
+    `refund_amount` DECIMAL(10,2) NOT NULL,
+    `refund_date` DATE NOT NULL,
+    PRIMARY KEY (`membership_refund_id`),
+    FOREIGN KEY (`membership_id`) REFERENCES `memberships`(`membership_id`),
     FOREIGN KEY (`member_id`) REFERENCES `member`(`member_id`)
-)AUTO_INCREMENT=1;
+) AUTO_INCREMENT=1;
 
 -- News table
 CREATE TABLE `news` (
@@ -89,31 +92,18 @@ CREATE TABLE `news` (
     `title` VARCHAR(255) NOT NULL,
     `content` TEXT NOT NULL,
     `publication_date` DATE NOT NULL,
-    `image_id` INT,
+    `image` VARCHAR(500),
 	PRIMARY KEY (`news_id`),
-    FOREIGN KEY (`image_id`) REFERENCES `images`(`image_id`),
-    FOREIGN KEY (`manager_id`) REFERENCES `manager`(`manager_id`)
-)AUTO_INCREMENT=1;
-
--- Settings table
-CREATE TABLE `settings` (
-    `setting_id` INT AUTO_INCREMENT,
-    `manager_id` INT,
-    `setting_type` ENUM('general', 'fee', 'schedule') NOT NULL,
-    `setting_name` VARCHAR(100) NOT NULL,
-    `setting_value` TEXT NOT NULL,
-    `description` TEXT,
-    PRIMARY KEY (`setting_id`),
     FOREIGN KEY (`manager_id`) REFERENCES `manager`(`manager_id`)
 )AUTO_INCREMENT=1;
 
 -- Class name table
 CREATE TABLE `class_name` (
     `class_name_id` INT AUTO_INCREMENT,
-    `name` ENUM('Zumba', 'Aqua Fit', 'Low-Impact', 'Mums', 'Babies') NOT NULL,
+    `name` ENUM('Zumba', 'Aqua Fit', 'Low-Impact', 'Mums', 'Babies','Aqua Fusion Flow','HydroFit Power Hour','Splash Dance Cardio','Aqua Sculpt & Tone','Aqua Zen Stretch','HydroBlast Intensity','Aqua Beat Blast','Splash & Dash HIIT') NOT NULL,
     `description` TEXT,
     PRIMARY KEY (`class_name_id`)
-)AUTO_INCREMENT=1;
+) AUTO_INCREMENT=1;
 
 -- Class schedule table
 CREATE TABLE `class_schedule` (
@@ -125,6 +115,8 @@ CREATE TABLE `class_schedule` (
     `start_time` TIME NOT NULL,
     `end_time` TIME NOT NULL,
     `capacity` INT NOT NULL DEFAULT 15,
+    `datetime` DATE,
+    `availability` INT NOT NULL DEFAULT 15,
     `class_status` VARCHAR(20) DEFAULT 'Open',
     PRIMARY KEY (`class_id`),
     FOREIGN KEY (`instructor_id`) REFERENCES `instructor`(`instructor_id`),
@@ -160,7 +152,7 @@ CREATE TABLE `bookings` (
     `member_id` INT,
     `class_id` INT,
     `lesson_id` INT,
-    `schedule_type` ENUM('class', 'lesson') NOT NULL,
+    `schedule_type` ENUM('aerobics class', 'swimming lesson') NOT NULL,
     `booking_status` ENUM('confirmed', 'cancelled') NOT NULL,
     `booking_date` DATE NOT NULL,
     PRIMARY KEY (`booking_id`),
@@ -231,10 +223,9 @@ INSERT INTO `user` (`username`, `password`, `usertype`) VALUES
 ('member019', '$2b$12$oMM.xMssDCBOZbLB0vstsO98YNlF4Fj7HHf12GLZUOzFvAOa..KWK', 'member'),
 ('member020', '$2b$12$oMM.xMssDCBOZbLB0vstsO98YNlF4Fj7HHf12GLZUOzFvAOa..KWK', 'member');
 
-
-INSERT INTO `manager` (`user_id`, `title`, `first_name`, `last_name`, `email`, `phone`, `position`, `status`) VALUES
-(1000, 'Mr', 'John', 'Doe', 'john@example.com', '1234567890', 'Senior Manager', 'Active'),
-(1001, 'Mr', 'Squidward', 'Tentacles', 'squidward@bikinibottom.net', '1234567890', 'Manager', 'Active');
+INSERT INTO `manager` (`user_id`, `title`, `first_name`, `last_name`, `email`, `phone`, `position`, `image_profile`, `status`) VALUES
+(1000, 'Mr', 'John', 'Doe', 'john@example.com', '1234567890', 'Senior Manager', 'doe.jpg', 'Active'),
+(1001, 'Mr', 'Squidward', 'Tentacles', 'squidward@bikinibottom.net', '1234567890', 'Manager', 'squidward.jpg', 'Active');
 
 INSERT INTO `instructor` (`user_id`, `title`, `first_name`, `last_name`, `email`, `phone`, `position`, `bio`, `image_profile`, `status`) VALUES
 (1002, 'Mrs', 'Jane', 'Doe', 'jane@example.com', '1234567890', 'Instructor', 
@@ -286,74 +277,423 @@ INSERT INTO `member` (`user_id`, `title`, `first_name`, `last_name`, `email`, `p
 
 -- Membership
 INSERT INTO `memberships` (`member_id`, `type`, `start_date`, `end_date`, `membership_fee`) VALUES
-(1, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(2, 'Monthly', '2024-05-01', '2024-05-31', 60.00),
-(3, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(4, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(5, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(6, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(7, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(8, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(9, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(10, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(11, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(12, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(13, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(14, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(15, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(16, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(17, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(18, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(19, 'Annual', '2024-05-01', '2025-04-30', 700.00),
-(20, '6 Month', '2024-05-01', '2024-11-01', 360.00);
+(1, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(2, 'Monthly', '2024-04-01', '2024-04-30', 60.00),
+(3, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(4, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(5, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(6, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(7, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(8, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(9, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(10, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(11, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(12, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(13, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(14, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(15, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(16, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(17, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(18, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(19, 'Annual', '2024-04-01', '2025-03-31', 700.00),
+(20, '6 Month', '2024-04-01', '2024-09-30', 360.00);
 
+-- news 
+INSERT INTO `news` (`manager_id`, `title`, `content`, `publication_date`, `image`) VALUES
+(1, 'A hot bath or sauna shows similar benefits to running, research indicates', 
+'• I study the effects of exercise on the body - so it’s perhaps unsurprising that when I’m not in the lab, I like to keep active by hitting the gym or going for a run. But for many people, it’s much harder to get out and move their bodies. Modern life doesn’t always make it easy to maintain a healthy, active lifestyle.
+\n• Yet even for someone like me, exercise isn’t always enjoyable. I have to repeatedly push myself to the point of tiredness and discomfort, in the hope I will get fitter and stay healthy. Surely the health benefits of a hot bath or a stint in a sauna — a far more attractive proposition — can’t be compared? Yet this is the question I have dedicated myself to answering. And the evidence, thus far, is promising.
+\n• The term “exercise is medicine” is rightly well-publicised. It’s one of the best ways to stay healthy, yet medicine doesn’t work if you aren’t prepared to take it. Exercise adherence is very poor, with many people unwilling to exercise due to lack of time and motivation. And for those who are older or have chronic diseases, exercise can also cause pain, which for obvious reasons limits exercise further.
+\n• Globally, about 25 per cent of adults don’t meet the minimum recommended physical activity levels of 150 minutes of moderate-intensity activity or 75 minutes of vigorous-intensity activity per week, or a combination of both. In the UK the figures are even worse, with around 34 per cent of men and 42 per cent of women not achieving these guidelines. Sadly, such high levels of sedentary behaviour are thought to be linked to about 11.6 per cent of UK deaths annually.
+\n• In a world where many of us are working nine-to-five office jobs and our daily tasks can be completed by a mere click of a button, it’s easy to see why the modernisation of societies has led to higher levels of sedentary behaviour. There is an urgent need to find alternative strategies to improve health that people are willing to follow.
+\n• In an effort to find such a solution, I’m looking into how hot baths and saunas affect the body. Throughout human history, multiple cultures around the world have used heat therapy to improve health. But until recently, the benefits of bathing were anecdotal and largely viewed as unscientific. However, in the last few decades evidence has been growing and today we know that regular bathing in a sauna or hot tub can help reduce the risk of cardiovascular disease — and may well have wider health benefits too.
+\n• Our recent review of the research found that regular sauna or hot tub bathing can indeed bring about some similar health benefits to that of low- to moderate-intensity aerobic exercise, such as walking, jogging and cycling. At first glance, comparing a hot bath or sauna to a jog might seem illogical – after all, the former tends to be seen as relaxing and the latter tiring — but they are more similar than you may think.', 
+'2023-05-10', 'news1.jpg'),
 
-INSERT INTO `news` (`manager_id`, `title`, `content`, `publication_date`, `image_id`) VALUES
-(1, 'Summer Fitness Fiesta', 'Join us for our Summer Fitness Fiesta! Dive into the world of Aqua Aerobics with our special summer lineup designed to boost your fitness 
-and beat the heat. From Aqua Zumba to Water Yoga, there’s something for everyone. Enroll now and make a splash in your fitness journey!', 
-'2023-05-10', NULL),
-
-(2, 'Expert Talk: The Benefits of Water Aerobics', 'We are excited to announce an exclusive session on "The Benefits of Water Aerobics" 
-by renowned aquatic fitness expert Sandy Cheeks. Sandy will share her insights on how water aerobics can improve cardiovascular health, 
-increase strength, and offer low-impact options for all ages. Mark your calendars for this enlightening session on June 5th!', 
-'2023-06-05', NULL);
-
+(2, 'Spongebob Squarepants promotes ‘violent and racist’ colonialism, university professor claims', 
+'• Spongebob Squarepants has been accused of normalising the colonisation of indigenous lands by a professor at the University of Washington.
+\n• The children’s cartoon – which marked its 20th anniversary this year – was criticised in a report by Professor Holly M Barker.
+\n• She wrote: “SpongeBob SquarePants and his friends play a role in normalising the settler colonial takings of indigenous lands while erasing the ancestral Bikinian people from their nonfictional homeland.”
+\n• The character Spongebob is a friendly sea sponge who lives in a pineapple under the sea among the other residents of a town called Bikini Bottom.
+\n• Professor Barker believes that this is a reference to the real-life Bikini Atoll in the Marshall Islands in the Pacific Ocean.
+\n• Natives of Bikini Atoll were relocated in 1946 so the US military could use the area for nuclear testing during the Cold War, which drew criticism from the media after it was revealed that the inhabitants were left without adequate food or water to prevent them from starvation.
+\n• Later nuclear tests left the islands of the atoll contaminated with enough radiation to affect food grown in the soil, which meant the islands’ inhabitants were unable to return, and those who did experienced issues such as stillbirths, miscarriages and genetic abnormalities.
+\n• This has given rise to fan theories that the cartoon inhabitants of Bikini Bottom owe their mutation to the testing.', 
+'2023-06-05', 'news2.jpg');
 
 INSERT INTO `class_name` (`name`, `description`) VALUES
 ('Zumba', 'Zumba class for all levels'),
 ('Aqua Fit', 'Aqua Fit class for all levels'),
 ('Low-Impact', 'Low-Impact class for all levels'),
 ('Mums', 'Mums class for all levels'),
-('Babies', 'Babies class for all levels');
+('Babies', 'Babies class for all levels'),
+('Aqua Fusion Flow', 'Blend of moves for flexibility and cardio.'),
+('HydroFit Power Hour', 'High-energy for strength and calorie burn.'),
+('Splash Dance Cardio', 'Fun, rhythmic moves for a pumped-up heart.'),
+('Aqua Sculpt & Tone', 'Tone up with water resistance.'),
+('Aqua Zen Stretch', 'Relaxing stretches in the water.'),
+('HydroBlast Intensity', 'Intense workout for maximum results.'),
+('Aqua Beat Blast', 'Energetic routines to upbeat music.'),
+('Splash & Dash HIIT', 'Quick, effective interval training in water.');
 
-INSERT INTO `class_schedule` (`instructor_id`, `class_name_id`, `week`, `start_time`, `end_time`) VALUES
-(1, 1, 'Monday', '06:00', '07:00'),
-(2, 2, 'Monday', '07:00', '08:00'),
-(3, 3, 'Monday', '18:00', '19:00'),
+-- Generate dates from April 15th, 2024 to July 1st, 2024
+INSERT INTO `class_schedule` (`instructor_id`, `class_name_id`, `week`, `start_time`, `end_time`, `datetime`, `class_status`) VALUES
+-- Day 1: 2024-04-01, Monday
+(1, 2, 'Monday', '06:00', '07:00', '2024-04-01', 'Open'),
+(2, 3, 'Monday', '07:00', '08:00', '2024-04-01', 'Open'),
+(3, 1, 'Monday', '08:00', '09:00', '2024-04-01', 'Open'),
+(4, 5, 'Monday', '09:00', '10:00', '2024-04-01', 'Open'),
+(5, 4, 'Monday', '15:00', '16:00', '2024-04-01', 'Open'),
+(1, 3, 'Monday', '16:00', '17:00', '2024-04-01', 'Open'),
+(2, 2, 'Monday', '17:00', '18:00', '2024-04-01', 'Open'),
 
-(4, 4, 'Tuesday', '06:00', '07:00'),
-(5, 5, 'Tuesday', '07:00', '08:00'),
-(1, 1, 'Tuesday', '18:00', '19:00'),
+-- Day 2: 2024-04-02, Tuesday
+(3, 1, 'Tuesday', '06:00', '07:00', '2024-04-02', 'Open'),
+(4, 2, 'Tuesday', '07:00', '08:00', '2024-04-02', 'Open'),
+(5, 3, 'Tuesday', '09:00', '10:00', '2024-04-02', 'Open'),
+(1, 5, 'Tuesday', '10:00', '11:00', '2024-04-02', 'Open'),
+(2, 4, 'Tuesday', '14:00', '15:00', '2024-04-02', 'Open'),
+(3, 2, 'Tuesday', '15:00', '16:00', '2024-04-02', 'Open'),
+(4, 1, 'Tuesday', '16:00', '17:00', '2024-04-02', 'Open'),
 
-(2, 2, 'Wednesday', '06:00', '07:00'),
-(3, 3, 'Wednesday', '07:00', '08:00'),
-(4, 4, 'Wednesday', '18:00', '19:00'),
+-- Day 3: 2024-04-03, Wednesday
+(5, 3, 'Wednesday', '06:00', '07:00', '2024-04-03', 'Open'),
+(1, 2, 'Wednesday', '08:00', '09:00', '2024-04-03', 'Open'),
+(2, 1, 'Wednesday', '09:00', '10:00', '2024-04-03', 'Open'),
+(3, 4, 'Wednesday', '11:00', '12:00', '2024-04-03', 'Open'),
+(4, 5, 'Wednesday', '15:00', '16:00', '2024-04-03', 'Open'),
+(5, 3, 'Wednesday', '16:00', '17:00', '2024-04-03', 'Open'),
+(1, 2, 'Wednesday', '17:00', '18:00', '2024-04-03', 'Open'),
 
-(5, 5, 'Thursday', '06:00', '07:00'),
-(1, 1, 'Thursday', '07:00', '08:00'),
-(2, 2, 'Thursday', '18:00', '19:00'),
+-- Day 4: 2024-04-04, Thursday
+(2, 1, 'Thursday', '06:00', '07:00', '2024-04-04', 'Open'),
+(3, 3, 'Thursday', '07:00', '08:00', '2024-04-04', 'Open'),
+(4, 5, 'Thursday', '08:00', '09:00', '2024-04-04', 'Open'),
+(5, 2, 'Thursday', '15:00', '16:00', '2024-04-04', 'Open'),
+(1, 4, 'Thursday', '16:00', '17:00', '2024-04-04', 'Open'),
+(2, 1, 'Thursday', '17:00', '18:00', '2024-04-04', 'Open'),
+(3, 3, 'Thursday', '18:00', '19:00', '2024-04-04', 'Open'),
 
-(3, 3, 'Friday', '06:00', '07:00'),
-(4, 4, 'Friday', '07:00', '08:00'),
-(5, 5, 'Friday', '18:00', '19:00'),
+-- Day 5: 2024-04-05, Friday
+(4, 5, 'Friday', '06:00', '07:00', '2024-04-05', 'Open'),
+(5, 2, 'Friday', '07:00', '08:00', '2024-04-05', 'Open'),
+(1, 1, 'Friday', '08:00', '09:00', '2024-04-05', 'Open'),
+(2, 4, 'Friday', '09:00', '10:00', '2024-04-05', 'Open'),
+(3, 5, 'Friday', '10:00', '11:00', '2024-04-05', 'Open'),
+(4, 2, 'Friday', '14:00', '15:00', '2024-04-05', 'Open'),
+(5, 1, 'Friday', '15:00', '16:00', '2024-04-05', 'Open'),
+(1, 3, 'Friday', '16:00', '17:00', '2024-04-05', 'Open'),
 
-(1, 1, 'Saturday', '06:00', '07:00'),
-(2, 2, 'Saturday', '07:00', '08:00'),
-(3, 3, 'Saturday', '18:00', '19:00'),
+-- Day 6: 2024-04-06, Saturday
+(2, 4, 'Saturday', '06:00', '07:00', '2024-04-06', 'Open'),
+(3, 5, 'Saturday', '07:00', '08:00', '2024-04-06', 'Open'),
+(4, 2, 'Saturday', '08:00', '09:00', '2024-04-06', 'Open'),
+(5, 1, 'Saturday', '09:00', '10:00', '2024-04-06', 'Open'),
+(1, 3, 'Saturday', '10:00', '11:00', '2024-04-06', 'Open'),
+(2, 5, 'Saturday', '11:00', '12:00', '2024-04-06', 'Open'),
+(3, 2, 'Saturday', '15:00', '16:00', '2024-04-06', 'Open'),
+(4, 1, 'Saturday', '16:00', '17:00', '2024-04-06', 'Open'),
 
-(4, 4, 'Sunday', '06:00', '07:00'),
-(5, 5, 'Sunday', '07:00', '08:00'),
-(1, 1, 'Sunday', '18:00', '19:00');
+-- Day 7: 2024-04-07, Sunday
+(5, 4, 'Sunday', '06:00', '07:00', '2024-04-07', 'Open'),
+(1, 5, 'Sunday', '07:00', '08:00', '2024-04-07', 'Open'),
+(2, 3, 'Sunday', '08:00', '09:00', '2024-04-07', 'Open'),
+(3, 1, 'Sunday', '15:00', '16:00', '2024-04-07', 'Open'),
+(4, 2, 'Sunday', '16:00', '17:00', '2024-04-07', 'Open'),
+(5, 4, 'Sunday', '17:00', '18:00', '2024-04-07', 'Open'),
+(1, 3, 'Sunday', '18:00', '19:00', '2024-04-07', 'Open'),
+
+-- Day 8: 2024-04-08, Monday
+
+(3, 11, 'Monday', '08:00', '09:00', '2024-04-08', 'Open'),
+(4, 10, 'Monday', '16:00', '17:00', '2024-04-08', 'Open'),
+(5, 9, 'Monday', '17:00', '18:00', '2024-04-08', 'Open'),
+
+
+-- Day 9: 2024-04-09, Tuesday
+(4, 5, 'Tuesday', '08:00', '09:00', '2024-04-09', 'Open'),
+(5, 4, 'Tuesday', '09:00', '10:00', '2024-04-09', 'Open'),
+(1, 3, 'Tuesday', '10:00', '11:00', '2024-04-09', 'Open'),
+(3, 1, 'Tuesday', '18:00', '19:00', '2024-04-09', 'Open'),
+
+-- Day 10: 2024-04-10, Wedn
+(1, 11, 'Wednesday', '08:00', '09:00', '2024-04-10', 'Open'),
+(2, 10, 'Wednesday', '09:00', '10:00', '2024-04-10', 'Open'),
+(3, 9, 'Wednesday', '15:00', '16:00', '2024-04-10', 'Open'),
+(4, 8, 'Wednesday', '16:00', '17:00', '2024-04-10', 'Open'),
+(5, 7, 'Wednesday', '17:00', '18:00', '2024-04-10', 'Open'),
+
+-- Day 11: 2024-04-11, Thursday
+(3, 4, 'Thursday', '09:00', '10:00', '2024-04-11', 'Open'),
+(4, 3, 'Thursday', '10:00', '11:00', '2024-04-11', 'Open'),
+(5, 2, 'Thursday', '14:00', '15:00', '2024-04-11', 'Open'),
+(1, 1, 'Thursday', '15:00', '16:00', '2024-04-11', 'Open'),
+(2, 13, 'Thursday', '16:00', '17:00', '2024-04-11', 'Open'),
+
+-- Day 12: 2024-04-12, Friday
+(5, 10, 'Friday', '08:00', '09:00', '2024-04-12', 'Open'),
+(1, 9, 'Friday', '09:00', '10:00', '2024-04-12', 'Open'),
+(2, 8, 'Friday', '10:00', '11:00', '2024-04-12', 'Open'),
+(3, 7, 'Friday', '14:00', '15:00', '2024-04-12', 'Open'),
+(4, 6, 'Friday', '15:00', '16:00', '2024-04-12', 'Open'),
+
+-- Day 13: 2024-04-13, Saturday
+(2, 3, 'Saturday', '08:00', '09:00', '2024-04-13', 'Open'),
+(3, 2, 'Saturday', '15:00', '16:00', '2024-04-13', 'Open'),
+(4, 1, 'Saturday', '16:00', '17:00', '2024-04-13', 'Open'),
+(5, 13, 'Saturday', '17:00', '18:00', '2024-04-13', 'Open'),
+
+-- Day 14: 2024-04-14, Sunday
+(3, 10, 'Sunday', '08:00', '09:00', '2024-04-14', 'Open'),
+(4, 9, 'Sunday', '15:00', '16:00', '2024-04-14', 'Open'),
+(5, 8, 'Sunday', '16:00', '17:00', '2024-04-14', 'Open'),
+(1, 7, 'Sunday', '17:00', '18:00', '2024-04-14', 'Open'),
+
+-- Day 15: 2024-04-15, Monday
+(1, 6, 'Monday', '06:00', '07:00', '2024-04-15', 'Open'),
+(2, 5, 'Monday', '07:00', '08:00', '2024-04-15', 'Open'),
+(3, 4, 'Monday', '09:00', '10:00', '2024-04-15', 'Open'),
+(4, 3, 'Monday', '10:00', '11:00', '2024-04-15', 'Open'),
+(5, 2, 'Monday', '11:00', '12:00', '2024-04-15', 'Open'),
+(1, 1, 'Monday', '15:00', '16:00', '2024-04-15', 'Open'),
+(2, 13, 'Monday', '16:00', '17:00', '2024-04-15', 'Open'),
+
+-- Day 16: 2024-04-16, Tuesday
+(3, 12, 'Tuesday', '06:00', '07:00', '2024-04-16', 'Open'),
+(4, 11, 'Tuesday', '07:00', '08:00', '2024-04-16', 'Open'),
+(5, 10, 'Tuesday', '08:00', '09:00', '2024-04-16', 'Open'),
+(1, 9, 'Tuesday', '09:00', '10:00', '2024-04-16', 'Open'),
+(2, 8, 'Tuesday', '10:00', '11:00', '2024-04-16', 'Open'),
+(3, 7, 'Tuesday', '17:00', '18:00', '2024-04-16', 'Open'),
+(4, 6, 'Tuesday', '18:00', '19:00', '2024-04-16', 'Open'),
+
+-- Day 17: 2024-04-17, Wednesday
+(5, 5, 'Wednesday', '06:00', '07:00', '2024-04-17', 'Open'),
+(1, 4, 'Wednesday', '07:00', '08:00', '2024-04-17', 'Open'),
+(2, 3, 'Wednesday', '09:00', '10:00', '2024-04-17', 'Open'),
+(3, 2, 'Wednesday', '10:00', '11:00', '2024-04-17', 'Open'),
+(4, 1, 'Wednesday', '11:00', '12:00', '2024-04-17', 'Open'),
+(5, 13, 'Wednesday', '15:00', '16:00', '2024-04-17', 'Open'),
+(1, 12, 'Wednesday', '16:00', '17:00', '2024-04-17', 'Open'),
+
+-- Day 18: 2024-04-18, Thursday
+(2, 11, 'Thursday', '06:00', '07:00', '2024-04-18', 'Open'),
+(3, 10, 'Thursday', '07:00', '08:00', '2024-04-18', 'Open'),
+(4, 9, 'Thursday', '08:00', '09:00', '2024-04-18', 'Open'),
+(5, 8, 'Thursday', '09:00', '10:00', '2024-04-18', 'Open'),
+(1, 7, 'Thursday', '10:00', '11:00', '2024-04-18', 'Open'),
+(2, 6, 'Thursday', '17:00', '18:00', '2024-04-18', 'Open'),
+(3, 5, 'Thursday', '18:00', '19:00', '2024-04-18', 'Open'),
+
+-- Day 19: 2024-04-19, Friday
+(4, 4, 'Friday', '06:00', '07:00', '2024-04-19', 'Open'),
+(5, 3, 'Friday', '07:00', '08:00', '2024-04-19', 'Open'),
+(1, 2, 'Friday', '08:00', '09:00', '2024-04-19', 'Open'),
+(2, 1, 'Friday', '09:00', '10:00', '2024-04-19', 'Open'),
+(3, 13, 'Friday', '15:00', '16:00', '2024-04-19', 'Open'),
+(4, 12, 'Friday', '16:00', '17:00', '2024-04-19', 'Open'),
+(5, 11, 'Friday', '17:00', '18:00', '2024-04-19', 'Open'),
+
+-- Day 20: 2024-04-20, Saturday
+(1, 10, 'Saturday', '06:00', '07:00', '2024-04-20', 'Open'),
+(2, 9, 'Saturday', '07:00', '08:00', '2024-04-20', 'Open'),
+(3, 8, 'Saturday', '08:00', '09:00', '2024-04-20', 'Open'),
+(4, 7, 'Saturday', '15:00', '16:00', '2024-04-20', 'Open'),
+(5, 6, 'Saturday', '16:00', '17:00', '2024-04-20', 'Open'),
+(1, 5, 'Saturday', '17:00', '18:00', '2024-04-20', 'Open'),
+
+-- Day 21: 2024-04-21, Sunday
+(2, 4, 'Sunday', '06:00', '07:00', '2024-04-21', 'Open'),
+(3, 3, 'Sunday', '07:00', '08:00', '2024-04-21', 'Open'),
+(4, 2, 'Sunday', '08:00', '09:00', '2024-04-21', 'Open'),
+(5, 1, 'Sunday', '15:00', '16:00', '2024-04-21', 'Open'),
+(1, 13, 'Sunday', '16:00', '17:00', '2024-04-21', 'Open'),
+(2, 12, 'Sunday', '17:00', '18:00', '2024-04-21', 'Open'),
+
+-- Day 22: 2024-04-22, Monday
+(3, 5, 'Monday', '06:00', '07:00', '2024-04-22', 'Open'),
+(5, 1, 'Monday', '09:00', '10:00', '2024-04-22', 'Open'),
+(2, 4, 'Monday', '10:00', '11:00', '2024-04-22', 'Open'),
+(4, 2, 'Monday', '13:00', '14:00', '2024-04-22', 'Open'),
+(1, 3, 'Monday', '16:00', '17:00', '2024-04-22', 'Open'),
+(3, 1, 'Monday', '17:00', '18:00', '2024-04-22', 'Open'),
+(5, 6, 'Monday', '19:00', '20:00', '2024-04-22', 'Open'),
+
+-- Day 23: 2024-04-23, Tuesday
+(1, 2, 'Tuesday', '06:00', '07:00', '2024-04-23', 'Open'),
+(3, 4, 'Tuesday', '07:00', '08:00', '2024-04-23', 'Open'),
+(5, 5, 'Tuesday', '08:00', '09:00', '2024-04-23', 'Open'),
+(2, 1, 'Tuesday', '11:00', '12:00', '2024-04-23', 'Open'),
+(4, 3, 'Tuesday', '14:00', '15:00', '2024-04-23', 'Open'),
+(1, 6, 'Tuesday', '15:00', '16:00', '2024-04-23', 'Open'),
+(3, 2, 'Tuesday', '18:00', '19:00', '2024-04-23', 'Open'),
+
+-- Day 24: 2024-04-24, Wednesday
+(5, 4, 'Wednesday', '06:00', '07:00', '2024-04-24', 'Open'),
+(2, 6, 'Wednesday', '07:00', '08:00', '2024-04-24', 'Empty'),
+(4, 5, 'Wednesday', '08:00', '09:00', '2024-04-24', 'Empty'),
+(1, 3, 'Wednesday', '09:00', '10:00', '2024-04-24', 'Open'),
+(3, 1, 'Wednesday', '10:00', '11:00', '2024-04-24', 'Open'),
+(5, 2, 'Wednesday', '11:00', '12:00', '2024-04-24', 'Empty'),
+(2, 4, 'Wednesday', '12:00', '13:00', '2024-04-24', 'Empty'),
+(4, 3, 'Wednesday', '13:00', '14:00', '2024-04-24', 'Open'),
+(1, 5, 'Wednesday', '14:00', '15:00', '2024-04-24', 'Open'),
+(3, 6, 'Wednesday', '15:00', '16:00', '2024-04-24', 'Empty'),
+(5, 1, 'Wednesday', '16:00', '17:00', '2024-04-24', 'Empty'),
+(2, 2, 'Wednesday', '17:00', '18:00', '2024-04-24', 'Open'),
+(4, 4, 'Wednesday', '18:00', '19:00', '2024-04-24', 'Empty'),
+(1, 6, 'Wednesday', '19:00', '20:00', '2024-04-24', 'Open'),
+
+-- Day 25: 2024-04-25, Thursday
+(4, 3, 'Thursday', '06:00', '07:00', '2024-04-25', 'Open'),
+(1, 5, 'Thursday', '07:00', '08:00', '2024-04-25', 'Open'),
+(3, 6, 'Thursday', '08:00', '09:00', '2024-04-25', 'Open'),
+(5, 1, 'Thursday', '09:00', '10:00', '2024-04-25', 'Empty'),
+(2, 2, 'Thursday', '10:00', '11:00', '2024-04-25', 'Empty'),
+(4, 4, 'Thursday', '11:00', '12:00', '2024-04-25', 'Empty'),
+(1, 2, 'Thursday', '12:00', '13:00', '2024-04-25', 'Empty'),
+(3, 4, 'Thursday', '13:00', '14:00', '2024-04-25', 'Empty'),
+(5, 5, 'Thursday', '14:00', '15:00', '2024-04-25', 'Empty'),
+(2, 1, 'Thursday', '15:00', '16:00', '2024-04-25', 'Open'),
+(4, 3, 'Thursday', '16:00', '17:00', '2024-04-25', 'Open'),
+(1, 6, 'Thursday', '17:00', '18:00', '2024-04-25', 'Empty'),
+(3, 2, 'Thursday', '18:00', '19:00', '2024-04-25', 'Empty'),
+(5, 4, 'Thursday', '19:00', '20:00', '2024-04-25', 'Empty'),
+
+-- Day 26: 2024-04-26, Friday
+(3, 5, 'Friday', '06:00', '07:00', '2024-04-26', 'Open'), 
+(5, 4, 'Friday', '07:00', '08:00', '2024-04-26', 'Empty'), 
+(2, 6, 'Friday', '08:00', '09:00', '2024-04-26', 'Empty'), 
+(4, 1, 'Friday', '09:00', '10:00', '2024-04-26', 'Open'), 
+(1, 2, 'Friday', '10:00', '11:00', '2024-04-26', 'Open'), 
+(3, 3, 'Friday', '11:00', '12:00', '2024-04-26', 'Empty'), 
+(5, 5, 'Friday', '12:00', '13:00', '2024-04-26', 'Empty'), 
+(2, 4, 'Friday', '13:00', '14:00', '2024-04-26', 'Open'), 
+(4, 2, 'Friday', '14:00', '15:00', '2024-04-26', 'Open'), 
+(1, 3, 'Friday', '15:00', '16:00', '2024-04-26', 'Open'), 
+(3, 1, 'Friday', '16:00', '17:00', '2024-04-26', 'Empty'), 
+(5, 6, 'Friday', '17:00', '18:00', '2024-04-26', 'Empty'), 
+(2, 5, 'Friday', '18:00', '19:00', '2024-04-26', 'Empty'), 
+(4, 6, 'Friday', '19:00', '20:00', '2024-04-26', 'Open'),
+
+-- Day 27: 2024-04-27, Saturday
+(2, 4, 'Saturday', '06:00', '07:00', '2024-04-27', 'Open'),
+(4, 2, 'Saturday', '07:00', '08:00', '2024-04-27', 'Open'),
+(1, 1, 'Saturday', '08:00', '09:00', '2024-04-27', 'Open'),
+(2, 1, 'Saturday', '09:00', '10:00', '2024-04-27', 'Empty'), 
+(4, 5, 'Saturday', '10:00', '11:00', '2024-04-27', 'Empty'), 
+(1, 1, 'Saturday', '11:00', '12:00', '2024-04-27', 'Empty'), 
+(3, 6, 'Saturday', '12:00', '13:00', '2024-04-27', 'Empty'), 
+(5, 2, 'Saturday', '13:00', '14:00', '2024-04-27', 'Empty'), 
+(2, 3, 'Saturday', '14:00', '15:00', '2024-04-27', 'Empty'), 
+(3, 3, 'Saturday', '15:00', '16:00', '2024-04-27', 'Open'), 
+(5, 5, 'Saturday', '16:00', '17:00', '2024-04-27', 'Open'),
+(2, 6, 'Saturday', '17:00', '18:00', '2024-04-27', 'Open'),
+(4, 4, 'Saturday', '18:00', '19:00', '2024-04-27', 'Open'),
+(2, 2, 'Saturday', '19:00', '20:00', '2024-04-27', 'Empty'),
+
+-- Day 28: 2024-04-28, Sunday
+(1, 2, 'Sunday', '06:00', '07:00', '2024-04-28', 'Open'),
+(3, 1, 'Sunday', '07:00', '08:00', '2024-04-28', 'Open'),
+(5, 3, 'Sunday', '09:00', '10:00', '2024-04-28', 'Open'),
+(2, 5, 'Sunday', '10:00', '11:00', '2024-04-28', 'Open'),
+(1, 2, 'Sunday', '12:00', '13:00', '2024-04-28', 'Empty'),
+(3, 1, 'Sunday', '13:00', '14:00', '2024-04-28', 'Empty'),  
+(4, 6, 'Sunday', '14:00', '15:00', '2024-04-28', 'Open'),
+(1, 4, 'Sunday', '15:00', '16:00', '2024-04-28', 'Open'),
+(3, 2, 'Sunday', '16:00', '17:00', '2024-04-28', 'Open'),
+(1, 3, 'Sunday', '17:00', '18:00', '2024-04-28', 'Empty'), 
+(3, 2, 'Sunday', '18:00', '19:00', '2024-04-28', 'Empty'), 
+(5, 4, 'Sunday', '19:00', '20:00', '2024-04-28', 'Empty'),
+
+-- Day 29: 2024-04-29, Monday
+(5, 1, 'Monday', '06:00', '07:00', '2024-04-29', 'Open'),
+(2, 3, 'Monday', '07:00', '08:00', '2024-04-29', 'Open'),
+(4, 5, 'Monday', '08:00', '09:00', '2024-04-29', 'Open'),
+(1, 6, 'Monday', '09:00', '10:00', '2024-04-29', 'Open'),
+(5, 2, 'Monday', '10:00', '11:00', '2024-04-29', 'Empty'),
+(2, 3, 'Monday', '11:00', '12:00', '2024-04-29', 'Empty'), 
+(4, 1, 'Monday', '12:00', '13:00', '2024-04-29', 'Empty'), 
+(1, 5, 'Monday', '13:00', '14:00', '2024-04-29', 'Empty'), 
+(3, 3, 'Monday', '14:00', '15:00', '2024-04-29', 'Empty'), 
+(5, 1, 'Monday', '15:00', '16:00', '2024-04-29', 'Empty'), 
+(2, 2, 'Monday', '16:00', '17:00', '2024-04-29', 'Empty'),  
+(3, 4, 'Monday', '17:00', '18:00', '2024-04-29', 'Open'),
+(5, 2, 'Monday', '18:00', '19:00', '2024-04-29', 'Open'),
+(2, 1, 'Monday', '19:00', '20:00', '2024-04-29', 'Open'),
+
+-- Day 30: 2024-04-30, Tuesday
+(4, 3, 'Tuesday', '06:00', '07:00', '2024-04-30', 'Open'),
+(1, 5, 'Tuesday', '07:00', '08:00', '2024-04-30', 'Open'),
+(4, 5, 'Tuesday', '08:00', '09:00', '2024-04-30', 'Empty'), 
+(1, 1, 'Tuesday', '09:00', '10:00', '2024-04-30', 'Empty'), 
+(3, 6, 'Tuesday', '10:00', '11:00', '2024-04-30', 'Empty'), 
+(5, 2, 'Tuesday', '11:00', '12:00', '2024-04-30', 'Empty'), 
+(2, 3, 'Tuesday', '12:00', '13:00', '2024-04-30', 'Empty'), 
+(4, 1, 'Tuesday', '13:00', '14:00', '2024-04-30', 'Empty'), 
+(1, 5, 'Tuesday', '14:00', '15:00', '2024-04-30', 'Empty'), 
+(3, 6, 'Tuesday', '15:00', '16:00', '2024-04-30', 'Open'),
+(5, 4, 'Tuesday', '16:00', '17:00', '2024-04-30', 'Open'),
+(2, 2, 'Tuesday', '17:00', '18:00', '2024-04-30', 'Open'),
+(4, 1, 'Tuesday', '18:00', '19:00', '2024-04-30', 'Open'),
+(1, 6, 'Tuesday', '19:00', '20:00', '2024-04-30', 'Empty'),
+
+-- Day 31: 2024-05-01, Wednesday
+(1, 3, 'Wednesday', '06:00', '07:00', '2024-05-01', 'Open'),
+(2, 1, 'Wednesday', '07:00', '08:00', '2024-05-01', 'Open'),
+(3, 2, 'Wednesday', '08:00', '09:00', '2024-05-01', 'Open'),
+(4, 5, 'Wednesday', '10:00', '11:00', '2024-05-01', 'Open'),
+(1, 3, 'Wednesday', '09:00', '10:00', '2024-05-01', 'Empty'), 
+(5, 4, 'Wednesday', '11:00', '12:00', '2024-05-01', 'Open'),
+(3, 5, 'Wednesday', '12:00', '13:00', '2024-05-01', 'Empty'), 
+(2, 1, 'Wednesday', '13:00', '14:00', '2024-05-01', 'Empty'), 
+(1, 6, 'Wednesday', '14:00', '15:00', '2024-05-01', 'Open'),
+(2, 1, 'Wednesday', '15:00', '16:00', '2024-05-01', 'Empty'),
+(2, 12, 'Wednesday', '16:00', '17:00', '2024-05-01', 'Open'),
+(3, 11, 'Wednesday', '17:00', '18:00', '2024-05-01', 'Open'),
+(4, 10, 'Wednesday', '19:00', '20:00', '2024-05-01', 'Open'),
+
+-- Day 32: 2024-05-02, Thursday
+(5, 9, 'Thursday', '06:00', '07:00', '2024-05-02', 'Open'),
+(1, 8, 'Thursday', '07:00', '08:00', '2024-05-02', 'Open'),
+(2, 7, 'Thursday', '09:00', '10:00', '2024-05-02', 'Open'),
+(3, 6, 'Thursday', '10:00', '11:00', '2024-05-02', 'Open'),
+(4, 5, 'Thursday', '13:00', '14:00', '2024-05-02', 'Open'),
+(5, 4, 'Thursday', '15:00', '16:00', '2024-05-02', 'Open'),
+(1, 3, 'Thursday', '16:00', '17:00', '2024-05-02', 'Open'),
+(2, 2, 'Thursday', '17:00', '18:00', '2024-05-02', 'Open'),
+(3, 1, 'Thursday', '18:00', '19:00', '2024-05-02', 'Open'),
+
+-- Day 33: 2024-05-03, Friday
+(4, 13, 'Friday', '06:00', '07:00', '2024-05-03', 'Open'),
+(5, 12, 'Friday', '08:00', '09:00', '2024-05-03', 'Open'),
+(1, 11, 'Friday', '09:00', '10:00', '2024-05-03', 'Open'),
+(2, 10, 'Friday', '11:00', '12:00', '2024-05-03', 'Open'),
+(3, 9, 'Friday', '13:00', '14:00', '2024-05-03', 'Open'),
+(4, 8, 'Friday', '14:00', '15:00', '2024-05-03', 'Open'),
+(5, 7, 'Friday', '15:00', '16:00', '2024-05-03', 'Open'),
+(1, 6, 'Friday', '17:00', '18:00', '2024-05-03', 'Open'),
+(2, 5, 'Friday', '19:00', '20:00', '2024-05-03', 'Open'),
+
+-- Day 34: 2024-05-04, Saturday
+(3, 4, 'Saturday', '06:00', '07:00', '2024-05-04', 'Open'),
+(4, 3, 'Saturday', '07:00', '08:00', '2024-05-04', 'Open'),
+(5, 2, 'Saturday', '09:00', '10:00', '2024-05-04', 'Open'),
+(1, 1, 'Saturday', '10:00', '11:00', '2024-05-04', 'Open'),
+(2, 13, 'Saturday', '11:00', '12:00', '2024-05-04', 'Open'),
+(3, 12, 'Saturday', '16:00', '17:00', '2024-05-04', 'Open'),
+(4, 11, 'Saturday', '17:00', '18:00', '2024-05-04', 'Open'),
+(5, 10, 'Saturday', '18:00', '19:00', '2024-05-04', 'Open'),
+
+-- Day 35: 2024-05-05, Sunday
+(1, 9, 'Sunday', '06:00', '07:00', '2024-05-05', 'Open'),
+(2, 8, 'Sunday', '08:00', '09:00', '2024-05-05', 'Open'),
+(3, 7, 'Sunday', '09:00', '10:00', '2024-05-05', 'Open'),
+(4, 6, 'Sunday', '14:00', '15:00', '2024-05-05', 'Open'),
+(5, 5, 'Sunday', '15:00', '16:00', '2024-05-05', 'Open'),
+(1, 4, 'Sunday', '16:00', '17:00', '2024-05-05', 'Open'),
+(2, 3, 'Sunday', '17:00', '18:00', '2024-05-05', 'Open'),
+(3, 2, 'Sunday', '18:00', '19:00', '2024-05-05', 'Open');
 
 INSERT INTO `lesson_name` (`description`) VALUES
 ('Beginner swimming lesson'),
@@ -388,79 +728,80 @@ INSERT INTO `lesson_schedule` (`instructor_id`, `lesson_name_id`, `week`, `start
 (4, 1, 'Sunday', '09:00', '10:00', 9),
 (5, 1, 'Sunday', '14:00', '15:00', 10);
 
-
 INSERT INTO `bookings` (`member_id`, `class_id`, `lesson_id`, `schedule_type`, `booking_status`, `booking_date`)
 VALUES
-(1, 1, NULL, 'class', 'confirmed', '2024-05-01'),
-(2, 2, NULL, 'class', 'confirmed', '2024-05-02'),
-(3, 3, NULL, 'class', 'confirmed', '2024-05-03'),
-(4, 4, NULL, 'class', 'confirmed', '2024-05-04'),
-(5, 5, NULL, 'class', 'confirmed', '2024-05-05'),
-(6, 6, NULL, 'class', 'confirmed', '2024-05-06'),
-(7, 7, NULL, 'class', 'confirmed', '2024-05-07'),
-(8, 8, NULL, 'class', 'confirmed', '2024-05-08'),
-(9, 9, NULL, 'class', 'confirmed', '2024-05-09'),
-(10, 10, NULL, 'class', 'confirmed', '2024-05-10'),
-(11, 11, NULL, 'class', 'confirmed', '2024-05-11'),
-(12, 12, NULL, 'class', 'confirmed', '2024-05-12'),
-(13, 13, NULL, 'class', 'confirmed', '2024-05-13'),
-(14, 14, NULL, 'class', 'confirmed', '2024-05-14'),
-(15, 15, NULL, 'class', 'confirmed', '2024-05-15'),
-(16, 16, NULL, 'class', 'confirmed', '2024-05-16'),
-(17, 17, NULL, 'class', 'confirmed', '2024-05-17'),
-(18, 18, NULL, 'class', 'confirmed', '2024-05-18'),
-(19, 19, NULL, 'class', 'confirmed', '2024-05-19'),
-(20, 20, NULL, 'class', 'confirmed', '2024-05-20'),
+(1, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(2, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(3, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(4, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(5, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(6, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(7, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(8, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(9, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(10, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(11, 1, NULL, 'aerobics class', 'confirmed', '2024-04-20'),
+(12, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(13, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(14, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(15, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(16, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(17, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(18, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(19, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
+(20, 2, NULL, 'aerobics class', 'confirmed', '2024-04-21'),
 
-(10, NULL, 1, 'lesson', 'confirmed', '2024-05-02'),
-(11, NULL, 2, 'lesson', 'confirmed', '2024-05-03'),
-(12, NULL, 3, 'lesson', 'confirmed', '2024-05-04'),
-(13, NULL, 4, 'lesson', 'confirmed', '2024-05-05'),
-(14, NULL, 5, 'lesson', 'confirmed', '2024-05-06'),
-(15, NULL, 6, 'lesson', 'confirmed', '2024-05-07'),
-(16, NULL, 7, 'lesson', 'confirmed', '2024-05-08'),
-(17, NULL, 8, 'lesson', 'confirmed', '2024-05-09'),
-(18, NULL, 9, 'lesson', 'confirmed', '2024-05-10'),
-(19, NULL, 10, 'lesson', 'confirmed', '2024-05-11'),
-(20, NULL, 11, 'lesson', 'confirmed', '2024-05-12');
+(10, NULL, 1, 'swimming lesson', 'confirmed', '2024-05-02'),
+(11, NULL, 2, 'swimming lesson', 'confirmed', '2024-05-03'),
+(12, NULL, 3, 'swimming lesson', 'confirmed', '2024-05-04'),
+(13, NULL, 4, 'swimming lesson', 'confirmed', '2024-05-05'),
+(14, NULL, 5, 'swimming lesson', 'confirmed', '2024-05-06'),
+(15, NULL, 6, 'swimming lesson', 'confirmed', '2024-05-07'),
+(16, NULL, 7, 'swimming lesson', 'confirmed', '2024-05-08'),
+(17, NULL, 8, 'swimming lesson', 'confirmed', '2024-05-09'),
+(18, NULL, 9, 'swimming lesson', 'confirmed', '2024-05-10'),
+(19, NULL, 10, 'swimming lesson', 'confirmed', '2024-05-11'),
+(20, NULL, 11, 'swimming lesson', 'confirmed', '2024-05-12');
 
 INSERT INTO `payments` (`member_id`, `membership_id`, `manager_id`, `lesson_id`, `payment_type`, `amount`, `payment_date`)
 VALUES
-(1, 110111, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(2, 110112, 1, NULL, 'membership', 60.00, '2024-05-01'),
-(3, 110113, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(4, 110114, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(5, 110115, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(6, 110116, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(7, 110117, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(8, 110118, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(9, 110119, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(10, 110120, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(11, 110121, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(12, 110122, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(13, 110123, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(14, 110124, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(15, 110125, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(16, 110126, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(17, 110127, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(18, 110128, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(19, 110129, 1, NULL, 'membership', 700.00, '2024-05-01'),
-(20, 110130, 1, NULL, 'membership', 360.00, '2024-05-01'),
+(1, 110111, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(2, 110112, 1, NULL, 'membership', 60.00, '2024-04-01'),
+(3, 110113, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(4, 110114, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(5, 110115, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(6, 110116, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(7, 110117, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(8, 110118, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(9, 110119, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(10, 110120, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(11, 110121, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(12, 110122, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(13, 110123, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(14, 110124, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(15, 110125, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(16, 110126, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(17, 110127, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(18, 110128, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(19, 110129, 1, NULL, 'membership', 700.00, '2024-03-01'),
+(20, 110130, 1, NULL, 'membership', 360.00, '2024-03-01'),
 
-(10, 110120, 2, 1, 'lesson', 50.00, '2024-05-02'),
-(11, 110121, 2, 2, 'lesson', 50.00, '2024-05-03'),
-(12, 110122, 2, 3, 'lesson', 50.00, '2024-05-04'),
-(13, 110123, 2, 4, 'lesson', 50.00, '2024-05-05'),
-(14, 110124, 2, 5, 'lesson', 50.00, '2024-05-06'),
-(15, 110125, 2, 6, 'lesson', 50.00, '2024-05-07'),
-(16, 110126, 2, 7, 'lesson', 50.00, '2024-05-08'),
-(17, 110127, 2, 8, 'lesson', 50.00, '2024-05-09'),
-(18, 110128, 2, 9, 'lesson', 50.00, '2024-05-10'),
-(19, 110129, 2, 10, 'lesson', 50.00, '2024-05-11'),
-(20, 110130, 2, 11, 'lesson', 50.00, '2024-05-12');
-
+(10, 110120, 2, 1, 'lesson', 50.00, '2024-04-22'),
+(11, 110121, 2, 2, 'lesson', 50.00, '2024-04-22'),
+(12, 110122, 2, 3, 'lesson', 50.00, '2024-04-22'),
+(13, 110123, 2, 4, 'lesson', 50.00, '2024-04-23'),
+(14, 110124, 2, 5, 'lesson', 50.00, '2024-04-23'),
+(15, 110125, 2, 6, 'lesson', 50.00, '2024-04-23'),
+(16, 110126, 2, 7, 'lesson', 50.00, '2024-04-24'),
+(17, 110127, 2, 8, 'lesson', 50.00, '2024-04-24'),
+(18, 110128, 2, 9, 'lesson', 50.00, '2024-04-24'),
+(19, 110129, 2, 10, 'lesson', 50.00, '2024-04-25'),
+(20, 110130, 2, 11, 'lesson', 50.00, '2024-04-25');
 
 INSERT INTO `attendance` (`class_id`, `schedule_type`, `member_id`, `attended`, `attendance_status`) VALUES 
 (1, 'class', 1, true, 'present'),
 (2, 'class', 1, true, 'late');
+
+
+
 

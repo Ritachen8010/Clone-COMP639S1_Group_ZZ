@@ -9,11 +9,11 @@ from app.database import getCursor
 from app.database import getConnection
 import re
 import os
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
 from flask_login import login_required, LoginManager, UserMixin, login_user
 from functools import wraps
-import mysql.connector
 from collections import defaultdict
+import mysql.connector
 
 class User(UserMixin):
     def __init__(self, user_id, Username, UserType, member_id):
@@ -101,9 +101,6 @@ def generate_timetable():
 
     return timetable
 
-
-
-
 @app.route('/dashboard_manager')
 @login_required
 @UserType_required('manager')
@@ -113,21 +110,23 @@ def dashboard_manager():
     manager_info = get_manager_info(user_id)
     return render_template('dashboard/dashboard_manager.html', user_info=user_info, manager_info=manager_info)
 
-@app.route('/timetable_manager')
-@login_required
-@UserType_required('manager')
-def timetable_manager():
-    user_id = session.get('UserID')
-    manager_info = get_manager_info(user_id)
+# @app.route('/timetable_manager')
+# @login_required
+# @UserType_required('manager')
+# def timetable_manager():
+#     current_datetime = datetime.now()
+#     user_id = session.get('UserID')
+#     manager_info = get_manager_info(user_id)
 
-    selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
-    current_datetime = datetime.now()  
+#     selected_date = request.args.get('date', default=datetime.today().strftime('%Y-%m-%d'))
+#     timetable = generate_timetable()
 
-    
-    timetable = generate_timetable(selected_date)
+#     dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(-3, 4)]
+#     time_slots = [f"{(datetime.min + timedelta(hours=h)).strftime('%I:%M %p')} - {(datetime.min + timedelta(hours=h+1)).strftime('%I:%M %p')}" for h in range(6, 21)]
 
-    return render_template('homepage/home_swimming_class.html', timetable=timetable,
-                           selected_date=selected_date, current_datetime=current_datetime)
+#     return render_template('manager/timetable_manager.html', timetable=timetable,
+#                            selected_date=selected_date, dates=dates, time_slots=time_slots,
+#                            current_datetime=current_datetime, manager_info=manager_info)
 
 @app.template_filter('timeformat')
 def timeformat(value):
@@ -143,9 +142,12 @@ def timeformat(value):
 @login_required
 @UserType_required('manager')
 def review_class():
+    user_id = session.get('UserID')
+    manager_info = get_manager_info(user_id)
     date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
     timetable, available_slots = generate_timetable(date)  # Make sure two values are expected here
-    return render_template('review_class.html', timetable=timetable, available_slots=available_slots, selected_date=date)
+    return render_template('manager/review_class.html', timetable=timetable, available_slots=available_slots, 
+                           selected_date=date, manager_info=manager_info)
 
 
 def generate_timetable(date):
@@ -235,7 +237,7 @@ def insert_new_class(class_name_id, instructor_id, date, start_time, end_time):
     cursor.execute("""
         INSERT INTO class_schedule (class_name_id, instructor_id, datetime, start_time, end_time, availability)
         VALUES (%s, %s, %s, %s, %s, %s)
-    """, (class_name_id, instructor_id, date, start_time, end_time, 15))  # Assuming default capacity and availability is 15
+    """, (class_name_id, instructor_id, date, start_time, end_time, 15))  # default capacity and availability is 15
     getConnection().commit()
     cursor.close()
 
@@ -259,6 +261,8 @@ def convert_time(time_str):
 @login_required
 @UserType_required('manager')
 def add_class():
+    user_id = session.get('UserID')
+    manager_info = get_manager_info(user_id)
     if request.method == 'POST':
         class_name_id = request.form.get('class_name_id')
         instructor_id = request.form.get('instructor_id')
@@ -300,20 +304,24 @@ def add_class():
     date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
     _, available_slots = generate_timetable(date)  # Fetch available slots for the selected date
 
-    return render_template('add_class.html', available_slots=available_slots, date=date, class_names=class_names, instructors=instructors)
+    return render_template('manager/add_class.html', available_slots=available_slots, date=date, 
+                           class_names=class_names, instructors=instructors, manager_info=manager_info)
 
 
 @app.route('/cancel_class/<int:class_id>', methods=['GET', 'POST'])
 @login_required
 @UserType_required('manager')
 def cancel_class(class_id):
+    user_id = session.get('UserID')
+    manager_info = get_manager_info(user_id)
     class_info = get_class_info(class_id)
     if request.method == 'POST':
         cancel_existing_class(class_id)
         flash('Class cancelled successfully!', 'success')
         return redirect(url_for('review_class'))
 
-    return render_template('cancel_class.html', class_info=class_info)
+    return render_template('manager/cancel_class.html', class_info=class_info,
+                           manager_info=manager_info)
 
 @app.route('/confirm_cancel_class/<int:class_id>', methods=['POST'])
 @login_required
@@ -323,41 +331,12 @@ def confirm_cancel_class(class_id):
     flash('Class cancelled successfully!', 'success')
     return redirect(url_for('review_class'))
 
-@app.route('/monthly_class_report')
-@login_required
-@UserType_required('manager')
-def monthly_class_report():
-    current_month = datetime.now().month
-    current_year = datetime.now().year
-
-    cursor = getCursor()
-    cursor.execute("""
-        SELECT cn.name, COUNT(b.class_id) as total_bookings
-        FROM bookings b
-        JOIN class_schedule cs ON b.class_id = cs.class_id
-        JOIN class_name cn ON cs.class_name_id = cn.class_name_id
-        WHERE MONTH(b.booking_date) = %s AND YEAR(b.booking_date) = %s
-        AND b.booking_status = 'confirmed'
-        GROUP BY cn.name
-        ORDER BY total_bookings DESC
-    """, (current_month, current_year))
-    
-    class_bookings = cursor.fetchall()
-    cursor.close()
-
-    # Calculate total bookings for percentage calculations
-    total_bookings = sum([booking['total_bookings'] for booking in class_bookings])
-    # Prepare percentages
-    for booking in class_bookings:
-        booking['percentage'] = (booking['total_bookings'] / total_bookings) * 100 if total_bookings > 0 else 0
-
-    return render_template('monthly_class_report.html', class_bookings=class_bookings,
-                           total_bookings=total_bookings, month=current_month, year=current_year)
-
 @app.route('/edit_class/', methods=['GET', 'POST'])
 @login_required
 @UserType_required('manager')
 def edit_class():
+    user_id = session.get('UserID')
+    manager_info = get_manager_info(user_id)
     cursor = getCursor()
     class_id = request.form.get('class_id')
     selected_class = None
@@ -391,5 +370,119 @@ def edit_class():
         cursor.execute("SELECT class_name_id, name, description FROM class_name WHERE class_name_id = %s", (class_id,))
         selected_class = cursor.fetchone()
 
-    return render_template('edit_class.html', classes=classes, selected_class=selected_class)
+    return render_template('manager/edit_class.html', classes=classes, selected_class=selected_class,
+                           manager_info=manager_info)
+
+#Report
+@app.route('/financial_report', methods=['GET', 'POST'])
+@login_required
+@UserType_required('manager')
+def financial_report():
+    user_id = session.get('UserID')
+    manager_info = get_manager_info(user_id)
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    if request.method == 'POST':
+        selected_year = int(request.form.get('year', datetime.now().year))
+        session['selected_year'] = selected_year  # Store the selected year in the session
+        selected_month = int(request.form.get('month', datetime.now().month))
+        session['selected_month'] = selected_month
+    else:
+        selected_year = session.get('selected_year', datetime.now().year)
+        selected_month = session.get('selected_month', datetime.now().month)
+
+    cursor = getCursor()
+    cursor.execute("""
+        SELECT MONTH(p.payment_date) as month, SUM(p.amount) as total_payments
+        FROM payments p
+        WHERE YEAR(p.payment_date) = %s AND p.payment_type = 'membership'
+        GROUP BY MONTH(p.payment_date)
+    """, (selected_year,))
+    
+    monthly_payments = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT MONTH(r.refund_date) as month, SUM(r.refund_amount) as total_refunds
+        FROM memberships_refund r
+        WHERE YEAR(r.refund_date) = %s
+        GROUP BY MONTH(r.refund_date)
+    """, (selected_year,))
+    
+    monthly_refunds = cursor.fetchall()
+
+    # Convert the result to a dictionary
+    payments_dict = {result['month']: result['total_payments'] for result in monthly_payments}
+    refunds_dict = {result['month']: result['total_refunds'] for result in monthly_refunds}
+
+    # Create a list for each month of the year
+    payments_list = [payments_dict.get(month, 0) for month in range(1, 13)]
+    refunds_list = [refunds_dict.get(month, 0) for month in range(1, 13)]
+
+    cursor.execute("""
+        SELECT SUM(p.amount) as total_payments
+        FROM payments p
+        WHERE YEAR(p.payment_date) = %s
+    """, (selected_year,))
+    
+    annual_payments = cursor.fetchone()['total_payments']
+
+    cursor.execute("""
+        SELECT SUM(r.refund_amount) as total_refunds
+        FROM memberships_refund r
+        WHERE YEAR(r.refund_date) = %s
+    """, (selected_year,))
+    
+    annual_refunds = cursor.fetchone()['total_refunds']
+    cursor.close()
+
+    return render_template('manager/financial_report.html', manager_info=manager_info,
+                           monthly_payments=payments_list, monthly_refunds=refunds_list,
+                           annual_payments=annual_payments, annual_refunds=annual_refunds,
+                           selected_year=selected_year, current_year=current_year)
+
+@app.route('/monthly_class_report', methods=['GET', 'POST'])
+@login_required
+@UserType_required('manager')
+def monthly_class_report():
+    user_id = session.get('UserID')
+    manager_info = get_manager_info(user_id)
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    if request.method == 'POST':
+        selected_year = int(request.form.get('selected_year', current_year))
+        selected_month = int(request.form.get('selected_month', current_month))
+        session['selected_year'] = selected_year  # Store the selected year in the session
+        session['selected_month'] = selected_month  # Store the selected month in the session
+    else:
+        selected_year = session.get('selected_year', current_year)
+        selected_month = session.get('selected_month', current_month)
+
+    cursor = getCursor()
+    cursor.execute("""
+        SELECT cn.name, COUNT(b.class_id) as total_bookings
+        FROM bookings b
+        JOIN class_schedule cs ON b.class_id = cs.class_id
+        JOIN class_name cn ON cs.class_name_id = cn.class_name_id
+        WHERE MONTH(b.booking_date) = %s AND YEAR(b.booking_date) = %s
+        AND b.booking_status = 'confirmed'
+        GROUP BY cn.name
+        ORDER BY total_bookings DESC
+    """, (selected_month, selected_year))
+    
+    class_bookings = cursor.fetchall()
+    cursor.close()
+
+    # Calculate total bookings for percentage calculations
+    total_bookings = sum([booking['total_bookings'] for booking in class_bookings])
+    # Prepare percentages
+    for booking in class_bookings:
+        booking['percentage'] = (booking['total_bookings'] / total_bookings) * 100 if total_bookings > 0 else 0
+
+    return render_template('manager/monthly_class_report.html', class_bookings=class_bookings,
+                           total_bookings=total_bookings, month=selected_month, year=selected_year,
+                           manager_info=manager_info, current_year=current_year)
+
+
 

@@ -17,6 +17,7 @@ ROLES = ['Member', 'Instructor', 'Manager']
 
 connection = None
 
+# Stored user name/type/ID 
 class User(UserMixin):
     def __init__(self, user_id, Username, UserType, member_id):
         self.id = user_id
@@ -24,6 +25,7 @@ class User(UserMixin):
         self.UserType = UserType
         self.MemberID = member_id
 
+# To check if user is logged in with the correct user type
 def UserType_required(*UserTypes):
     def decorator(f):
         @wraps(f)
@@ -44,22 +46,26 @@ def convert_date_format(original_date):
         return new_date_format
     except ValueError:
         return "Invalid Date Format"
-    
+
+# Define member info based on user id     
 def get_member_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM member WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
+# Define instructor info based on user id 
 def get_instructor_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
+# Define manager info based on user id
 def get_manager_info(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM manager WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
+# Load user based on user id
 @login_manager.user_loader
 def load_user(user_id):
     try:
@@ -120,7 +126,7 @@ def register():
                                (user_id, Title, First_name, Last_name, email, phone, address, dob, occupation, health_info))
                 member_id = cursor.lastrowid 
 
-                # New code to handle subscription type selection
+                # Handle subscription type selection
                 subscription_type = request.form.get('subscription_type')
 
                 # Define subscription options and corresponding fees
@@ -142,15 +148,23 @@ def register():
                 start_date = date.today().isoformat()
                 end_date = (date.today() + timedelta(days=selected_subscription['duration'])).isoformat()
 
-                # Insert payment record
-                cursor.execute("INSERT INTO payments (member_id, payment_type, amount, payment_date) VALUES (%s, 'membership', %s, %s)",
-                               (member_id, selected_subscription['fee'], date.today().isoformat()))
-                payment_id = cursor.lastrowid
-
                 # Insert membership record
-                cursor.execute("INSERT INTO memberships (member_id, type, start_date, end_date, membership_fee) VALUES (%s, %s, %s, %s, %s)",
-                               (member_id, selected_subscription['type'], start_date, end_date, selected_subscription['fee']))
-
+                cursor.execute("""
+                    INSERT INTO memberships (member_id, type, start_date, end_date, membership_fee) 
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (member_id, selected_subscription['type'], start_date, end_date, selected_subscription['fee']))
+                
+                # Get the ID of the newly inserted membership
+                membership_id = cursor.lastrowid
+                
+                # Insert payment record
+                manager_id = '1'
+                cursor.execute("""
+                    INSERT INTO payments (member_id, payment_type, membership_id, manager_id, amount, payment_date) 
+                    VALUES (%s, 'membership', %s, %s, %s, %s)
+                """, (member_id, membership_id, manager_id, selected_subscription['fee'], date.today().isoformat()))
+                payment_id = cursor.lastrowid
+                
                 getConnection().commit()
 
                 flash('Registration successful! You can now login.')
@@ -169,7 +183,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Retrieve username and password from the form
+        # Get username and password from the form
         Username = request.form.get('Username').strip()
         entered_Password = request.form.get('Password').strip()
         login_successful = False
@@ -246,7 +260,7 @@ def change_password():
         # Get form data
         old_Password = request.form.get('old_Password')
         new_Password = request.form.get('new_Password')
-        confirm_Password = request.form.get('confirm_Password')  # New confirm password
+        confirm_Password = request.form.get('confirm_Password')  # Double-confirm password
 
         if old_Password and new_Password and confirm_Password:
             if new_Password == confirm_Password:  # Confirm that both new passwords match
@@ -269,7 +283,7 @@ def change_password():
                     print("Error while changing password:", e)
                     flash("An error occurred while changing the password.")
                 finally:
-                    cursor.close()  # Close the cursor
+                    cursor.close() 
             else:
                 flash("New passwords do not match.")
         else:

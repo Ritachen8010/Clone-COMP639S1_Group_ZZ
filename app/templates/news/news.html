@@ -6,15 +6,13 @@
 <div class="text-black custom-bg">
     <div class="row">
         <div class="col-12">
-            {% if session['UserType'] in ['member', 'instructor', 'manager'] %}
+            {% if session['UserType'] in ['member', 'instructor'] %}
                 <div class="grid-container">
                     <div class="sidebar-position">
                         {% if session['UserType'] == 'member' %}
                             {% include 'dashboard_sidebar_template/member_sidebar.html' %}
                         {% elif session['UserType'] == 'instructor' %}
                             {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
-                        {% elif session['UserType'] == 'manager' %}
-                            {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
                         {% endif %}
                     </div>
                     <div class="container" style="min-height: 100vh;">

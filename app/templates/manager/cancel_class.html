@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Cancel Class{% endblock %}
+
+{% block content %}
+<div class="grid-container custom-bg">
+    <div class="sidebar-position">
+        {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
+    </div>
+    <div class="d-container-fluid container mt-5 mb-5">
+        <div class="h2-custom mb-4">Cancel Class</div>
+        <div class="card">
+            <div class="card-header text-light">
+                <h2>Class Name: {{ class_info.name }}</h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text"><strong>Instructor:</strong> {{ class_info.instructor }}</p>
+                <p class="card-text"><strong>Time:</strong> {{ class_info.start_time | timeformat }} - {{ class_info.end_time | timeformat }}</p>
+                <p class="card-text"><strong>Date:</strong> {{ class_info.datetime.strftime('%A, %B %d, %Y') }}</p>
+                <p class="card-text"><strong>Pool Type:</strong> {{ class_info.pool_type }}</p>
+                <p class="card-text"><strong>Available Slots:</strong> {{ class_info.availability }}</p>
+            </div>
+        </div>
+        <form action="{{ url_for('confirm_cancel_class', class_id=class_info.class_id) }}" method="post">
+            <a href="{{ url_for('review_class') }}">
+                <button type="button" class="btn btn-secondary">Cancel</button>
+            </a>
+            <button type="submit" class="btn btn-danger">Confirm Cancel</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

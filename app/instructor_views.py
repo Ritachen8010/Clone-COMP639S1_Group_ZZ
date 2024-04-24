@@ -52,57 +52,56 @@ def format_time_slot(start_time, end_time):
 def format_date_filter(date):
     return date.strftime("%d/%m/%Y")
 
+# define instructor based on user id 
 def instructor(user_id):
     cursor = getCursor()
     cursor.execute("SELECT * FROM instructor WHERE user_id = %s", (user_id,))
     return cursor.fetchone()
 
-def generate_timetable(selected_date=None):
-    cursor = getCursor()
-    cursor.execute("""
-        SELECT
-            class_name.name,
-            class_name.description,
-            instructor.first_name,
-            instructor.last_name,
-            class_schedule.week,
-            class_schedule.pool_type,
-            class_schedule.start_time,
-            class_schedule.end_time,
-            class_schedule.capacity,
-            class_schedule.datetime,
-            class_schedule.availability
+# def generate_timetable(selected_date=None):
+#     cursor = getCursor()
+#     cursor.execute("""
+#         SELECT
+#             class_name.name,
+#             class_name.description,
+#             instructor.first_name,
+#             instructor.last_name,
+#             class_schedule.week,
+#             class_schedule.pool_type,
+#             class_schedule.start_time,
+#             class_schedule.end_time,
+#             class_schedule.capacity,
+#             class_schedule.datetime,
+#             class_schedule.availability
             
-        FROM class_schedule
-        JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
-        JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
-    """)
-    timetable_data = cursor.fetchall()
-    cursor.close()
+#         FROM class_schedule
+#         JOIN class_name ON class_schedule.class_name_id = class_name.class_name_id
+#         JOIN instructor ON class_schedule.instructor_id = instructor.instructor_id
+#     """)
+#     timetable_data = cursor.fetchall()
+#     cursor.close()
     
-    timetable = {}
+#     timetable = {}
 
-    for row in timetable_data:
-        # Extract datetime
-        date = row['datetime']
-        # Format time slot
-        time_slot = format_time_slot(row['start_time'], row['end_time'])
+#     for row in timetable_data:
+#         date = row['datetime']
+#         time_slot = format_time_slot(row['start_time'], row['end_time'])
 
-        if date not in timetable:
-            timetable[date] = {}
-        if time_slot not in timetable[date]:
-            timetable[date][time_slot] = []
+#         if date not in timetable:
+#             timetable[date] = {}
+#         if time_slot not in timetable[date]:
+#             timetable[date][time_slot] = []
         
-        timetable[date][time_slot].append({
-            'name': row['name'],
-            'description': row['description'],
-            'availability': row['availability'],
-            'instructor': f"{row['first_name']} {row['last_name']}",
-        })
+#         timetable[date][time_slot].append({
+#             'name': row['name'],
+#             'description': row['description'],
+#             'availability': row['availability'],
+#             'instructor': f"{row['first_name']} {row['last_name']}",
+#         })
     
-    return timetable
+#     return timetable
 
-
+# define timetable
 def generate_timetable(instructor_id=None):
     cursor = getCursor()
     query = """
@@ -185,7 +184,7 @@ def timetable_instructor():
 
     timetable = generate_timetable(instructor_id=instructor_id)  # Filter by instructor ID
 
-    return render_template('timetable_instructor.html', timetable=timetable, 
+    return render_template('instructor/timetable_instructor.html', timetable=timetable, 
                            instructor_info=instructor_info, selected_date=selected_date, 
                            dates=dates, time_slots=time_slots)
 

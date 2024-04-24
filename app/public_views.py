@@ -1,6 +1,6 @@
 from app import app
 from flask import render_template
-from flask import request, g
+from flask import request
 from app.database import getCursor, getConnection
 from datetime import timedelta, datetime
 from collections import defaultdict
@@ -12,6 +12,7 @@ def format_time_slot(start_time, end_time):
     return f"{start_time_str}-{end_time_str}"
 
 def generate_timetable():
+    current_datetime = datetime.now()
     cursor = getCursor()
     cursor.execute("""
         SELECT
@@ -72,9 +73,8 @@ def profile_instructor():
 
 @app.route('/')
 def home():
-    timetable = generate_timetable()
     instructor = profile_instructor()
-    return render_template('homepage/homepage.html', timetable=timetable, instructor=instructor)
+    return render_template('homepage/homepage.html', instructor=instructor)
 
 @app.route('/about_us')
 def about_us():

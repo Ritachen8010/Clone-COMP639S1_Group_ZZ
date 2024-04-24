@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Financial Report{% endblock %}
+
+{% block content %}
+<div class="grid-container custom-bg">
+  <div class="sidebar-position">
+      {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
+  </div>
+  <div class="d-container-fluid container mt-5 mb-5">
+      <div class="col-12">
+          <div class="h2-custom mb-4">Popularity Report</div>
+
+          <form method="POST" class="form-inline d-flex align-items-center mb-3">
+            <label for="selected_year" class="me-2">Year:</label>
+            <select id="selected_year" name="selected_year" class="me-3">
+              {% for selected_year in range(current_year, 2023, -1) %}
+                <option value="{{ selected_year }}" {% if year == selected_year %} selected {% endif %}>{{ selected_year }}</option>
+              {% endfor %}
+            </select>
+
+            <label for="selected_month" class="me-2">Month:</label>
+            <select id="selected_month" name="selected_month" class="me-3">
+              {% for selected_month in range(1, 13) %}
+                <option value="{{ selected_month }}" {% if month == selected_month %} selected {% endif %}>{{ selected_month }}</option>
+              {% endfor %}
+            </select>
+
+            <button type="submit" class="btn btn-primary ml-2">Submit</button>
+          </form>
+
+            <div class="row justify-content-center">
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-header text-white">Total Bookings per Aqua Aerobics Class</div>
+                  <div class="card-body">
+                    <canvas id="totalBookingsChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-header text-white">Booking Percentage% by Aqua Aerobics Class</div>
+                  <div class="card-body">
+                    <canvas id="bookingPercentageChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const yearSelect = document.getElementById('selected_year');
+    const monthSelect = document.getElementById('selected_month');
+    
+    // Listen for changes to the year and month selects
+    yearSelect.addEventListener('change', updateCharts);
+    monthSelect.addEventListener('change', updateCharts);
+    
+    function updateCharts() {
+      const year = yearSelect.value;
+      const month = monthSelect.value;
+    
+    }
+  
+    updateCharts();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const ctxBar = document.getElementById('totalBookingsChart').getContext('2d');
+    const totalBookingsChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: {{ class_bookings|map(attribute='name')|list|tojson }},
+        datasets: [{
+          label: 'Total Bookings',
+          data: {{ class_bookings|map(attribute='total_bookings')|list|tojson }},
+          backgroundColor: 'rgba(0, 123, 255, 0.5)',
+          borderColor: 'rgba(0, 123, 255, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#000' 
+            }
+          },
+          x: {
+            ticks: {
+              color: '#000' 
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#000' 
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                var label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += context.parsed.y;
+                }
+                return label;
+              }
+            }
+          }
+        },
+        maintainAspectRatio: false
+      }
+    });
+
+    const ctxPie = document.getElementById('bookingPercentageChart').getContext('2d');
+    const bookingPercentageChart = new Chart(ctxPie, {
+      type: 'doughnut',
+      data: {
+        labels: {{ class_bookings|map(attribute='name')|list|tojson }},
+        datasets: [{
+          data: {{ class_bookings|map(attribute='percentage')|list|tojson }},
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
+          ],
+          borderColor: 'rgba(255, 255, 255, 0.8)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#000'
+            }
+          }
+        },
+        maintainAspectRatio: false
+      }
+    });
+  });
+</script>
+{% endblock %}
