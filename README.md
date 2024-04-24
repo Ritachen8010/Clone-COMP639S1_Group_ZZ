@@ -15,7 +15,7 @@
 - Our Final Feature to be delivery:
 ![Project Diagram](project_diagram_for_github_readme/05.jpg "Project Diagram")
 - Our Porject Key and Highlighted point: 
-    1. Dynamic schedule.
+    1. Dynamic Timetable.
     2. A visually appealing UI.
     3. Easy to use.
 
