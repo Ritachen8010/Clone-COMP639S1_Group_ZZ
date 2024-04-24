@@ -332,17 +332,17 @@ text-align: center;
     }
     
     .list-group-item.list-group-item-action:hover {
-        background-color: rgb(64, 101, 155) !important;  /* Slightly darker blue when hovered */
+        background-color: rgb(64, 101, 155) !important;  
     }
 
     .list-group-item.list-group-item-action:active {
-        background-color: rgb(44, 81, 135) !important;  /* Even darker blue when clicked */
+        background-color: rgb(44, 81, 135) !important; 
     }
 
     /* dashboard adjustment */
     .grid-container {
         display: grid;
-        grid-template-columns: 250px 1fr;  /* Adjust 250px based on the width of your sidebar */
+        grid-template-columns: 250px 1fr;  
         width: 100%;
     }
     .custom-bg {

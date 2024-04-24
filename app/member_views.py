@@ -221,7 +221,7 @@ def generate_timetable():
             'instructor': f"{row['first_name']} {row['last_name']}",
             'availability': row['availability'],
             'class_status': row['class_status'],
-            'datetime': class_datetime,  # Full datetime of the class
+            'datetime': class_datetime, 
             'expired': class_datetime < current_datetime  # Check if the class datetime is before the current datetime
         })
 

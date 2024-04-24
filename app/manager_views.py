@@ -249,10 +249,6 @@ def cancel_existing_class(class_id):
     getConnection().commit()
     cursor.close()
 
-
-
-from datetime import datetime
-
 def convert_time(time_str):
     """Convert 12-hour formatted time with AM/PM to 24-hour format."""
     return datetime.strptime(time_str, '%I:%M %p').strftime('%H:%M:%S')
