@@ -6,17 +6,25 @@
 <div class="text-black custom-bg">
     <div class="row">
         <div class="col-12">
+            <!-- Check if user type is either member or instructor -->
             {% if session['UserType'] in ['member', 'instructor'] %}
+                <!-- Grid container for layout -->
                 <div class="grid-container">
                     <div class="sidebar-position">
+                        <!-- Check if user type is member -->
                         {% if session['UserType'] == 'member' %}
+                            <!-- Include member sidebar -->
                             {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+                        <!-- Check if user type is instructor -->
                         {% elif session['UserType'] == 'instructor' %}
+                            <!-- Include instructor sidebar -->
                             {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
                         {% endif %}
                     </div>
                     <div class="container" style="min-height: 100vh;">
+                        <!-- News title -->
                         <div class="h2-custom mt-5 mb-5 text-black">News</div>
+                        <!-- Loop through each news item in the news list -->
                         {% for list in news_list %}
                         <article class="newscard blue">
                             <a class="newscard_img_link">
@@ -31,6 +39,7 @@
                                 </div>
                                 <div class="newscard_bar"></div>
                                 <div class="newscard_preview-txt">
+                                    <!-- Loop through each paragraph in the news content -->
                                     {% for paragraph in list.content.replace('•', '').split('\n') %}
                                         {{ paragraph.strip() | capitalize | truncate(30) }}
                                     {% endfor %}

@@ -6,8 +6,10 @@
         {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
     </div>
     <div class="d-container-fluid container mt-5 mb-5">
-        <div class="h2-custom mb-4">Manage Aerobics Classes</div>
+        <div class="h2-custom mb-4">Manage Aerobics Classes Name and Description</div>
+        <!-- Starts the form for managing aerobics classes -->
         <form method="POST">
+            <!-- Dropdown for selecting the class -->
             <div class="form-group">
                 <label for="class_id">Select Class:</label>
                 <select name="class_id" id="class_id" class="form-control" onchange="this.form.submit();">
@@ -18,6 +20,7 @@
                 </select>
             </div>
             
+            <!-- If a class is selected, display fields for editing the class name and description -->
             {% if selected_class %}
             <div class="form-group">
                 <label for="name">Class Name:</label>
@@ -27,8 +30,8 @@
                 <label for="description">Description:</label>
                 <textarea name="description" id="description" class="form-control">{{ selected_class.description }}</textarea>
             </div>
-            <button type="submit" name="update" class="btn btn-primary">Update</button>
-            <button type="submit" name="delete" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+            <button type="submit" name="update" class="btn btn-primary mt-3">Update</button>
+            <button type="submit" name="delete" class="btn btn-danger mt-3" onclick="return confirm('Are you sure you want to delete the aerobics class name and aerobics class description?');">Delete</button>
             {% endif %}
         </form>
     </div>

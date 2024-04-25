@@ -6,12 +6,17 @@
 <div class="text-black custom-bg">
     <div class="row">
         <div class="col-12">
+            <!-- Check if user type is either member or instructor -->
             {% if session['UserType'] in ['member', 'instructor'] %}
                 <div class="grid-container">
                     <div class="sidebar-position">
+                        <!-- Check if user type is member -->
                         {% if session['UserType'] == 'member' %}
+                            <!-- Include member sidebar -->
                             {% include 'dashboard_sidebar_template/member_sidebar.html' %}
+                        <!-- Check if user type is instructor -->
                         {% elif session['UserType'] == 'instructor' %}
+                            <!-- Include instructor sidebar -->
                             {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
                         {% endif %}
                     </div>

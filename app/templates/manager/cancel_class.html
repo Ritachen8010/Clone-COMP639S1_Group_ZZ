@@ -8,24 +8,28 @@
         {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
     </div>
     <div class="d-container-fluid container mt-5 mb-5">
-        <div class="h2-custom mb-4">Cancel Class</div>
+        <div class="h2-custom mb-4">Cancel Aerobics Class</div>
+        <!-- Starts the card for displaying class information -->
         <div class="card">
             <div class="card-header text-light">
                 <h2>Class Name: {{ class_info.name }}</h2>
             </div>
-            <div class="card-body">
+            <div class="card-body mb-3">
+                <!-- Displays the instructor, time, date, pool type, and available slots for the class -->
                 <p class="card-text"><strong>Instructor:</strong> {{ class_info.instructor }}</p>
                 <p class="card-text"><strong>Time:</strong> {{ class_info.start_time | timeformat }} - {{ class_info.end_time | timeformat }}</p>
-                <p class="card-text"><strong>Date:</strong> {{ class_info.datetime.strftime('%A, %B %d, %Y') }}</p>
+                <p class="card-text"><strong>Date:</strong> {{ class_info.datetime.strftime('%A, %d %B, %Y') }}</p>
                 <p class="card-text"><strong>Pool Type:</strong> {{ class_info.pool_type }}</p>
                 <p class="card-text"><strong>Available Slots:</strong> {{ class_info.availability }}</p>
             </div>
         </div>
+        <!-- Starts the form for confirming the class cancellation -->
         <form action="{{ url_for('confirm_cancel_class', class_id=class_info.class_id) }}" method="post">
+            <!-- Cancel button that redirects to the review class page -->
             <a href="{{ url_for('review_class') }}">
-                <button type="button" class="btn btn-secondary">Cancel</button>
+                <button type="button" class="btn btn-secondary mt-3">Cancel</button>
             </a>
-            <button type="submit" class="btn btn-danger">Confirm Cancel</button>
+            <button type="submit" class="btn btn-danger mt-3">Confirm Cancel</button>
         </form>
     </div>
 </div>

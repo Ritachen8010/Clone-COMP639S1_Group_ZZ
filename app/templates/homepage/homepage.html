@@ -36,20 +36,25 @@
       </div>
       <div id="carouselExampleControls" class="image-slide carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
+          <!-- First image in the carousel -->
           <div class="carousel-item active">
             <img src="{{ url_for('static', filename='homepage/istock-157732856_web.jpg') }}" class="d-block w-100" alt="Slide 1">
           </div>
+          <!-- Second image in the carousel -->
           <div class="carousel-item">
             <img src="{{ url_for('static', filename='homepage/YMCAWaterExercise_480px.jpg') }}" class="d-block w-100" alt="Slide 2">
           </div>
+          <!-- Third image in the carousel -->
           <div class="carousel-item">
             <img src="{{ url_for('static', filename='homepage/istock-21312ddf.jpg') }}" class="d-block w-100" alt="Slide 3">
           </div>
         </div>
+        <!-- Button to navigate to the previous image in the carousel -->
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
         </button>
+        <!-- Button to navigate to the next image in the carousel -->
         <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
@@ -65,13 +70,16 @@
   <h2>Our Instructors</h2>
   <div id="our_instructors">
   <div class="row">
+    <!-- A loop that goes through each instructor in the instructor list -->
     {% for instructor in instructor %}
+    <!-- Each instructor is displayed in a column -->
     <div class="col-md-4 mb-1">
       <div class="flip-card">
         <div class="flip-card-inner">
           <div class="flip-card-front">
             <img src="{{ url_for('static', filename='instructor/' + instructor['image_profile']) }}" alt="image" style="width:300px">
           </div>
+          <!-- The back of the flip card shows the instructor's name and bio -->
           <div class="flip-card-back">
             <h2>{{ instructor['first_name'] }} {{ instructor['last_name'] }}</h2>
             <p>{{ instructor['bio'] }}</p>

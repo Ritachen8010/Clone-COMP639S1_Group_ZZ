@@ -9,6 +9,7 @@
     </div>
     <div class="d-container-fluid container mt-5 mb-5">
         <div class="h2-custom mb-4">Manage Aerobics Classes</div>
+        <!-- Day navigation -->
         <div class="day-navigation text-center mt-5 mb-5">
             <button onclick="navigateDay(-1)" class="btn btn-primary">&lt; Previous Day</button>
             <input type="date" id="datePicker" class="form-control" onchange="navigateToDate()" value="{{ selected_date }}" style="width: auto; display: inline-block; margin: 0 15px;">
@@ -30,6 +31,7 @@
                     <td>
                         {% if slot_info.status == "Open" %}
                             {% for class in slot_info.classes %}
+                            <!-- Class details -->
                             <div class="class-container">
                                 <div class="timetable__content-title fw-500">{{ class.name }}</div>
                                 <div class="timetable__flex--start fw-400">
@@ -41,14 +43,17 @@
                                     Space: {{ class.availability }}
                                 </div>
                                 <div>Instr: {{ class.instructor }}</div>
+                                <!-- Cancel class button -->
                                 <a href="{{ url_for('cancel_class', class_id=class.class_id) }}" class="btn btn-danger btn-sm">Cancel</a>
                             </div>
                             {% endfor %}
                         {% elif slot_info.status == "Empty" or slot_info.status == "Cancelled" %}
+                            <!-- Add class button -->
                             <div class="class-container">
                                 <a href="{{ url_for('add_class', date=selected_date, time_slot=time_slot) }}" class="btn btn-primary">Add Class</a>
                             </div>
                         {% elif slot_info.expired %}
+                            <!-- Expired status -->
                             <div class="class-container">
                                 <button class="btn btn-secondary disabled">Expired</button>
                             </div>
@@ -63,9 +68,12 @@
     </div>
 </div>
 
+<!-- JavaScript for date navigation -->
 <script>
+// Set initial date
 document.getElementById('datePicker').value = "{{ selected_date }}";
 
+// Navigate to previous/next day
 function navigateDay(offset) {
     var datePicker = document.getElementById('datePicker');
     var currentDate = new Date(datePicker.value);
@@ -74,6 +82,7 @@ function navigateDay(offset) {
     navigateToDate();
 }
 
+// Navigate to selected date
 function navigateToDate() {
     var datePicker = document.getElementById('datePicker');
     var selectedDate = datePicker.value;

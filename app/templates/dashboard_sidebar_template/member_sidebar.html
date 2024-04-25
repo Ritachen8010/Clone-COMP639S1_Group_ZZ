@@ -1,32 +1,41 @@
 <nav id="sidebarmenu" class="collapse d-lg-block sidebar collapse">
     <div class="position-sticky">
+        <!-- Profile section starts here -->
         <div class="mx-3 mt-5 mb-3 text-center">
+            <!-- Displaying the member's profile image static folder -->
             <img src="{{ url_for('static', filename='member/' + member_info.image_profile) }}" alt="image_profile" 
             width="100" height="100" class="rounded-circle">
+            <!-- Displaying the member's first and last name with the first letter capitalized -->
             <h5 class="mt-3 text-white">{{ member_info.first_name | capitalize }} {{ member_info.last_name | capitalize }}</h5>
         </div>
 
+        <!-- Navigation links start here -->
         <div class="list-group list-group-flush mx-3 mt-4">
+            <!-- Link to the News page -->
             <a href="{{ url_for('news') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-newspaper me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">News</span>
             </a>
 
+            <!-- Link to the Booking My Aqua Aerobics Class page -->
             <a href="{{ url_for('swimming_class') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-calendar-plus me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">Booking My Aqua Aerobics Class</span>
             </a>
 
+            <!-- Link to the Manage My Booking page -->
             <a href="{{ url_for('book') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-book me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">Manage My Booking</span>
             </a>
 
+            <!-- Link to the My Membership page -->
             <a href="{{ url_for('view_membership') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-card-checklist me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">My Membership</span>
             </a>
 
+            <!-- Link to the member's profile management page -->
             <a href="{{ url_for('manage_profile') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-person me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">My Profile</span>

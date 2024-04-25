@@ -5,10 +5,12 @@
 {% block content %}
 <div class="grid-container custom-bg">
     <div class="sidebar-position">
+        <!-- Sidebar -->
         {% include 'dashboard_sidebar_template/member_sidebar.html' %}
     </div>
     <div class="d-container-fluid container mt-5 mb-5">
         <div class="h2-custom mb-4">My Payment History</div>
+            <!-- Payment history table -->
             <table class="table">
                 <thead>
                     <tr>
@@ -19,6 +21,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Loop through payment records -->
                     {% for record in payment_records %}
                     <tr>
                         <td>{{ record.membership_id }}</td>

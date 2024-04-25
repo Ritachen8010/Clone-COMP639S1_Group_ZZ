@@ -5,13 +5,16 @@
 {% block content %}
 <div class="grid-container custom-bg">
     <div class="sidebar-position">
+        <!-- Including manager_sidebar.html as the sidebar -->
         {% include 'dashboard_sidebar_template/manager_sidebar.html' %}
     </div>
     <div class="d-container-fluid">
         <div class="col-12">
             <div class="dashboard-block"></div>
             <div class="text-black">
+                    <!-- Displaying the manager's first and last name with the first letter capitalized -->
                     <div class="greeting text-black">Hello, {{ manager_info.first_name | capitalize }} {{ manager_info.last_name | capitalize }}!
+                        <!-- Displaying the manager's position with the first letter of each word capitalized -->
                         <p>Position: {{ manager_info.position | title }}</p>
                     </div>
                 </div>
@@ -19,10 +22,12 @@
                     <div class="col-md-6">
                         <div class="da-small-block text-black">
                             <div class="card mt-3">
+                                <!-- Displaying an image, the path of the image is fetched from static folder -->
                                 <img src="{{ url_for('static', filename='others/1334.png') }}" class="card-img-top" alt="Image 1">
                                 <div class="card-body">
                                     <h5 class="card-title">Our Aerobics Classes Timetable</h5>
                                     <p class="card-text">Click below to view the club's timetable.</p>
+                                    <!-- Providing a link that redirects to the timetable page when clicked -->
                                     <a href="{{ url_for('home_swimming_class') }}" class="btn btn-sm btn-primary">View Timetable</a>
                                 </div>
                             </div>

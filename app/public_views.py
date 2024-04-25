@@ -36,8 +36,12 @@ def generate_timetable():
     timetable_data = cursor.fetchall()
     cursor.close()
 
+    # Create a nested dictionary to store the timetable data
     timetable = defaultdict(lambda: defaultdict(list))
+    # Iterate over each row in the fetched data
     for row in timetable_data:
+        # Check if start_time and end_time are instances of timedelta and convert them to time
+        # If not, parse them as strings in the format '%H:%M:%S' to get time objects
         if isinstance(row['start_time'], timedelta):  # Handling timedelta if fetched as such
             start_time = (datetime.min + row['start_time']).time()
         else:
@@ -47,10 +51,12 @@ def generate_timetable():
             end_time = (datetime.min + row['end_time']).time()
         else:
             end_time = datetime.strptime(row['end_time'], '%H:%M:%S').time()
-
+        # Combine the class date and start time to get a full datetime object
         full_datetime = datetime.combine(row['class_date'], start_time)
+        # Create a time slot string in the format '%I:%M %p' - '%I:%M %p'
         time_slot = f"{start_time.strftime('%I:%M %p')} - {end_time.strftime('%I:%M %p')}"
 
+        # Append the class details to the corresponding date and time slot in the timetable
         timetable[row['class_date'].strftime('%Y-%m-%d')][time_slot].append({
             'name': row['class_name'],
             'description': row['description'] if row['description'] else 'No description provided.',
@@ -82,9 +88,13 @@ def about_us():
 
 @app.route('/home_swimming_class/')
 def home_swimming_class():
+    # Get the current date and time
     current_datetime = datetime.now()
+    # Get the selected date from the request arguments, default to today's date if not provided
     selected_date = request.args.get('date') or datetime.today().strftime('%Y-%m-%d')
+    # Generate a list of dates for the week starting from the selected date
     dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(7)]
+    # Generate a list of time slots from 6 AM to 8 PM
     time_slots = [f"{(datetime.min + timedelta(hours=h)).strftime('%I:%M %p')} - {(datetime.min + timedelta(hours=h+1)).strftime('%I:%M %p')}" for h in range(6, 20)]
 
     timetable = generate_timetable()

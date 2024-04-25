@@ -352,7 +352,7 @@ text-align: center;
         min-height: 100vh;
     }
 
-/* news */
+/* News */
 /* Cards */
 .newscard {
     display: flex;
@@ -439,10 +439,6 @@ text-align: center;
     margin-bottom: 10px;
     border: 1px solid #dee2e6;
 }
-
-body {
-    margin: 20px;
-  }
 
 .page-wrapper {
   display: flex;

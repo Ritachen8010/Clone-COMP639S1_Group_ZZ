@@ -9,11 +9,14 @@
     </div>
     <div class="d-container-fluid container mt-5 mb-5">
         <div class="h2-custom mb-4">Class Information</div>
+         <!-- Class details card -->
         <div class="card">
             <div class="card-header text-light">
+                <!-- Class name -->
                 <h2>Class Name: {{ class_details.class_name }}</h2>
             </div>
             <div class="card-body">
+                <!-- Class details -->
                 <p class="card-text"><strong>Instructor:</strong> {{ class_details.instructor_name }}</p>
                 <p class="card-text"><strong>Time:</strong> {{ class_details.start_time }} - {{ class_details.end_time }}</p>
                 <p class="card-text"><strong>Date:</strong> {{ class_details.datetime.strftime('%A, %B %d, %Y') }}</p>
@@ -21,10 +24,13 @@
                 <p class="card-text"><strong>Capacity:</strong> {{ class_details.capacity }}</p>
                 <p class="card-text"><strong>Space Left:</strong> {{ class_details.availability }}</p>
                 <p class="card-text"><strong>Description:</strong> {{ class_details.description | capitalize }}</p>
+                <!-- Booking form -->
                 <form action="{{ url_for('confirm_booking', class_id=class_details.class_id) }}" method="post">
+                    <!-- Cancel button -->
                     <a href="{{ url_for('swimming_class') }}">
                         <button type="button" class="btn btn-secondary">Cancel</button>
                     </a>
+                    <!-- Confirm booking button -->
                     <button type="submit" class="btn btn-primary">Confirm Booking</button>
                 </form>
         

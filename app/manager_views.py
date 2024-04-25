@@ -76,17 +76,23 @@ def generate_timetable():
     rows = cursor.fetchall()
     cursor.close()
     
+    # Create a dictionary to store the timetable data
     timetable = {}
+    # Iterate over each row in the fetched data
     for row in rows:
+        # Combine the class date and start time to get a full datetime object
         class_datetime = datetime.combine(row['datetime'], row['start_time'])
-        # Convert times to strings for easier handling
+        # Format the start and end times into a time slot string
         time_slot = format_time_slot(row['start_time'], row['end_time'])
 
+        # If the class date is not already in the timetable, add it
         if row['datetime'] not in timetable:
             timetable[row['datetime']] = {}
+        # If the time slot is not already in the timetable for the class date, add it
         if time_slot not in timetable[row['datetime']]:
             timetable[row['datetime']][time_slot] = []
 
+        # Create a dictionary with the class details
         class_info = {
             'class_id': row['class_id'],
             'name': row['name'],
@@ -145,7 +151,7 @@ def review_class():
     user_id = session.get('UserID')
     manager_info = get_manager_info(user_id)
     date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
-    timetable, available_slots = generate_timetable(date)  # Make sure two values are expected here
+    timetable, available_slots = generate_timetable(date) 
     return render_template('manager/review_class.html', timetable=timetable, available_slots=available_slots, 
                            selected_date=date, manager_info=manager_info)
 
@@ -164,23 +170,29 @@ def generate_timetable(date):
         AND cs.end_time <= '20:00:00'
         ORDER BY cs.start_time;
     """
+    # Execute the SQL query with the provided date
     cursor.execute(query, (date,))
     rows = cursor.fetchall()
     cursor.close()
     
+    # Create a dictionary to store the timetable data
     timetable = {}
     available_slots = []  # This will capture slots for 'Empty' status
+    # Iterate over each row in the fetched data
     for row in rows:
+        # Format the start and end times into a time slot string
         time_slot = format_time_slot(row['start_time'], row['end_time'])
         if row['class_status'] == 'Empty':
             available_slots.append(time_slot)  # Add to available slots if status is 'Empty'
 
+        # If the time slot is not already in the timetable, add it
         if time_slot not in timetable:
             timetable[time_slot] = {
                 'classes': [],
                 'status': row['class_status']
             }
 
+        # Append the class details to the corresponding time slot in the timetable
         timetable[time_slot]['classes'].append({
             'class_id': row['class_id'],
             'name': row['name'],
@@ -190,8 +202,6 @@ def generate_timetable(date):
         })
 
     return timetable, available_slots
-
-
 
 
 def generate_time_slots(start, end, duration):
@@ -221,6 +231,8 @@ def get_class_info(class_id):
     class_info = cursor.fetchone()
     cursor.close()
     
+    # If class_info is not None, format the instructor's full name and 
+    # convert start_time and end_time to time objects if they are timedelta objects
     if class_info:
         # Formatting instructor's full name properly
         class_info['instructor'] = f"{class_info['first_name']} {class_info['last_name']}"
@@ -228,8 +240,6 @@ def get_class_info(class_id):
         class_info['end_time'] = (datetime.min + class_info['end_time']).time() if isinstance(class_info['end_time'], timedelta) else class_info['end_time']
         
     return class_info
-
-
 
 def insert_new_class(class_name_id, instructor_id, date, start_time, end_time):
     """Insert a new class into the database."""
@@ -266,12 +276,15 @@ def add_class():
         time_slot = request.form.get('time_slot')
 
         try:
+            # Try to split the time slot into start time and end time
             start_time, end_time = [convert_time(time.strip()) for time in time_slot.split("-")]
         except ValueError:
+            # If the time slot format is invalid, flash an error message and redirect to the add class page
             flash("Invalid time slot format. Please use the format 'HH:MM AM - HH:MM PM'.", 'error')
             return redirect(url_for('add_class'))
 
         cursor = getCursor()
+        # Execute a SQL query to update the class schedule with the new class
         cursor.execute("""
             UPDATE class_schedule
             SET class_name_id = %s, instructor_id = %s, class_status = 'Open'
@@ -282,6 +295,7 @@ def add_class():
         getConnection().commit()
         cursor.close()
 
+        # If no rows were updated, flash an error message, otherwise flash a success message
         if updated_rows == 0:
             flash('No available slots to update or slot not found.', 'error')
         else:
@@ -297,6 +311,7 @@ def add_class():
     instructors = cursor.fetchall()
     cursor.close()
 
+    # Get the date from the request arguments or use today's date if not provided
     date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
     _, available_slots = generate_timetable(date)  # Fetch available slots for the selected date
 
@@ -335,7 +350,7 @@ def edit_class():
     manager_info = get_manager_info(user_id)
     cursor = getCursor()
     class_id = request.form.get('class_id')
-    selected_class = None
+    selected_class = None # Initialize the selected class to None
 
     # Fetch all classes for dropdown
     cursor.execute("SELECT class_name_id, name FROM class_name ORDER BY name")
@@ -344,13 +359,13 @@ def edit_class():
     if request.method == 'POST':
         description = request.form.get('description')
 
-        if 'update' in request.form:
+        if 'update' in request.form: # If the update button was clicked
             # Update class description
             cursor.execute("UPDATE class_name SET description = %s WHERE class_name_id = %s", (description, class_id))
             getConnection().commit()
             flash('Class description updated successfully!', 'success')
 
-        elif 'delete' in request.form:
+        elif 'delete' in request.form: # If the delete button was clicked
             try:
                 # Attempt to delete the class
                 cursor.execute("DELETE FROM class_name WHERE class_name_id = %s", (class_id,))
@@ -362,7 +377,8 @@ def edit_class():
                 else:
                     flash(f'Failed to delete class: {str(e)}', 'error')
 
-    if class_id:
+    if class_id: # If a class ID is provided
+        # Fetch the selected class details
         cursor.execute("SELECT class_name_id, name, description FROM class_name WHERE class_name_id = %s", (class_id,))
         selected_class = cursor.fetchone()
 
@@ -379,9 +395,10 @@ def financial_report():
     current_month = datetime.now().month
     current_year = datetime.now().year
 
+    # If the request method is POST, get the selected year and month from the form data
     if request.method == 'POST':
         selected_year = int(request.form.get('year', datetime.now().year))
-        session['selected_year'] = selected_year  # Store the selected year in the session
+        session['selected_year'] = selected_year 
         selected_month = int(request.form.get('month', datetime.now().month))
         session['selected_month'] = selected_month
     else:
@@ -389,47 +406,48 @@ def financial_report():
         selected_month = session.get('selected_month', datetime.now().month)
 
     cursor = getCursor()
+    # Execute a SQL query to get the total payments for each month of the selected year
     cursor.execute("""
         SELECT MONTH(p.payment_date) as month, SUM(p.amount) as total_payments
         FROM payments p
         WHERE YEAR(p.payment_date) = %s AND p.payment_type = 'membership'
         GROUP BY MONTH(p.payment_date)
     """, (selected_year,))
-    
     monthly_payments = cursor.fetchall()
 
+    # Execute a SQL query to get the total refunds for each month of the selected year
     cursor.execute("""
         SELECT MONTH(r.refund_date) as month, SUM(r.refund_amount) as total_refunds
         FROM memberships_refund r
         WHERE YEAR(r.refund_date) = %s
         GROUP BY MONTH(r.refund_date)
     """, (selected_year,))
-    
     monthly_refunds = cursor.fetchall()
 
     # Convert the result to a dictionary
     payments_dict = {result['month']: result['total_payments'] for result in monthly_payments}
     refunds_dict = {result['month']: result['total_refunds'] for result in monthly_refunds}
 
-    # Create a list for each month of the year
+    # Create lists of payments and refunds for each month of the year
     payments_list = [payments_dict.get(month, 0) for month in range(1, 13)]
     refunds_list = [refunds_dict.get(month, 0) for month in range(1, 13)]
 
+    # Execute a SQL query to get the total payments for the selected year
     cursor.execute("""
         SELECT SUM(p.amount) as total_payments
         FROM payments p
         WHERE YEAR(p.payment_date) = %s
     """, (selected_year,))
-    
     annual_payments = cursor.fetchone()['total_payments']
 
+    # Execute a SQL query to get the total refunds for the selected year
     cursor.execute("""
         SELECT SUM(r.refund_amount) as total_refunds
         FROM memberships_refund r
         WHERE YEAR(r.refund_date) = %s
     """, (selected_year,))
-    
     annual_refunds = cursor.fetchone()['total_refunds']
+
     cursor.close()
 
     return render_template('manager/financial_report.html', manager_info=manager_info,
@@ -446,6 +464,7 @@ def monthly_class_report():
     current_month = datetime.now().month
     current_year = datetime.now().year
 
+    # If the request method is POST, it gets the selected year and month from the form data
     if request.method == 'POST':
         selected_year = int(request.form.get('selected_year', current_year))
         selected_month = int(request.form.get('selected_month', current_month))
@@ -456,6 +475,7 @@ def monthly_class_report():
         selected_month = session.get('selected_month', current_month)
 
     cursor = getCursor()
+    # Execute a SQL query to get the total confirmed bookings for each class in the selected month and year
     cursor.execute("""
         SELECT cn.name, COUNT(b.class_id) as total_bookings
         FROM bookings b

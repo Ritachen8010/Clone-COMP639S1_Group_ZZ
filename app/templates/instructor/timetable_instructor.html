@@ -6,18 +6,24 @@
 
 <div class="grid-container custom-bg">
     <div class="sidebar-position">
+        <!-- Includes the instructor sidebar template -->
         {% include 'dashboard_sidebar_template/instructor_sidebar.html' %}
     </div>
     <div class="d-container-fluid container mt-5 mb-5">
         <div class="col-12">
             <div class="h2-custom mb-4">My Aerobics Classes Timetable</div>
             <!-- Dynamic Day Navigation Buttons with Date Picker -->
+            <!-- Day navigation buttons with date picker -->
             <div class="day-navigation text-center mt-5 mb-5">
+                <!-- Previous day button -->
                 <button onclick="navigateDay(-1)" class="btn btn-primary">&lt; Previous Day</button>
+                <!-- Date picker -->
                 <input type="date" id="datePicker" class="form-control" onchange="navigateToDate()" 
                 style="width: auto; display: inline-block; margin: 0 15px;" value="{{ selected_date }}">
+                <!-- Next day button -->
                 <button onclick="navigateDay(1)" class="btn btn-primary">Next Day &gt;</button>
             </div>
+            <!-- Table for the timetable -->
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -29,19 +35,23 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- Loop through the time slots and create a table row for each time slot -->
                         {% for time_slot in time_slots %}
                         <tr>
                             <td>{{ time_slot }}</td>
+                            <!-- Loop through the dates and create a table data cell for each date -->
                             {% for date in dates %}
                             <td>
+                                <!-- Gets the class information for the specified date and time slot -->
                                 {% set day_classes = timetable[date.strftime('%Y-%m-%d')].get(time_slot, []) %}
+                                 <!-- Dynamically generates class information -->
                                 {% for class_info in day_classes %}
                                 <div class="class-container {{ 'cancelled' if class_info['class_status'] == 'Cancelled' else 'expired' if class_info['expired'] else '' }}">
                                     <div class="timetable__content-title fw-500">
                                         {{ class_info['name'] }}
                                     </div>
                                     <div class="timetable__flex--start fw-400">
-                                        {{ class_info['description'] | default('No description provided.') }}
+                                        {{ class_info['description'] | default('No description provided.') | truncate(40) }}
                                     </div>
                                     <div class="timetable__flex--start fw-400">
                                         Space: {{ class_info['availability'] }}
@@ -75,9 +85,11 @@
     </div>
 </div>
 
+<!-- Defines the JavaScript functions for date navigation -->
 <script>
+    // Sets the initial value of the date picker
     document.getElementById('datePicker').value = "{{ selected_date }}";
-        // navigate to a different day
+        // Defines the function to navigate to a different day
         function navigateDay(offset) {
             var datePicker = document.getElementById('datePicker');
             var currentDate = new Date(datePicker.value);
@@ -85,7 +97,7 @@
             datePicker.valueAsDate = currentDate;
             navigateToDate();
         }
-        // navigate to the selected date by updating the URL
+        // Defines the function to navigate to the selected date
         function navigateToDate() {
             var datePicker = document.getElementById('datePicker');
             var selectedDate = datePicker.value;
@@ -93,7 +105,7 @@
             url.searchParams.set('date', selectedDate);
             window.location.href = url;
         }
-        
+        // After the page is loaded, scrolls to the position of the date picker
         window.onload = function() {
             var datePicker = document.getElementById('datePicker');
             window.scrollTo(0, datePicker.offsetTop - 100); 

@@ -11,6 +11,7 @@
       <div class="col-12">
           <div class="h2-custom mb-4">Popularity Report</div>
 
+          <!-- Form for selecting year and month -->
           <form method="POST" class="form-inline d-flex align-items-center mb-3">
             <label for="selected_year" class="me-2">Year:</label>
             <select id="selected_year" name="selected_year" class="me-3">
@@ -29,7 +30,9 @@
             <button type="submit" class="btn btn-primary ml-2">Submit</button>
           </form>
 
+            <!-- Container for the charts -->
             <div class="row justify-content-center">
+              <!-- Total Bookings per Aqua Aerobics Class chart -->
               <div class="col-md-6 mb-4">
                 <div class="card">
                   <div class="card-header text-white">Total Bookings per Aqua Aerobics Class</div>
@@ -38,7 +41,8 @@
                   </div>
                 </div>
               </div>
-            
+              
+              <!-- Booking Percentage% by Aqua Aerobics Class chart -->
               <div class="col-md-6 mb-4">
                 <div class="card">
                   <div class="card-header text-white">Booking Percentage% by Aqua Aerobics Class</div>
@@ -53,6 +57,7 @@
   </div>
 </div>
 
+<!-- Include Chart.js library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {

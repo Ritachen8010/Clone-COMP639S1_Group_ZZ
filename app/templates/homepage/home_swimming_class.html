@@ -3,13 +3,15 @@
 {% block title %}Swimming Classes{% endblock %}
 
 {% block content %}
+<!-- Header image with club's slogan -->
 <div class="about-image d-flex align-items-center justify-content-center">
     <div class="text-center text-white">
       <h1>A SWIM CLUB THAT COMES TO YOU</h1>
       <p>THE BEST PLACE FOR FUN AND PLAY</p>
     </div>
 </div>
-  
+
+<!-- Main content container -->
 <div class="container">
     <div class="heading text-black mt-5 mb-5">
         <h2>Aerobics Class Timetable</h2>
@@ -22,36 +24,47 @@
         <p>Events are to behold in Deep Pool.</p>
     </div>
     <!-- Dynamic Day Navigation Buttons with Date Picker -->
+    <!-- Day navigation buttons with date picker -->
     <div class="day-navigation text-center mt-5 mb-5">
+        <!-- Previous day button -->
         <button onclick="navigateDay(-1)" class="btn btn-primary">&lt; Previous Day</button>
+        <!-- Date picker -->
         <input type="date" id="datePicker" class="form-control" onchange="navigateToDate()" 
         style="width: auto; display: inline-block; margin: 0 15px;" value="{{ selected_date }}">
+        <!-- Next day button -->
         <button onclick="navigateDay(1)" class="btn btn-primary">Next Day &gt;</button>
     </div>
+    <!-- Table for the timetable -->
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
                     <th>Time</th>
+                    <!-- Loop through the dates and create a table header cell for each date -->
                     {% for date_info in dates %}
                         <th>{{ date_info.strftime('%A') }}<br>{{ date_info.strftime('%d %b') }}</th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
+                <!-- Loop through the time slots and create a table row for each time slot -->
                 {% for time_slot in time_slots %}
                     <tr>
                         <td>{{ time_slot }}</td>
+                        <!-- Loop through the dates and create a table data cell for each date -->
                         {% for date_info in dates %}
                             <td>
+                                <!-- Get the classes for the current date and time slot -->
                                 {% set day_classes = timetable.get(date_info.strftime('%Y-%m-%d'), {}).get(time_slot, []) %}
+                                <!-- Loop through the classes and create a div for each class -->
                                 {% for class_info in day_classes %}
+                                    <!-- Class container with different classes based on the class status -->
                                     <div class="class-container {% if class_info['datetime'] < current_datetime %}expired{% elif class_info['class_status'] == 'Cancelled' %}cancelled{% endif %}">
                                         <div class="timetable__content-title fw-500">
                                             {{ class_info['name'] }}
                                         </div>
                                         <div class="timetable__flex--start fw-400">
-                                            {{ class_info['description'] | default('No description provided.') }}
+                                            {{ class_info['description'] | default('No description provided.') | truncate(40) }}
                                         </div>
                                         <div class="timetable__flex--start fw-400">
                                             Space: {{ class_info['availability'] }}
@@ -84,28 +97,42 @@
     </div>
 </div>
 
+<!-- JavaScript to handle the day navigation -->
 <script>
-function navigateDay(offset) {
-    var datePicker = document.getElementById('datePicker');
-    var currentDate = new Date(datePicker.value);
-    currentDate.setDate(currentDate.getDate() + offset);
-    datePicker.valueAsDate = currentDate;
-    navigateToDate();
-}
+    // Function to navigate to a different day
+    function navigateDay(offset) {
+        // Get the date picker element
+        var datePicker = document.getElementById('datePicker');
+        // Get the current date from the date picker
+        var currentDate = new Date(datePicker.value);
+        // Add the offset to the current date
+        currentDate.setDate(currentDate.getDate() + offset);
+        // Set the new date in the date picker
+        datePicker.valueAsDate = currentDate;
+        navigateToDate();
+    }
 
-function navigateToDate() {
-    var datePicker = document.getElementById('datePicker');
-    var selectedDate = datePicker.value;
-    var url = new URL(window.location.href);
-    url.searchParams.set('date', selectedDate);
-    window.history.pushState({ path: url.toString() }, '', url.toString());
-    location.reload();
-}
+    // Function to navigate to the selected date
+    function navigateToDate() {
+        var datePicker = document.getElementById('datePicker');
+        // Get the selected date from the date picker
+        var selectedDate = datePicker.value;
+        // Create a new URL object with the current URL
+        var url = new URL(window.location.href);
+        // Set the 'date' query parameter to the selected date
+        url.searchParams.set('date', selectedDate);
+        // Update the URL in the browser without reloading the page
+        window.history.pushState({ path: url.toString() }, '', url.toString());
+        // Reload the page
+        location.reload();
+    }
 
-window.onload = function() {
-    var datePicker = document.getElementById('datePicker');
-    window.scrollTo(0, datePicker.offsetTop - 100); 
-};
+    // Function to scroll to the date picker when the page loads
+    window.onload = function() {
+        var datePicker = document.getElementById('datePicker');
+        // Scroll to the date picker
+        window.scrollTo(0, datePicker.offsetTop - 100); 
+    };
 </script>
 
 {% include 'homepage/footer.html' %}

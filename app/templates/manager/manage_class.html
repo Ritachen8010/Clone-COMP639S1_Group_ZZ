@@ -9,13 +9,16 @@
     </div>
     <div class="d-container-fluid container mt-5 mb-5">
         <div class="h2-custom mb-4">Manage Aerobics Classes</div>
+        <!-- Starts the form for managing aerobics classes -->
         <form method="POST">
             <div class="form-group">
+                <!-- Input field for the date -->
                 <label for="date">Date:</label>
                 <input type="date" id="date" name="date" class="form-control" value="{{ class_info.datetime.strftime('%Y-%m-%d') }}">
             </div>
             <div class="form-group">
                 <label for="time_slot">Time Slot:</label>
+                <!-- Dropdown for selecting the time slot -->
                 <select id="time_slot" name="time_slot" class="form-control">
                     {% for slot in available_timeslots %}
                     <option value="{{ slot }}">{{ slot }}</option>
@@ -24,6 +27,7 @@
             </div>
             <div class="form-group">
                 <label for="instructor_id">Instructor:</label>
+                <!-- Dropdown for selecting the instructor -->
                 <select id="instructor_id" name="instructor_id" class="form-control">
                     {% for instructor in available_instructors %}
                     <option value="{{ instructor.id }}">{{ instructor.name }}</option>

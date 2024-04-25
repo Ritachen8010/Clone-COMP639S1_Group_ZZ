@@ -34,10 +34,10 @@
                             <td>{{ user_full_name }}</td>
                             <td>{{ membership.membership_id }}</td>
                             <td>{{ membership.type }}</td>
-                            <!-- nz date format -->
+                            <!-- NZ date format -->
                             <td>{{ membership.start_date | formatdate }}</td>
                             <td>{{ membership.end_date | formatdate }}</td>
-                            <!-- a dollar sign is added to the membership fee -->
+                            <!-- A dollar sign is added to the membership fee -->
                             <td>${{ membership.membership_fee }}</td>
                             <td>
                                 <form action="{{ url_for('cancel_membership', membership_id=membership.membership_id) }}" method="post">

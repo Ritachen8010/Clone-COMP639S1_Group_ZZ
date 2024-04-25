@@ -1,36 +1,45 @@
 <nav id="sidebarmenu" class="collapse d-lg-block sidebar collapse">
     <div class="position-sticky">
+        <!-- Profile section starts here -->
         <div class="mx-3 mt-5 mb-3 text-center">
+            <!-- Displaying the manager's profile image static folder -->
             <img src="{{ url_for('static', filename='manager/' + manager_info.image_profile) }}" alt="image_profile" 
             width="100" height="100" class="rounded-circle">
+            <!-- Displaying the manager's first and last name with the first letter capitalized -->
             <h5 class="mt-3 text-white">{{ manager_info.first_name | capitalize }} {{ manager_info.last_name | capitalize }}</h5>
         </div>
 
+        <!-- Navigation links start here -->
         <div class="list-group list-group-flush mx-3 mt-4">
+            <!-- Link to the Aqua Aerobics Timetable page -->
             <a href="{{ url_for('home_swimming_class') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-book me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">Aqua Aerobics Timetable</span>
             </a>
 
-            <!-- New Link for Review Classes -->
+            <!-- Link to the Review Classes page -->
             <a href="{{ url_for('review_class') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-calendar3 me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">Manage Aqua Aerobics Classes</span>
             </a>
 
+            <!-- Link to the Edit Class page -->
             <a href="{{ url_for('edit_class') }}" class="list-group-item list-group-item-action py-2 ripple">
-                <i class="bi bi-pencil-square me-2"></i>  <!-- Using a pencil icon for edit -->
+                <i class="bi bi-pencil-square me-2"></i> 
                 <span class="ms-1 d-none d-sm-inline">Edit Class</span>
             </a>
 
+            <!-- Link to the Popularity Aqua Aerobics Class Report page -->
             <a href="{{ url_for('monthly_class_report') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center ">
                 <i class="bi bi-graph-up me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">Popularity Aqua Aerobics Class Report</span>
-            
+
+            <!-- Link to the Financial Report page -->
             <a href="{{ url_for('financial_report') }}" class="list-group-item list-group-item-action py-2 ripple d-flex align-items-center">
                 <i class="bi bi-graph-up me-2"></i>
                 <span class="ms-1 d-none d-sm-inline">Financial Report</span>
-                
+
+            <!-- Link to the manager's profile management page -->
             <a href="{{ url_for('manage_profile') }}" class="list-group-item list-group-item-action py-2 ripple">
                 <i class="bi bi-person"></i>
                 <span class="ms-1 d-none d-sm-inline">My Profile</span>

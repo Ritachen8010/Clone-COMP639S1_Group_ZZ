@@ -123,23 +123,31 @@ def generate_timetable(instructor_id=None):
         JOIN class_name AS cn ON cs.class_name_id = cn.class_name_id
         JOIN instructor AS i ON cs.instructor_id = i.instructor_id
     """
+    # If an instructor_id is provided, add a WHERE clause to the query
     if instructor_id:
         query += " WHERE i.instructor_id = %s"
         cursor.execute(query, (instructor_id,))
     else:
         cursor.execute(query)
 
+    # Fetch all rows from the executed query
     timetable_data = cursor.fetchall()
     cursor.close()
 
+    # Initialize a default dictionary to store the timetable
     timetable = defaultdict(lambda: defaultdict(list))
+    # Loop through each row in the fetched data
     for row in timetable_data:
+        # Convert start and end times to time objects
         start_time_obj = (datetime.min + row['start_time']).time() if isinstance(row['start_time'], timedelta) else datetime.strptime(row['start_time'], '%H:%M:%S').time()
         end_time_obj = (datetime.min + row['end_time']).time() if isinstance(row['end_time'], timedelta) else datetime.strptime(row['end_time'], '%H:%M:%S').time()
         
+        # Combine class date and start time to get class datetime
         class_datetime = datetime.combine(row['class_date'], start_time_obj)
+        # Format time slot as a string
         time_slot = f"{start_time_obj.strftime('%I:%M %p')} - {end_time_obj.strftime('%I:%M %p')}"
 
+        # Add class details to the timetable dictionary
         timetable[row['class_date'].strftime('%Y-%m-%d')][time_slot].append({
             'class_id': row['class_id'],
             'name': row['class_name'],
@@ -174,16 +182,22 @@ def dashboard_instructor():
 @UserType_required('instructor')
 def timetable_instructor():
     user_id = session.get('UserID')
-    instructor_info = instructor(user_id)  # Ensure this retrieves correct instructor info
+    # Retrieve the instructor information using the user ID
+    instructor_info = instructor(user_id) 
 
+    # Get the instructor ID from the instructor info, if it exists
     instructor_id = instructor_info['instructor_id'] if instructor_info else None
 
+    # Get the selected date from the request arguments, default to today's date if not provided
     selected_date = request.args.get('date', default=datetime.today().strftime('%Y-%m-%d'))
+    # Generate a list of dates for the week centered around the selected date
     dates = [datetime.strptime(selected_date, '%Y-%m-%d') + timedelta(days=i) for i in range(-3, 4)]
+    # Generate a list of time slots for the day
     time_slots = [f"{(datetime.min + timedelta(hours=h)).strftime('%I:%M %p')} - {(datetime.min + timedelta(hours=h+1)).strftime('%I:%M %p')}" for h in range(6, 21)]
 
-    timetable = generate_timetable(instructor_id=instructor_id)  # Filter by instructor ID
-
+    # Generate the timetable filtered by the instructor ID
+    timetable = generate_timetable(instructor_id=instructor_id)
+    
     return render_template('instructor/timetable_instructor.html', timetable=timetable, 
                            instructor_info=instructor_info, selected_date=selected_date, 
                            dates=dates, time_slots=time_slots)
