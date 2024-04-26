@@ -11,9 +11,9 @@
         <form method="POST">
             <!-- Dropdown for selecting the class -->
             <div class="form-group">
-                <label for="class_id">Select Class:</label>
-                <select name="class_id" id="class_id" class="form-control" onchange="this.form.submit();">
-                    <option value="">Choose...</option>
+                <label for="class_id"><strong>Select Class:</strong></label>
+                <select name="class_id" id="class_id" class="form-control mt-3" onchange="this.form.submit();">
+                    <option value="">Please Choose Aerobics Class Name ...</option>
                     {% for class in classes %}
                     <option value="{{ class.class_name_id }}" {% if selected_class and selected_class.class_name_id == class.class_name_id %}selected{% endif %}>{{ class.name }}</option>
                     {% endfor %}

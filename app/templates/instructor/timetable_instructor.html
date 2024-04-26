@@ -61,14 +61,14 @@
                                         {% if class_info['class_status'] == 'Cancelled' %}
                                             <button class="btn btn-danger disabled">Class Cancelled</button>
                                         {% else %}
-                                            <button class="btn btn-secondary disabled">Expired</button>
+                                            <button class="btn btn-secondary disabled">Class Expired</button>
                                         {% endif %}
                                     {% elif class_info['class_status'] == 'Cancelled' %}
                                         <button class="btn btn-danger disabled">Class Cancelled</button>
                                     {% elif class_info['availability'] > 0 %}
                                         <button class="btn btn-success disabled">Class Open</button>
                                     {% else %}
-                                        <button class="btn btn-secondary disabled">No Space</button>
+                                        <button class="btn btn-secondary disabled">Class No Space</button>
                                     {% endif %}
                                 </div>
                                 {% else %}
@@ -103,8 +103,11 @@
             var selectedDate = datePicker.value;
             var url = new URL(window.location.href);
             url.searchParams.set('date', selectedDate);
-            window.location.href = url;
+            // Update the URL in the browser without reloading the page
+            window.history.pushState({ path: url.toString() }, '', url.toString());
+            location.reload();
         }
+        
         // After the page is loaded, scrolls to the position of the date picker
         window.onload = function() {
             var datePicker = document.getElementById('datePicker');

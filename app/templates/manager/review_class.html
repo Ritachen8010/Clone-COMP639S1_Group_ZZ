@@ -71,24 +71,32 @@
 <!-- JavaScript for date navigation -->
 <script>
 // Set initial date
-document.getElementById('datePicker').value = "{{ selected_date }}";
+    document.getElementById('datePicker').value = "{{ selected_date }}";
 
-// Navigate to previous/next day
-function navigateDay(offset) {
-    var datePicker = document.getElementById('datePicker');
-    var currentDate = new Date(datePicker.value);
-    currentDate.setDate(currentDate.getDate() + offset);
-    datePicker.valueAsDate = currentDate;
-    navigateToDate();
-}
+        // Navigate to previous/next day
+        function navigateDay(offset) {
+            var datePicker = document.getElementById('datePicker');
+            var currentDate = new Date(datePicker.value);
+            currentDate.setDate(currentDate.getDate() + offset);
+            datePicker.valueAsDate = currentDate;
+            navigateToDate();
+        }
 
-// Navigate to selected date
-function navigateToDate() {
-    var datePicker = document.getElementById('datePicker');
-    var selectedDate = datePicker.value;
-    var url = new URL(window.location.href);
-    url.searchParams.set('date', selectedDate);
-    window.location.href = url;
-}
+        // Navigate to selected date
+        function navigateToDate() {
+            var datePicker = document.getElementById('datePicker');
+            var selectedDate = datePicker.value;
+            var url = new URL(window.location.href);
+            url.searchParams.set('date', selectedDate);
+            // Update the URL in the browser without reloading the page
+            window.history.pushState({ path: url.toString() }, '', url.toString());
+            location.reload();
+        }
+
+        // After the page is loaded, scrolls to the position of the date picker
+        window.onload = function() {
+            var datePicker = document.getElementById('datePicker');
+            window.scrollTo(0, datePicker.offsetTop - 100); 
+        };
 </script>
 {% endblock %}

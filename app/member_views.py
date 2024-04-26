@@ -96,9 +96,9 @@ def get_member_class_bookings(member_id):
             class_name.name AS class_name, 
             instructor.first_name, 
             instructor.last_name,
-            class_schedule.week, 
-            class_schedule.start_time, 
-            class_schedule.end_time,
+            class_schedule.week,
+            TIME_FORMAT(class_schedule.start_time, '%h:%i %p') AS start_time, 
+            TIME_FORMAT(class_schedule.end_time, '%h:%i %p') AS end_time, 
             class_schedule.datetime,
             bookings.schedule_type, 
             bookings.booking_status, 
@@ -130,8 +130,8 @@ def get_member_lesson_bookings(member_id):
             instructor.first_name,
             instructor.last_name,
             lesson_schedule.week, 
-            lesson_schedule.start_time, 
-            lesson_schedule.end_time,
+            TIME_FORMAT(lesson_schedule.start_time, '%h:%i %p') AS start_time, 
+            TIME_FORMAT(lesson_schedule.end_time, '%h:%i %p') AS end_time, 
             bookings.schedule_type, 
             bookings.booking_status, 
             bookings.booking_date
@@ -249,18 +249,7 @@ def swimming_class():
     return render_template('member/swimming_class.html', timetable=timetable, selected_date=selected_date,
                            dates=dates, time_slots=time_slots, current_datetime=current_datetime,
                            member_info=member_info, user_booked_classes=user_booked_classes)
-
-
-@app.template_filter('timeformat')
-def timeformat(value):
-    """Format a time object to 'HH:MM AM/PM' format."""
-    if isinstance(value, time): 
-        return value.strftime('%I:%M %p')
-    elif isinstance(value, datetime): 
-        return value.time().strftime('%I:%M %p')
-    else:
-        return str(value) 
-
+    
 # Member view my aerobics booking list only
 @app.route('/book')
 @login_required
@@ -280,8 +269,8 @@ def book():
     bookings = class_bookings + lesson_bookings
 
     return render_template('member/member_booking.html', class_bookings=class_bookings, 
-                           lesson_bookings=lesson_bookings, member_info=member_info, bookings=bookings)
-
+                           lesson_bookings=lesson_bookings, member_info=member_info, bookings=bookings,
+                           current_time=datetime.now())
 
 @app.route('/booking_class/<int:class_id>', methods=['GET'])
 @login_required
@@ -312,9 +301,11 @@ def booking_class(class_id):
         """, (class_id,))
         class_details = cursor.fetchone()
     except Exception as e:
+        # If an error occurred, flash the error message and redirect to the swimming_class page
         flash(str(e), 'danger')
         return redirect(url_for('swimming_class'))
 
+    # If no class details were found, flash a warning message and redirect to the swimming_class page
     if not class_details:
         flash("Class not found.", "warning")
         return redirect(url_for('swimming_class'))
@@ -338,6 +329,7 @@ def confirm_booking(class_id):
     cursor.execute("SELECT availability, datetime, start_time FROM class_schedule WHERE class_id = %s AND availability > 0", (class_id,))
     class_info = cursor.fetchone()
 
+    # If no class information was found, flash a warning message and redirect to the swimming_class page
     if not class_info:
         flash("Class not found or no available spaces.", "warning")
         return redirect(url_for('swimming_class'))
@@ -346,28 +338,37 @@ def confirm_booking(class_id):
     cursor.execute("SELECT end_date FROM memberships WHERE member_id = %s ORDER BY end_date DESC LIMIT 1", (member_id,))
     membership_info = cursor.fetchone()
 
-    # Check if the membership has expired
+    # If the membership has expired, flash a warning message and redirect to the swimming_class page
     if membership_info and membership_info['end_date'] < class_info['datetime']:
         flash("Your membership has expired.", "warning")
         return redirect(url_for('swimming_class'))
 
+    # Get the current datetime
     now = datetime.now()
+    # Get the start time of the class
     start_time = (datetime.min + class_info['start_time']).time()
+    # Combine the class's date and start time into a single datetime
     class_start_datetime = datetime.combine(class_info['datetime'], start_time)
+    # If the class has already started, flash a warning message and redirect to the swimming_class page
     if class_start_datetime < now:
         flash("Cannot book past events.", "warning")
         return redirect(url_for('swimming_class'))
 
+    # If the class is available, try to book it
     if class_info and class_info['availability'] > 0:
         try:
+            # Update the class's availability in the database
             cursor.execute("UPDATE class_schedule SET availability = availability - 1 WHERE class_id = %s", (class_id,))
+            # Insert a new booking into the database
             cursor.execute("INSERT INTO bookings (member_id, class_id, booking_status, booking_date) VALUES (%s, %s, 'confirmed', NOW())", (member_id, class_id))
             getConnection().commit()
             flash('Booking confirmed successfully.', 'success')
         except Exception as e:
+            # If an error occurred, rollback the changes and flash an error message
             getConnection().rollback()
             flash('Failed to confirm booking: ' + str(e), 'danger')
     else:
+        # If the class is not available, flash an error message
         flash('No available spaces.', 'danger')
 
     return redirect(url_for('swimming_class'))
@@ -383,11 +384,14 @@ def cancel_booking():
     cursor = getCursor()
 
     try:
-        # Check if the booking exists and is confirmed
+        # Check if the booking exists, is confirmed, and is in the future
         cursor.execute("""
-            SELECT class_id 
+            SELECT bookings.class_id, class_schedule.datetime 
             FROM bookings 
-            WHERE member_id = %s AND booking_id = %s AND booking_status = 'confirmed'
+            INNER JOIN class_schedule ON bookings.class_id = class_schedule.class_id
+            INNER JOIN memberships ON bookings.member_id = memberships.member_id
+            WHERE bookings.member_id = %s AND booking_id = %s AND booking_status = 'confirmed' 
+            AND DATE(class_schedule.datetime) >= CURDATE() AND memberships.end_date >= CURDATE()
         """, (member_info['member_id'], booking_id))
         booking_to_cancel = cursor.fetchone()
 
@@ -400,7 +404,7 @@ def cancel_booking():
             getConnection().commit()
             flash('Booking cancelled successfully.', 'success')
         else:
-            flash('Booking not found or not confirmed.', 'warning')
+            flash('Booking has expriy.', 'warning')
             getConnection().rollback()
 
     except Exception as e:
@@ -461,6 +465,14 @@ def cancel_membership(membership_id):
         INNER JOIN class_schedule ON bookings.class_id = class_schedule.class_id
         SET booking_status = 'cancelled' 
         WHERE member_id = %s AND booking_status = 'confirmed' AND class_schedule.datetime > %s
+    """, (current_user.MemberID, end_date))
+
+    # Increase availability for the cancelled bookings
+    cursor.execute("""
+        UPDATE class_schedule
+        INNER JOIN bookings ON class_schedule.class_id = bookings.class_id
+        SET class_schedule.availability = class_schedule.availability + 1
+        WHERE bookings.member_id = %s AND bookings.booking_status = 'cancelled' AND class_schedule.datetime > %s
     """, (current_user.MemberID, end_date))
 
     getConnection().commit()
